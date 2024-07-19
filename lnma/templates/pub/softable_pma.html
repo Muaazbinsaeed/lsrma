@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
+<title>Summary of Findings: Pairwise Meta-Analysis</title>
+
+<link rel="icon" href="/static/img/favicon.png" type="image/png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+{% include 'css/box.css' %}
+{% include 'css/start_screen.css' %}
+html, body {
+    width: 100%;
+    /* height: 100%; */
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+body {
+    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+a {
+    color: #333333;
+    text-decoration: none;
+}
+p {
+    margin-bottom: 0.2rem;
+}
+#wrapper {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+}
+
+
+/* for this page */
+#app_softpma {
+    width: 100%;
+    height: 100%;
+}
+
+.oc-item {
+    display: flex;
+    align-items: center;
+    width: calc(100% - 10px);
+    height: 50px;
+    border: 1px solid #dddddd;
+    margin: 0 0 10px;
+    padding: 0 0 0 10px;
+    cursor: pointer;
+}
+.oc-item:hover {
+    background: whitesmoke;
+    font-weight: bold;
+}
+.oc-item-selected {
+    background: #ececec;
+    font-weight: bold;
+}
+
+/* for the table */
+#tb_simple_sofpma {
+    width: 100%;
+    height: 100%;
+}
+#vw_oclist_plotpanel {
+    height: 100%;
+    overflow-y: auto;
+}
+.oc-name {
+    width:     180px;
+    min-width: 180px;
+    cursor: pointer;
+    padding: 2px 0;
+}
+.oc-type {
+    width: 30px;
+    min-width: 30px;
+    text-align: center;
+    cursor: pointer;
+    padding: 2px 0;
+}
+.oc-type:hover {
+    background-color: #cccccc;
+    font-weight: bold;
+}
+.oc-type-selected {
+    background-color: #555555;
+    color: #ffffff;
+    font-weight: bold;
+}
+.oc-cate {
+    flex-direction: column;
+}
+.oc-cate-info {
+    width: 100%;
+    border-bottom: 1px solid transparent;
+}
+.oc-cate-info:hover {
+    border-bottom: 1px solid #555555;
+}
+.oc-cate-info .oc-name {
+    font-weight: bold;
+}
+.oc-cate-info .oc-type {
+    font-weight: bold;
+}
+.oc-items {
+    width: 100%;
+    padding-left: 20px;
+}
+.oc-items-hide {
+    display: none;
+}
+.oc-item {
+    border-left: 1px solid #aaaaaa;
+}
+.oc-item-info {
+    width: calc(100% - 20px);
+    border-bottom: 1px solid transparent;
+}
+.oc-item-info:hover {
+    background-color: #efefef;
+    border-bottom: 1px solid #cccccc;
+}
+.oc-item-info .oc-name {
+    width:       150px;
+    min-width:   150px;
+    padding-left: 10px;
+}
+.oc-plot-img {
+    width: 100%;
+}
+.oc-plot-tab {
+    padding: 4px 15px;
+    border: 0;
+    color: #999999;
+    border-bottom: 1px solid #999999;
+    cursor: pointer;
+}
+.oc-plot-tab:hover {
+    color: #555555;
+    border-bottom: 1px solid #555555;
+}
+.oc-plot-tab-selected {
+    color: #000000;
+    font-weight: bold;
+    border-bottom: 1px solid #000000;
+}
+.oc-plot-tab-page {
+    display: none;
+}
+.oc-plot-tab-page-selected {
+    display: block;
+}
+
+/* for the SoF table */
+.sof-table {
+    width: 100%;
+}
+.sof-table th {
+    text-align: center;
+    background: whitesmoke;
+    padding: 5px 0;
+}
+.sof-table td {
+    text-align: center;
+    line-height: 1.45em;
+    padding: 3px 3px;
+    border-bottom: 1px solid #e6e6e6;
+    border-right: 1px solid #e6e6e6;
+    cursor: default;
+}
+.sof-table .col-oc-name {
+    width: 150px;
+    max-width: 200px;
+    cursor: pointer;
+}
+.sof-table .col-oc-name:hover {
+    background: whitesmoke;
+}
+.sof-table .col-ta-left {
+    text-align: left !important;
+    padding-left: 10px;
+}
+.sof-table .col-flipable {
+    cursor: pointer;
+}
+.sof-table .col-flipable:hover {
+    background: whitesmoke;
+}
+.cie-table th {
+    text-align: left;
+    padding: 3px 5px;
+}
+.cell-treat {
+    background: white;
+    cursor: pointer;
+}
+.cell-treat:hover {
+    background: #efefef;
+}
+.cie-bene-4 { background: rgb(55, 86, 35); color: white; }
+.cie-bene-3 { background: rgb(169, 208, 142); color: black; }
+.cie-bene-2 { background: rgb(226, 239, 218); color: black; }
+.cie-bene-1 { background: rgb(255, 242, 204); color: black; }
+.cie-harm-4 { background: rgb(150, 0, 0); color: white; }
+.cie-harm-3 { background: rgb(255, 103, 91); color: black; }
+.cie-harm-2 { background: rgb(255, 199, 193); color: black; }
+.cie-harm-1 { background: rgb(255, 242, 204); color: black; }
+.cie-nner-4 { background: rgb(66, 66, 66); color: rgb(255, 255, 255); }
+.cie-nner-3 { background: rgb(128, 128, 128); color: rgb(255, 255, 255); }
+.cie-nner-2 { background: rgb(191, 191, 191); color: black; }
+.cie-nner-1 { background: rgb(255, 242, 204); color: black; }
+
+.legend-table td { padding: 5px 10px; font-size: 14px; }
+
+.dlg-sm h4 { margin: 5px 0; }
+.dlg-sm p { margin: 0; }
+.dlg-sm hr { border: 0; border-bottom: 1px solid #ececec; }
+</style>
+</head>
+<body>
+<div id="start-screen">
+    <h1>
+        <i class="fa fa-table"></i>
+        Summary of Findings: Pairwise Meta-Analysis
+    </h1>
+    <div id="ss-msg">Loading data and initializing ...</div>
+</div>
+
+<div id="wrapper">
+
+<div id="color_guide" style="display: none;" title="Color guide">
+{% include 'pub/_shared/_table_color_guide.html' %}
+</div>
+<!-- /div#legend -->
+
+<div id="app_softpma" class="d-flex fx-row">
+
+    <div id="tb_simple_sofpma">
+        <div class="box" style="width: 100%; height: 100%;">
+            <div class="box-header">
+                <div class="d-flex fx-row">
+                    <div class="box-menu-group d-flex fx-row">
+                        <div class="cfg-name">
+                            Risks per: 
+                        </div>
+                        <div class="cfg-value">
+                            <select v-model="baseline">
+                                <option value="100">100</option>
+                                <option value="1000">1000</option>
+                                <option value="10000">10,000</option>
+                                <option value="100000">100,000</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="box-menu-group d-flex fx-row show_raw_data">
+                        <div>
+                            Show raw data: 
+                        </div>
+                        <div>
+                            <select v-model="show_raw">
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="box-menu-group d-flex fx-row">
+                        <div>
+                            Show CI: 
+                        </div>
+                        <div>
+                            <select v-model="show_CIR">
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="box-menu-group d-flex fx-row">
+                        <div>
+                            Show ARD: 
+                        </div>
+                        <div>
+                            <select v-model="show_ARD">
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+                    </div>                    
+
+                    <div class="box-menu-group d-flex fx-row">
+                        <div>
+                            Show survival data: 
+                        </div>
+                        <div>
+                            <select v-model="show_survival">
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="box-menu-group d-flex fx-row">
+                        <div class="box-menu-link" onclick="jarvis.show_color_guide();">
+                            <i class="fa fa-paint-brush"></i>
+                            Color guide
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="box-body" 
+                style="height: 100%;">
+
+                <table class="sof-table">
+                    <tr>
+                        <th class="col-oc-name" rowspan="2">Outcome</th>
+                        <th rowspan="2">Relative</th>
+                        <th rowspan="2" v-if="show_raw=='yes'">Raw</th>
+
+                        <th colspan="3">Absolute</th>
+                        <th rowspan="2">Certainty in <br>Evidence</th>
+                        <th rowspan="2">Importance</th>
+                    </tr>
+                    <tr>
+                        <th>Intervention</th>
+                        <th>Control</th>
+                        <th>Risk Difference</th>
+                    </tr>
+
+                    <tr v-for="r, r_idx in rs">
+                        <td class="col-oc-name">
+                            <b>{{r.oc_category_outcome}}</b><br>
+                            {{ r.oc_full_name }} <br>
+                            {{ r.n_stu }} Studies
+                        </td>
+
+                        <td>
+                            {{ r.oc.extract.meta.measure_of_effect }} 
+                            {{ _round2(r.sm) }}<br>
+                            ({{ _round2(r.lower) }} to 
+                             {{ _round2(r.upper) }})
+                        </td>
+
+                        <td v-if="show_raw == 'yes'">
+                            <span v-if="r.oc_data_type == 'raw'">
+                                Events: <b>{{ r.Et }}</b><br>
+                                Participants: <b>{{ r.Nt }}</b>
+                            </span>
+                            <span v-else>
+                                NA
+                            </span>
+                        </td>
+
+                        <td>
+                            {{ _int(get_CIR(r) * baseline) }} per {{ baseline }}
+                            
+                            <span v-if="show_CIR == 'yes'">
+                                <br>
+                                CI: {{ _int(get_CIR(r, 'lower') * baseline) }} to 
+                                {{ _int(get_CIR(r, 'upper') * baseline) }}
+                            </span>
+
+                            <span v-if="show_survival=='yes' && get_SRVI_txt(r, 'sm') !='NA' ">
+                                <br>
+                                Survival: {{ get_SRVI_txt(r, 'sm') }}
+                            </span>
+                        </td>
+
+                        <td>
+                            {{ _int(get_ACR(r) * baseline) }} per {{ baseline }}
+
+                            <span v-if="show_survival=='yes' && get_SRVI_txt(r, 'sm') !='NA' ">
+                                <br>
+                                Survival: {{ get_SRVC_txt(r) }}
+                            </span>
+                        </td>
+
+                        <td>
+                            {{ get_ARD_txt(r) }} per {{ baseline }} 
+                            <span v-if="show_ARD == 'yes'">
+                                <br>
+                                CI: {{ get_ARD_txt(r, 'lower') }} to 
+                                {{ get_ARD_txt(r, 'upper') }}<br>
+                                RD(%): {{ get_ARDp_txt(r) }}<br>
+                                CI: {{ get_ARDp_txt(r, 'lower')}} to {{ get_ARDp_txt(r, 'upper')}}
+                            </span>
+
+                            <span v-if="show_survival=='yes' && get_SRVI_txt(r, 'sm') !='NA' ">
+                                <br>
+                                Survival: {{ get_SRVD_txt(r, 'sm') }}
+                            </span>
+                        </td>
+
+                        <td v-bind:class="get_cie_clr(r)"
+                            v-on:click="">
+                            {{ _txt('CIE_TOT_' + r.oc.extract.certainty.cie) }}
+                        </td>
+
+                        <td>
+                            {{ _txt('IMPORTANCE_' + r.oc.extract.certainty.importance) }}
+                        </td>
+                    </tr>
+                </table>
+
+                
+
+            </div>
+        </div>
+
+    </div>
+    
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/alasql/0.5.5/alasql.min.js"></script>
+
+<script>
+var isIE = /*@cc_on!@*/false || !!document.documentMode;
+if (isIE) {
+    document.getElementById('ss-msg').innerHTML = 'The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.';
+}
+</script>
+
+<script>
+
+var app_softpma = {
+    vpp: null,
+    vpp_id: '#app_softpma',
+
+    vpp_methods: {
+        /****************************************************
+         * functions related to UI
+         ***************************************************/
+
+        
+
+
+        /****************************************************
+         * functions related to MA
+         ***************************************************/
+        // get the UI text
+        get_a_measure: function(r) {
+            return r.oc_measure;
+        },
+
+        // get survival in control
+        get_SRVC: function(r) {
+            if (r.has_survival_data) {
+                return r.oc.extract.survival_in_control;
+            } else {
+                return null;
+            }
+        },
+
+        get_SRVC_txt: function(r) {
+            if (r.has_survival_data) {
+                return this.get_SRVC(r).toFixed(1) + ' (mo)';
+            } else {
+                return 'NA';
+            }
+        },
+
+        // get survival of intervention
+        get_SRVI: function(r, obj) {
+            if (r.has_survival_data) {
+                // if we have survival data, it's usually HR
+                var hr = r[obj];
+                var srvi = (1 / hr) * r.oc.extract.survival_in_control;
+                return srvi;
+            } else {
+                return null;
+            }
+        },
+
+        get_SRVI_txt: function(r, obj) {
+            // obj could be
+            // sm, lower, upper
+            if (r.has_survival_data) {
+                var srvi = this.get_SRVI(r, obj);
+                return srvi.toFixed(1) + ' (mo)';
+
+            } else {
+                return 'NA';
+            }
+        },
+
+        // get survival difference
+        get_SRVD: function(r, obj) {
+            var SRVC = this.get_SRVC(r);
+            var SRVI = this.get_SRVI(r, obj);
+            
+            if (SRVC == null) { return null; }
+            if (SRVI == null) { return null; }
+
+            var SRVD = SRVC - SRVI;
+            return SRVD;
+        },
+
+        get_SRVD_txt: function(r, obj) {
+            var SRVD = this.get_SRVD(r, obj);
+            if (SRVD == null) {
+                return 'NA';
+            }
+            var txt = '';
+            if (SRVD < 0) {
+                txt = ' more';
+            } else if (SRVD > 0) {
+                txt = ' fewer';
+            } else {
+                txt = '';
+            }
+            return Math.abs(SRVD).toFixed(1) + ' (mo)' + txt;
+        },
+
+        // calc the ACR, CIR, ARD
+        get_ACR: function(r) {
+            if (r.which_ACR.use_which_val == 'internal') {
+                if (r.oc_data_type == 'raw') {
+                    return r.Ec / r.Nc;
+                } else {
+                    return r.oc.extract.internal_val / 1000;
+                }
+            }
+            if (r.which_ACR.use_which_val == 'external') {
+                return r.which_ACR.external_val / this.baseline;
+            }
+        },
+
+        get_ACR_txt: function(r) {
+            var ACR = this.get_ACR(r);
+            if (ACR == null) {
+                // it means no available data for this treat
+                return 'NA';
+            } else {
+                return Math.round(ACR * this.baseline) + ' per ' + this.baseline;
+            }
+        },
+
+        get_CIR: function(r, obj) {
+            // get the obj of this CIR
+            // obj could be
+            // sm, lower, upper
+            if (typeof(obj)=='undefined') {
+                obj = 'sm';
+            }
+            // val is the value of measure
+            var val = r[obj];
+
+            // calculate the CIR based on measure
+            if (this.get_a_measure(r) == 'OR') {
+                var a = this.get_ACR(r) * val;
+                var b = 1 - this.get_ACR(r);
+                var c = a + b;
+                var d = a / c;
+                var e = d * this.baseline;
+                return d;
+
+            } else if (this.get_a_measure(r) == 'RR') {
+                var a = this.get_ACR(r) * val;
+                return a;
+
+            } else if (this.get_a_measure(r) == 'HR') {
+                var a = 1 - this.get_ACR(r);
+                var b = Math.log(a);
+                var c = b * val;
+                var d = Math.exp(c);
+                var e = 1 - d;
+                return e;
+            }
+        },
+
+        get_ARD: function(r, obj) {
+            // obj could be
+            // sm, lower, upper
+            if (typeof(obj)=='undefined') {
+                obj = 'sm';
+            }
+            var val = r[obj];
+
+            // calc the ARD
+            if (this.get_a_measure(r) == 'OR') {
+                var ACR = this.get_ACR(r);
+                var CIR = this.get_CIR(r, obj);
+                var ARD = ACR - CIR;
+                return ARD;
+
+            } else if (this.get_a_measure(r) == 'RR') {
+                var a = this.get_ACR(r) * (1 - val);
+                return a;
+
+            } else if (this.get_a_measure(r) == 'HR') {
+                var ACR = this.get_ACR(r);
+                var CIR = this.get_CIR(r, obj);
+                var ARD = ACR - CIR;
+                return ARD;
+            }
+        },
+
+        get_ARD_txt: function(r, obj) {
+            var ARD = this.get_ARD(r, obj);
+            var txt = ' fewer';
+            if (ARD < 0) {
+                txt = ' more';
+            }
+            return Math.abs(Math.round(ARD * this.baseline)) + txt;
+        },
+
+        get_ARDp_txt: function(r, obj) {
+            var ARDp = 100 * this.get_ARD(r, obj);
+            var txt = ' fewer';
+            if (ARDp < 0) {
+                txt = ' more';
+            }
+            return Math.abs(ARDp).toFixed(1) + '%' + txt;
+        },
+
+        get_cie_clr: function(r) {
+            // use the two digits rounded value instead of the real value
+            var sm = parseFloat(this._round2(r.sm));
+            var lower = parseFloat(this._round2(r.lower));
+            var upper = parseFloat(this._round2(r.upper));
+            var which_is_better = r.oc.extract.meta.which_is_better;
+            var cie = r.oc.extract.certainty.cie;
+
+            var delta_sm = Math.abs(1 - sm);
+            var is_ci_cross_one = lower <= 1 && upper >= 1;
+            var ci_diff = upper - lower;
+
+            var _d2c = function(wib, sm, cie) {
+                if (sm == 1) { return 'cie-nner-' + cie; }
+                if (wib == 'lower') {
+                    if (sm < 1) { return 'cie-bene-' + cie; }
+                    else { return 'cie-harm-' + cie; }
+                } else {
+                    if (sm > 1) { return 'cie-bene-' + cie; }
+                    else { return 'cie-harm-' + cie; }
+                }
+            }
+
+            /**
+             * 2021-03-28: update the rule for color
+                1. if sm = 1 -> grey
+                2. if sm not = 1 then:
+                    a. if CI not cross -> red / green depends on direction of sm
+                    b. if CI cross 1 then:
+                        i. if the difference between upper and lower < 0.3, then
+                            1. if the 1- sm =<0.1 -> grey
+                            2. if the 1- sm >0.1 -> depends on direction of sm
+                        ii. if the difference between upper and lower >= 0.3, then
+                            1. depends upon direction of sm
+                */
+
+            // Rule 1
+            if (sm == 1) {
+                return 'cie-nner-' + cie;
+            }
+
+            // small is green, big is red
+            if (is_ci_cross_one) {
+                // Rule 2b
+                if (ci_diff < 0.3) {
+                    // Rule 2bi
+                    if (delta_sm <= 0.1) {
+                        return 'cie-nner-' + cie; 
+                    } else {
+                        return _d2c(which_is_better, sm, cie);
+                    }
+                } else {
+                    // Rule 2bii
+                    return _d2c(which_is_better, sm, cie);
+                }
+            } else {
+                // Rule 2a
+                return _d2c(which_is_better, sm, cie);
+            }
+
+        },
+
+        _txt: function(c) {
+            if (this.code_texts.hasOwnProperty(c)) {
+                return this.code_texts[c];
+            } else {
+                return 'NA';
+            }
+        },
+
+        _int: function(v) {
+            return Math.round(v);
+        },
+
+        _round2: function(v) {
+            return (Math.round(v * 100) / 100).toFixed(2);
+        }
+    },
+
+    init: function(data) {
+        // pre-processing data
+        // sort the outcomes by name
+        var rs = [];
+        for (const abbr in data.oc_dict) {
+            if (Object.hasOwnProperty.call(data.oc_dict, abbr)) {
+                const oc = data.oc_dict[abbr];
+                // we need to convert this oc to a format for vpp
+                var r = this.conv_oc2r(oc);
+                rs.push(r);
+            }
+        }
+
+        // sort
+        
+        rs.sort(jarvis.compare_oc_names_category_outcome);
+        rs.sort(jarvis.compare_oc_names);
+        
+        // init the vpp
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                oc_dict: data.oc_dict,
+                // for the results
+                rs: rs,
+
+                // for the table part
+                baseline: 1000,
+
+                // switches for detail information
+                show_survival: 'yes',
+                show_raw: 'no',
+                show_CIR: 'no',
+                show_ARD: 'no',
+
+                // for display
+                code_texts: {
+                    'OR': 'Odds Ratio (OR)',
+                    'RR': 'Risk Ratio (RR)',
+                    'HR': 'Hazard Ratio (HR)',
+                    'CIE_TOT_4': 'High',
+                    'CIE_TOT_3': 'Moderate',
+                    'CIE_TOT_2': 'Low',
+                    'CIE_TOT_1': 'Very Low',
+                    'CIE_VAL_4': 'Very serious',
+                    'CIE_VAL_3': 'Very serious',
+                    'CIE_VAL_2': 'Serious',
+                    'CIE_VAL_1': 'No serious',
+                    'PUB_BIA_2': 'Strongly suspected',
+                    'PUB_BIA_1': 'Undetected',
+                    'PUB_BIA_0': 'Not applicable',
+                    'IMPORTANCE_2': 'Critical',
+                    'IMPORTANCE_1': 'Important',
+                    'IMPORTANCE_0': 'NA',
+                    'IMPORTANCE_Critical': 'Critical',
+                    'IMPORTANCE_Important': 'Important',
+                    'IMPORTANCE_NA': 'NA',
+                },
+            },
+
+            methods: this.vpp_methods,
+
+            mounted: function() {
+                // the last thing is to notify that the height may changed
+                if (parent.hasOwnProperty('resize_iframes')) {
+                    // which means this is iframed
+                    parent.resize_iframes();
+                    console.log('* softable pma sent resize request to parent window');
+                }
+            },
+
+            updated: function() {
+                // the last thing is to notify that the height may changed
+                if (parent.hasOwnProperty('resize_iframes')) {
+                    // which means this is iframed
+                    parent.resize_iframes();
+                    console.log('* softable pma sent resize request to parent window');
+                }
+            }
+        });
+    },
+
+
+    // make a record for display
+    // the oc object is an item in the oc_dict
+    // looks like:
+    // {
+    //     extract: {
+    //         abbr: '',
+    //         meta: {
+    //             cq_abbr: ...
+    //         },
+    //         oc_type: ''
+    //     },
+    //     results [{
+    //         cfg: {},
+    //         rs: [{
+    //             Ec: 0, Et: ...
+    //         }],
+    //         rst: {
+    //             data: {
+    //                 primma: {
+    //                     heterogeneity: {},
+    //                     model: {
+    //                         fixed: {},
+    //                         random: {}
+    //                     },
+    //                     stus: [{}, {}, ...]
+    //                 }
+    //             }
+    //         }
+    //     }]
+    // }
+    // due to the complixity of the data format
+    // 
+
+
+    conv_oc2r: function(oc) {
+        if (oc.results.length == 0) {
+            // no results binded with oc, skip
+            return null;
+        }
+
+        var rst_idx = 0;
+        var fixed_or_random = 'random';
+        
+        if (oc.results[rst_idx].rs.length == 0) {
+            // this means no studies in this oc + grade 
+            return;
+        }
+
+        // for quick access the result
+        var oc_rst = oc.results[rst_idx].rst.data.primma.model[fixed_or_random];
+    
+        // build the r for display
+        var r = {
+            // bind the oc itself
+            oc: oc,
+
+            // bind the rst
+            oc_rst: oc_rst,
+
+            // abbr
+            oc_name: oc.extract.abbr,
+
+            // name for quick access
+            oc_full_name: oc.extract.meta.full_name,
+
+            oc_category_outcome : oc.extract.meta.category_outcome,
+
+            // measure for quick access
+            oc_measure: oc.extract.meta.measure_of_effect,
+
+            // input_format / datatype for quick access
+            oc_data_type: oc.extract.data_type,
+
+            // for the raw format, 
+            // will be undefined if pre
+            Et: oc_rst.Et,
+            Nt: oc_rst.Nt,
+            Ec: oc_rst.Ec,
+            Nc: oc_rst.Nc,
+
+            // core results, use the back_traced values
+            sm: oc_rst.bt_TE,
+            lower: oc_rst.bt_lower,
+            upper: oc_rst.bt_upper,
+
+            // get the survival_in_control
+            has_survival_data: oc.extract.survival_in_control > 0,
+
+            // general data
+            n_stu: oc.results[rst_idx].rs.length,
+
+            // for ACR and others
+            which_ACR: {
+                // internal is available only when data type is raw
+                // pre data won't have this option
+                has_internal: oc.extract.has_internal_val,
+
+                // the default value
+                use_which_val: oc.extract.has_internal_val?'internal':'external',
+
+                // the external value
+                external_val: 100,
+
+                // decide which internal to use
+                use_internal_avg: true,
+                use_internal_min: false,
+                use_internal_max: false
+            },
+
+            // for display setting
+            is_show: {
+                // show sm, study info
+                sm: true,
+                // show ARD, or ARD CI
+                ARD: true,
+                // show CIR, or CIR CI
+                CIR: true
+            }
+        }
+        return r;
+    }
+
+};
+
+var jarvis = {
+
+    // for the PMA table
+    default_measure: '',
+    measure_list: [],
+
+    measure_dict: {
+        OR: { abbr: 'OR', name: 'Odds Ratio (OR)' },
+        RR: { abbr: 'RR', name: 'Risk Ratio (RR)' },
+        HR: { abbr: 'HR', name: 'Hazard Ratio (HR)' },
+    },
+
+    init: function() {
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+
+        console.log('* User is using IE:', isIE);
+        if (isIE) {
+            jarvis.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
+            return;
+        }
+
+        // OK, get the project name
+        var prj = jarvis.get_url_paramter('prj');
+        if (prj == null) {
+            jarvis.ssmsg('Project information error.')
+            return;
+        }
+        // get the cq_abbr for this project
+        var cq = jarvis.get_url_paramter('cq');
+        if (cq == null) {
+            cq = 'default';
+        }
+        // if(cq=="parp_mcrpc"){
+        //     $('.show_raw_data').removeClass('d-flex');
+        //     $('.show_raw_data').addClass('oc-items-hide');
+        // }
+        // get the analysis group, by default just show the primary
+        var gp = jarvis.get_url_paramter('gp');
+        if (gp == '') {
+            gp = 'primary';
+        }
+
+        // where to get the data
+        var src = jarvis.get_url_paramter('src');
+        if (src == '') {
+            src = 'cache';
+        }
+
+        // set the sorting
+        var od = jarvis.get_url_paramter('od');
+        if (od == '') {
+            jarvis.oc_orders = [];
+        } else {
+            od = od.toLocaleLowerCase();
+            jarvis.oc_orders = od.split(';');
+        }
+
+        jarvis.ssmsg('Loading data ...');
+
+        // send request to get data for initializing app
+        var url = "[[ url_for('pub.graphdata', keystr='__KEYSTR__', fn='SOFTABLE_PMA.json') ]]";
+        // update with url with the project keystr
+        url = url.replace('__KEYSTR__', prj);
+        
+        $.get(
+            url,
+            // '/pub/graphdata/'+prj+'/SOFTABLE_PMA.json',
+            {
+                src: src, 
+                cq: cq, 
+                gp: gp,
+                ver: Math.random()
+            },
+            function(data) {
+                console.log(data);
+                
+                // init the app
+                app_softpma.init(data);
+
+                // ok, remove the 
+                jarvis.ssmsg('Almost initialized.');
+                setTimeout('jarvis.ssclose();', 400);
+            }, 'json'
+        );
+
+    },
+
+    get_url_paramter: function(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    },
+
+    toggle_oc: function(oc_name) {
+        console.log('* toggle_oc '+ oc_name);
+        tb_simple_sofpma.toggle_oc(oc_name);
+    },
+
+    clear_all_oc: function() {
+        tb_simple_sofpma.clear_all_oc();
+    },
+
+    ssmsg: function(msg) {
+        $('#ss-msg').html(msg);
+    },
+
+    ssclose: function() {
+        $('#start-screen').hide();
+    },
+
+    show_color_guide: function() {
+        $('#color_guide').dialog({
+            width: 680
+        });
+    }
+};
+
+// include the jarvis extensions
+{% include 'js/jarvis_ext_compare_oc_names.js' %}
+
+$(document).ready(function() {
+    jarvis.init();
+})
+</script>
+</body>

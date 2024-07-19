@@ -1,0 +1,514 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Manage Result Table
+{% endblock %}
+
+
+{% block section_cq %}
+{% include 'shared_module/_cq_selector_toolbar.html' %}
+{% endblock %}
+
+{% block style %}
+<style>
+
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    .container { 
+        font-family: 'Nunito', sans-serif;
+    }
+
+    .not-found-message {
+        text-align: center;
+        font-size: 2em;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 90vh;
+        margin: 0;
+    }
+
+    /* Styles for the headers list */
+    #headers-list {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .sub-header h5, .nested-header h5{
+        font-size: 1.15rem;
+    }
+
+    #sub-headers-list {
+        margin-left: 2%;
+    }
+
+    #sub-child-list {
+        margin-left: 4%;
+    }
+
+    #sub-headers-list h5, #sub-child-list  h5 {
+        font-size: 18px;
+    }
+
+    .item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        gap: 5px;
+    }
+
+    .header-btn {
+        position: absolute;
+        top: 18px;
+        right: 20px;
+    }
+
+    /* Styles for each header item */
+    .header-item {
+        border: 1px solid #3498db;
+        border-radius: 5px;
+        padding: 5px 10px;
+        margin: 5px;
+        display: flex;
+        align-items: center;
+    }
+
+    .header-item p {
+        margin: 0;
+    }
+
+    i {
+        cursor: pointer;
+    }
+
+    .header-row {
+        padding: 10px;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .header-label {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .header-row label {
+        margin-right: 10px;
+    }
+
+    .second-row {
+        padding: 20px;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .third-row {
+        padding: 20px;
+    }
+
+    .parent-container {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .child {
+        flex: 1;
+        margin-right: 10px;
+        padding: 10px;
+        border: 1px solid #ccc;
+    }
+
+    /* Rows Table */
+    table, th, td {
+        table-layout: fixed;
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid #000;
+        text-align: center;
+    }
+
+    .empty-cell {
+        background-color: aquamarine;
+    }
+
+        
+</style>
+{% endblock %}
+
+{% block page_name %}
+<i class="fa fa-list"></i>
+Manage Result  Table
+{% endblock %}
+
+{% block content %}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="//cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+<script src="//code.jquery.com/jquery-3.5.1.js"></script>
+<script src="//cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<div class="content">
+    <div id="container" class="container-fluid">
+
+        <div>
+            <button title="Preview" class="btn btn-sm btn-primary" style="float: right;" onclick="goToResultTable()">
+                Live Preview
+            </button>
+        </div>
+
+        <div class="row" id="result_table_view">
+            <div class="col-6">
+                <div class="header-row">
+                    <div class="header-label">
+                        <h4 class="mr-3">Headers</h4>
+                    </div>
+
+
+                    <div id="headers">
+                        <!-- First Level Headers -->
+                        <button title="Add Attribute" class="btn btn-outline-primary header-btn" @click="openModal('Header', -1)">
+                            <i class="fa fa-plus"></i> Add Header
+                        </button>
+                        <div v-for="(header, headerIndex) in headers" :key="headerIndex" class="mb-3">
+                            <div class="item">
+                                <h5 @click="selectHeader(headerIndex)">
+                                    <i class="fa" :class="{'fa-caret-down': headerStates[headerIndex], 'fa-caret-right': !headerStates[headerIndex]}"></i>
+                                    {{ header.name }}
+                                </h5>
+                                <div>
+                                    <button title="Add Sub Header" class="btn btn-sm btn-outline-success mr-1" @click="openModal('Sub Header', headerIndex)">
+                                        <i class="fa fa-plus"></i> Add Sub Header
+                                    </button>
+                                    <button title="Delete Header" class="btn btn-sm btn-outline-danger" @click="deleteHeader(headerIndex)">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Second Level Subheaders -->
+                            <div v-show="headerStates[headerIndex]">
+                                <div v-for="(subHeader, subHeaderIndex) in header.attrs" :key="subHeaderIndex" class="my-3">
+                                    <div class="ml-3 sub-header">
+                                        <div class="item">
+                                            <h5 @click="selectSubHeader(headerIndex, subHeaderIndex)">
+                                                <i class="fa" :class="{'fa-caret-down': subHeaderStates[`${headerIndex}-${subHeaderIndex}`], 'fa-caret-right': !subHeaderStates[`${headerIndex}-${subHeaderIndex}`]}"></i>
+                                                {{ subHeader.name }}
+                                            </h5>
+                                            <div>
+                                                <button title="Add Child" class="btn btn-sm btn-outline-info" @click="openModal('Nested Header', headerIndex, subHeaderIndex)">
+                                                    <i class="fa fa-plus"></i> Add Child
+                                                </button>
+                                                <button title="Delete Sub Header" class="btn btn-sm btn-outline-danger" @click="deleteSubHeader(headerIndex, subHeaderIndex)">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <hr>
+                                    
+                                    <!-- Third Level Nested Headers -->
+                                    <div v-show="subHeaderStates[`${headerIndex}-${subHeaderIndex}`]">
+                                        <div v-for="(nestedHeader, nestedHeaderIndex) in subHeader.sub_categories" :key="nestedHeaderIndex" class="my-2">
+                                            <div class="ml-4 nested-header">
+                                                <div class="item">
+                                                    <h5 @click="selectNestedHeader(headerIndex, subHeaderIndex, nestedHeaderIndex)">
+                                                        - {{ nestedHeader.name }}
+                                                    </h5>
+                                                    <button title="Delete Nested Header" class="btn btn-sm btn-outline-danger" @click="deleteNestedHeader(headerIndex, subHeaderIndex, nestedHeaderIndex)">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="d-flex justify-content-end mt-5">
+                            <button title="Save Table" class="btn btn-info" @click="updateTable()">
+                                <i class="fa fa-bookmark"></i> Save Headers
+                            </button>
+                        </div>
+                        
+
+                        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                  <h5 class="modal-title" id="exampleModalLabel">{{ modalContent }}</h5>
+                                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                  </button>
+                                </div>
+                                <div class="modal-body">
+                                  <input type="text" class="form-control" v-model="modalInput" />
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal" @click="saveModal()">Save</button>
+                                  <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="closeModal">Close</button>
+                                </div>
+                              </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}
+
+{% block active_nav_link %}extractor-manage-result-table{% endblock %}
+
+{% block script %}
+
+<script>
+
+    let tableHeaders = [];
+    // let categoryLabel = [[ comaparator_name|safe ]];
+    // let trialLabel = [[ varaiable_name|safe ]];
+    let resData = '[[ headers_result|safe ]]';
+    let rowResData = '[[ rows_result|safe ]]';
+    let seq_data = '[[ rows_result_seq|safe ]]';
+    let rowResMapping = '[[ rows_headers_mapping|safe ]]';
+    let abbrResMapping = '[[ abbr_list_updated|safe ]]';
+    let save_result_table_url  = "[[ url_for('extractor.manage_result_table') ]]";
+    resData = JSON.parse(resData);
+
+    let rowMappingModified = {};        
+
+    if (
+        !resData || resData === undefined || resData === null || Object.keys(resData).length === 0 ||
+        !rowResData || rowResData === undefined || rowResData === null ||
+        !rowResMapping || rowResMapping === undefined || rowResMapping === null
+        ) {
+            var container = document.getElementById('container');
+            container.innerHTML = '<p class="not-found-message">Data Not Found</p>';
+    } 
+    else {
+
+        let headersData = resData;
+        let rowsData = JSON.parse(rowResData);
+        seq_data = JSON.parse(seq_data);
+
+        var headers = {
+            vpp_id: "#headers",
+            init: function () {
+                this.vpp = new Vue({
+                    el: this.vpp_id,
+                    data: {
+                        headers: headersData,
+                        modalContent: '',
+                        modalInput: '',
+                        headerStates: {},
+                        subHeaderStates: {},
+                        nestedHeaderStates: {},
+                        selectedHeaderIndex: null,
+                        selectedSubHeaderIndex: null,
+                        selectedNestedHeaderIndex: null,
+                        updatedHeadersVariable: headersData,
+                    },
+                    methods: {
+                        openModal: function (content, headerIndex, subHeaderIndex, nestedHeaderIndex) {
+                            this.modalContent = content;
+                            this.selectedHeaderIndex = headerIndex;
+                            this.selectedSubHeaderIndex = subHeaderIndex;
+                            this.selectedNestedHeaderIndex = nestedHeaderIndex;
+                            $('#myModal').modal('show');
+                        },
+                        saveModal: function() {
+
+                            if (this.modalContent === 'Header') {
+                                this.headers.push({
+                                    abbr: this.generateAbbr(),
+                                    name: this.modalInput,
+                                    attrs: []
+                                });
+                                updatedHeaders = this.headers.slice();
+                            } else if (this.modalContent === 'Sub Header') {
+                                const selectedHeaderIndex = this.selectedHeaderIndex;
+                                this.headers[selectedHeaderIndex].attrs.push({
+                                    abbr: this.generateAbbr(),
+                                    name: this.modalInput,
+                                    sub_categories: []
+                                });
+                                updatedHeaders = this.headers.slice(); 
+                            } else if (this.modalContent === 'Nested Header') {
+                                const selectedHeaderIndex = this.selectedHeaderIndex;
+                                const selectedSubHeaderIndex = this.selectedSubHeaderIndex;
+                                this.headers[selectedHeaderIndex].attrs[selectedSubHeaderIndex].sub_categories.push({
+                                    abbr: this.generateAbbr(),
+                                    name: this.modalInput,
+                                });
+                                updatedHeaders = this.headers.slice();
+                            }
+                            this.updatedHeadersVariable = updatedHeaders;
+                            this.closeModal();
+                        },
+                        closeModal: function () {
+                            $('#myModal').modal('hide');
+                            this.modalContent = '';
+                            this.modalInput = '';
+                        },
+                        deleteHeader: function(headerIndex) {
+                            swal({
+                                    title: "Are you sure?",
+                                    icon: "warning",
+                                    buttons: true,
+                                    dangerMode: true,
+                                })
+                                .then((yes) => {
+                                if (yes) {
+                                    this.headers.splice(headerIndex, 1);
+                                    updatedHeaders = this.headers.slice();
+                                    toast('Header is deleted');
+                                }
+                            });
+                        },
+                        deleteSubHeader: function(headerIndex, subHeaderIndex) {
+                            swal({
+                                    title: "Are you sure?",
+                                    icon: "warning",
+                                    buttons: true,
+                                    dangerMode: true,
+                                })
+                                .then((yes) => {
+                                if (yes) {
+                                    this.headers[headerIndex].attrs.splice(subHeaderIndex, 1);
+                                    updatedHeaders = this.headers.slice();
+                                    toast('Sub header is deleted');
+                                }
+                            });
+                        },
+                        deleteNestedHeader: function(headerIndex, subHeaderIndex,nestedHeaderIndex) {
+                            swal({
+                                    title: "Are you sure?",
+                                    icon: "warning",
+                                    buttons: true,
+                                    dangerMode: true,
+                                })
+                                .then((yes) => {
+                                if (yes) {
+                                    this.headers[headerIndex].attrs[subHeaderIndex].sub_categories.splice(nestedHeaderIndex, 1);
+                                    updatedHeaders = this.headers.slice();
+                                    toast('Nested header is deleted');
+                                }
+                            });
+                        },
+                        generateAbbr: function () {
+                            return Math.random().toString(36).substr(2, 9);
+                        },
+                        toggleHeader: function(headerIndex) {
+                            this.$set(this.headerStates, headerIndex, !this.headerStates[headerIndex]);
+                        },
+
+                        toggleSubHeader: function(headerIndex, subHeaderIndex) {
+                            const key = `${headerIndex}-${subHeaderIndex}`;
+                            this.$set(this.subHeaderStates, key, !this.subHeaderStates[key]);
+                        },
+
+                        toggleNestedHeader: function(headerIndex, subHeaderIndex, nestedHeaderIndex) {
+                            const key = `${headerIndex}-${subHeaderIndex}-${nestedHeaderIndex}`;
+                            this.$set(this.nestedHeaderStates, key, !this.nestedHeaderStates[key]);
+                        },
+
+                        selectHeader: function(headerIndex) {
+                            this.toggleHeader(headerIndex);
+                            this.$set(this.subHeaderStates, headerIndex, false);
+                            this.$set(this.nestedHeaderStates, headerIndex, false);
+                        },
+
+                        selectSubHeader: function(headerIndex, subHeaderIndex) {
+                            this.toggleSubHeader(headerIndex, subHeaderIndex);
+                            this.$set(this.nestedHeaderStates, `${headerIndex}-${subHeaderIndex}`, false);
+                        },
+
+                        selectNestedHeader: function(headerIndex, subHeaderIndex, nestedHeaderIndex) {
+                            this.toggleNestedHeader(headerIndex, subHeaderIndex, nestedHeaderIndex);
+                        },
+                        updateTable: function(){
+                            console.log(headers.vpp.updatedHeadersVariable, ' @@')
+                            var project_id = Cookies.get('project_id');
+                            var cq_abbr = Cookies.get('cq_abbr');
+
+                            $.ajax({
+                                type: 'POST',
+                                dataType: 'json',
+                                url: save_result_table_url,
+                                data: {
+                                    project_id:project_id, 
+                                    cq_abbr:cq_abbr, 
+                                    result_table_headers:JSON.stringify(headers.vpp.updatedHeadersVariable)
+                                },
+                                cache: false,
+                                success: function (data) {
+                                    toast(data["msg"]);
+                                   
+                                    //hideLoader();
+                                },
+                                error: function(jqXHR, textStatus, errorThrown) {
+                                    jarvis.toast('Something wrong when saving the extraction.', 'alert');
+                                    console.error(textStatus, errorThrown);
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        };
+
+        headers.init();
+
+        function goToResultTable() {
+            const project_id = Cookies.get('project_id');
+            const cq_abbr = Cookies.get('cq_abbr');
+            version = Math.random();
+            var url = `[[ url_for('extractor.result_table', ) ]]?src=db&project_id=${project_id}&cq=${cq_abbr}&ver=${version}`;
+            window.open(url, '_blank', 'noreferrer');
+        }
+
+
+        // let rowData = JSON.parse(rowResData);
+        // let rowMapping = JSON.parse(rowResMapping);
+        // let abbrMapping = JSON.parse(abbrResMapping);
+        // const namesArray = data.map(item => item.name);
+
+        // let subCategoryFlag = false;
+        // var headerCounter = 0;
+        // var rowCounter = 0;
+
+        // var table = document.getElementById("resultTable");
+        // var categories = document.getElementById("categories");
+        // var trialNames = document.getElementById("trialNames");
+        // var variablesNames = document.getElementById("variables");
+        // var trialLabelText = document.getElementById("trialLabel");
+        // var categoryLabelText = document.getElementById("categoryLabel");
+        // var rowManagerText = document.getElementById("row-manager");
+        // var columnManagerText = document.getElementById("column-manager");
+        // var dropDownText = document.getElementById("dropdown-text");
+ 
+
+        // categoryLabelText.innerHTML = categoryLabel;
+        // trialLabelText.innerHTML = trialLabel;
+        // rowManagerText.innerHTML = trialLabel;
+        // columnManagerText.innerHTML = categoryLabel;
+        // dropDownText.innerHTML = categoryLabel;
+    }
+
+    
+    
+</script>
+
+{% endblock %}
+

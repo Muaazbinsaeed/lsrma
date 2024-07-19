@@ -1,0 +1,1965 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Upload XLS Files
+{% endblock %}
+
+{% block style %}
+<style>
+label:not(.form-check-label):not(.custom-file-label) {
+    font-weight: normal !important;
+}
+
+
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        .group {
+            margin-bottom: 20px;
+        }
+        .group-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .subgroup {
+            margin-left: 20px;
+        }
+        .subgroup-name {
+            font-size: 1.2em;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+        .item-list {
+            margin-left: 20px;
+        }
+        .collapsed .item-list, .collapsed .subgroup-content {
+            display: none;
+        }
+        .collapsed .subgroup-name::after {
+            content: ' (click to expand)';
+            font-weight: normal;
+        }
+
+        .not-found {
+        color: red;
+    }
+    .d-display-none {
+    display: none !important;
+}
+
+
+header {
+    background-color: #6c757d;
+    color: white;
+    padding: 10px 0;
+    text-align: center;
+}
+
+header h1 {
+    font-size: 24px;
+    margin: 0;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: #5a6268;
+    color: white;
+}
+
+.nav-tabs .nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.nav-tabs .badge {
+    background-color: #343a40;
+    color: white;
+    margin-left: 10px;
+}
+.max-h-300{
+    height: 300px;
+}
+.overflow-y-scroll{
+    overflow-y: scroll;
+}
+.vertical-tabs .nav-link {
+    background-color: #e9ecef;
+    color: #495057;
+    border: 1px solid #ced4da;
+    margin-bottom: 5px;
+    transition: background-color 0.3s, color 0.3s;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.vertical-tabs .nav-link.active {
+    background-color: #6c757d;
+    color: white;
+}
+
+.vertical-tabs .nav-link.active i {
+    color: white;
+}
+
+
+.card-body {
+    background-color: white;
+    border-radius: 0 0 10px 10px;
+    padding: 0 !important;
+}
+
+.tab-content {
+    background-color: #f8f9fa;
+}
+
+.tab-pane {
+    border-radius: 10px;
+}
+
+.tab-pane h3 {
+    color: #6c757d;
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+
+.card-header {
+    color: #212529;
+    border-radius: 10px 10px 0 0;
+    padding: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+
+/* Meta Data Container Stylings */
+.list-group-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border: 1px solid #ddd;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+}
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+.list-group-item .item-description {
+    flex-grow: 1;
+}
+.badge-custom {
+    background-color: #007bff;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+.nav-link {
+    font-size: 1.1rem;
+}
+.btn-heading{
+    font-weight: bold;
+    font-size: large;
+}
+table{
+    padding: 0 !important;
+    margin: 0 !important;
+}
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 0, 0, 0.1); 
+}
+.file-icon {
+    margin-right: 10px;
+}
+a{
+    text-decoration: none;
+    list-style: none;
+}
+   
+.card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .card-container-nma {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .card_d {
+            border: 1px solid #ccc;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+
+
+        .card-header {
+
+cursor: pointer;
+
+}
+
+.card-header .btn {
+
+text-align: left;
+color: #54B4D3;
+
+width: auto;
+/* width: 100%; */
+
+}
+
+.card-header .badge {
+
+font-size: .95rem;
+
+}
+
+.card-header .btn-link:hover {
+color: #172c7a;
+text-decoration: none;
+}
+
+.card-body {
+
+max-height: 300px;
+
+overflow-y: scroll;
+
+}
+
+.card-body ul {
+list-style-type: square;
+}
+
+
+.nested-list>ul>li {
+color: #08a29e;
+margin-bottom: 5px;
+}
+
+.nested-list>ul>li>ul>li {
+color: #a2b458;
+margin-bottom: 3px;
+}
+
+.nested-list>ul>li>ul>li>ul>li {
+color: #a6cabd;
+margin-bottom: 3px;
+}
+
+.nested-list>ul>li>ul>li>ul>li>ul>li {
+color: #955468;
+margin-bottom: 3px;
+}
+
+
+
+
+
+
+
+</style>
+{% endblock %}
+
+
+{% block section_cq %}
+{% include 'shared_module/_cq_selector_toolbar.html' %}
+{% endblock %}
+
+{% block active_nav_link %}upload-xls-files{% endblock %}
+
+{% block page_name %}
+<i class="fas fa-file-upload"></i>
+Upload XLS Files
+{% endblock %}
+
+{% block content %}
+<!-- Content Header (Page header) -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0 text-dark">
+                    Upload XLS Files for iTable, PWMA, and NMA.
+                </h1>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="[[ url_for('portal.index') ]]">Home</a></li>
+                    <li class="breadcrumb-item active">
+                        Upload XLS Files
+                    </li>
+                </ol>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+<!-- /.content-header -->
+
+<div class="content">
+<div class="container-fluid">
+
+
+
+<div id="app">
+<div class="row">
+    <div class="col-md-4">
+
+        <div class="d-flex flex-column">
+            <div class="form-group mr-3">
+                <label for="">
+                    Upload Task Type?
+                </label>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1" value="itable"
+                        v-model="task_type">
+                    <label class="form-check-label" for="exampleRadios1">
+                    iTable (Interactive Table)
+                    </label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1" value="result_table"
+                        v-model="task_type">
+                    <label class="form-check-label" for="exampleRadios1">
+                    Result Table
+                    </label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2" value="pwma"
+                        v-model="task_type">
+                    <label class="form-check-label" for="exampleRadios2">
+                    PWMA (Pairwise Meta-analysis)
+                    </label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios3" value="nma"
+                        v-model="task_type">
+                    <label class="form-check-label" for="exampleRadios3">
+                    NMA (Network Meta-analysis)
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input"
+                        id="task_confirm"
+                        name="task_confirm"
+                        v-model="task_confirm"
+                        v-bind:value="task_confirm">
+                    <label class="custom-control-label" for="task_confirm">
+                        I confirmed the uploading will be used for:
+                        <br>
+                        <b style="color: #3f51b5;">
+                            [[ project.title ]] / {{ cq_abbr }}
+                        </b>
+                    </label>
+                </div>
+            </div>
+
+            <!-- <div class="form-group">
+                <label for="">
+                    Purpose?
+                </label>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="exampleRadiosa" id="exampleRadios2a" value="evaluation"
+                        v-model="task_purpose">
+                    <label class="form-check-label" for="exampleRadios2a">
+                    Evaluate the effects. It won't write/update any records.
+                    </label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="exampleRadiosa" id="exampleRadios3a" value="update"
+                        v-model="task_purpose">
+                    <label class="form-check-label" for="exampleRadios3a">
+                    Update records in database with the uploaded XLS files.
+                    </label>
+                </div>
+
+            </div> -->
+
+        </div>
+
+        <hr>
+
+        <form v-if="task_type == 'itable'"
+            id="form_itable" 
+            method="post" 
+            enctype="multipart/form-data">
+            <h4>
+                iTable XLS Files and Parameters
+            </h4>
+            <div class="form-group">
+                <label for="default_stage">The XLS file of the extracted data from included studies</label>
+                <input type="file" class="form-control-file" name="file_itable" id="file_itable">
+            </div>
+            <div class="form-group">
+                <label for="default_stage">The XLS file of the filters (optional)</label>
+                <input type="file" class="form-control-file" name="file_filter" id="file_filter">
+            </div>
+
+            
+            <div class="form-group">
+                <label for="">
+                    Other Parameters for Uploading
+                </label>
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input"
+                        id="itable_flag_overwrite_decision"
+                        name="itable_flag_overwrite_decision"
+                        v-model="itable_flag_overwrite_decision"
+                        v-bind:value="itable_flag_overwrite_decision">
+                    <label class="custom-control-label" for="itable_flag_overwrite_decision">
+                        Check screening decision for each paper. <br>
+                        Change to INCLUDED_IN_SR if they are not.
+                    </label>
+                </div>
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input"
+                        id="itable_flag_overwrite_piece"
+                        name="itable_flag_overwrite_piece"
+                        v-model="itable_flag_overwrite_piece"
+                        v-bind:value="itable_flag_overwrite_piece">
+                    <label class="custom-control-label" for="itable_flag_overwrite_piece">
+                        Overwrite the extracted data if they already exist.
+                    </label>
+                </div>
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input"
+                        id="itable_flag_redirect_sys_stdout"
+                        name="itable_flag_redirect_sys_stdout"
+                        v-model="itable_flag_redirect_sys_stdout"
+                        v-bind:value="itable_flag_redirect_sys_stdout">
+                    <label class="custom-control-label" for="itable_flag_redirect_sys_stdout">
+                        Collect all output for display. <br>
+                        By checking this box, all outputs in the backend will be collected instead of printing on console. Once the uploading is finished, the collected outputs will be displayed in the "Server Output" section. If unchecking this box, the output can be monitored in real-time in the server console.
+                    </label>
+                </div>
+            </div>
+            
+        </form>
+
+
+        <form v-if="task_type == 'result_table'"
+            id="form_result_table" 
+            method="post" 
+            enctype="multipart/form-data">
+
+            
+            <div class="form-group">
+                <label for="default_stage">The Result Table file</label>
+                <input type="file" class="form-control-file" name="file_extracts" id="file_extracts">
+            </div>
+                    
+
+        
+        </form>
+
+
+        <form v-else-if="task_type == 'pwma'"
+            id="form_extracts_pwma" 
+            method="post" 
+            enctype="multipart/form-data">
+            <h4>
+                Pairwise MA XLS File and Parameters
+            </h4>
+            <div class="form-group">
+                <label for="default_stage">The XLS file of the extracted data from included studies</label>
+                <input type="file" class="form-control-file" name="file_extracts" id="file_extracts">
+            </div>
+
+            
+            <div class="form-group">
+                <label for="">
+                    Other Parameters for Uploading
+                </label>
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input"
+                        id="pwma_flag_unselect_existing_pieces"
+                        name="pwma_flag_unselect_existing_pieces"
+                        v-model="pwma_flag_unselect_existing_pieces"
+                        v-bind:value="pwma_flag_unselect_existing_pieces">
+                    <label class="custom-control-label" for="pwma_flag_unselect_existing_pieces">
+                        Unselect all existing extracted studies for all PWMA outcomes. <br>
+                        By checking this box, the selection for previously selected studies will be reset to [Unselected]. Don't worry, the extracted data won't be deleted.
+                    </label>
+                </div>
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input"
+                        id="pwma_flag_exclude_existing_outcomes_from_public"
+                        name="pwma_flag_exclude_existing_outcomes_from_public"
+                        v-model="pwma_flag_exclude_existing_outcomes_from_public"
+                        v-bind:value="pwma_flag_exclude_existing_outcomes_from_public">
+                    <label class="custom-control-label" for="pwma_flag_exclude_existing_outcomes_from_public">
+                        Exclude all existing outcomes from public website. <br>
+                        By checking this box, all exisiting outcomes for plots+SoF+evmap will be EXCLUDED from public website. Only those outcomes defined in the new XLS file will be included in the public website. Don't worry, the extracted data won't be deleted.
+                    </label>
+                </div>
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input"
+                        id="pwma_flag_redirect_sys_stdout"
+                        name="pwma_flag_redirect_sys_stdout"
+                        v-model="pwma_flag_redirect_sys_stdout"
+                        v-bind:value="pwma_flag_redirect_sys_stdout">
+                    <label class="custom-control-label" for="pwma_flag_redirect_sys_stdout">
+                        Collect all output for display. <br>
+                        By checking this box, all outputs in the backend will be collected instead of printing on console. Once the uploading is finished, the collected outputs will be displayed in the "Server Output" section. If unchecking this box, the output can be monitored in real-time in the server console.
+                    </label>
+                </div>
+            </div>
+        </form>
+
+        
+        <form v-else-if="task_type == 'nma'"
+            id="form_extracts_nma" 
+            method="post" 
+            enctype="multipart/form-data">
+            <h4>
+                Network MA XLS File and Parameters
+            </h4>
+            <div class="form-group">
+                <label for="default_stage">The XLS file of the extracted data from included studies</label>
+                <input type="file" class="form-control-file" name="file_extracts" id="file_extracts">
+            </div>
+            
+            <div class="form-group">
+                <label for="">
+                    Other Parameters for Uploading
+                </label>
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input"
+                        id="nma_flag_unselect_existing_pieces"
+                        name="nma_flag_unselect_existing_pieces"
+                        v-model="nma_flag_unselect_existing_pieces"
+                        v-bind:value="nma_flag_unselect_existing_pieces">
+                    <label class="custom-control-label" for="nma_flag_unselect_existing_pieces">
+                        Unselect all existing extracted studies for all NMA outcomes. <br>
+                        By checking this box, the selection for previously selected studies will be reset to [Unselected]. Don't worry, the extracted data won't be deleted.
+                    </label>
+                </div>
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input"
+                        id="nma_flag_exclude_existing_outcomes_from_public"
+                        name="nma_flag_exclude_existing_outcomes_from_public"
+                        v-model="nma_flag_exclude_existing_outcomes_from_public"
+                        v-bind:value="nma_flag_exclude_existing_outcomes_from_public">
+                    <label class="custom-control-label" for="nma_flag_exclude_existing_outcomes_from_public">
+                        Exclude all existing outcomes from public website. <br>
+                        By checking this box, all exisiting outcomes for plots+SoF+evmap will be EXCLUDED from public website. Only those outcomes defined in the new XLS file will be included in the public website. Don't worry, the extracted data won't be deleted.
+                    </label>
+                </div>
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input"
+                        id="nma_flag_has_coe"
+                        name="nma_flag_has_coe"
+                        v-model="nma_flag_has_coe"
+                        v-bind:value="nma_flag_has_coe">
+                    <label class="custom-control-label" for="nma_flag_has_coe">
+                        Parsing [Certainty] sheet in the XLS for the Certainty of Evidence. <br>
+                        By checking this box, the server will try to find and parse a [Certainty] sheet in the given XLS file. Please ensure the [Certainty] sheet is filled correctly.
+                    </label>
+                </div>
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input"
+                        id="nma_flag_redirect_sys_stdout"
+                        name="nma_flag_redirect_sys_stdout"
+                        v-model="nma_flag_redirect_sys_stdout"
+                        v-bind:value="nma_flag_redirect_sys_stdout">
+                    <label class="custom-control-label" for="nma_flag_redirect_sys_stdout">
+                        Collect all output for display. <br>
+                        By checking this box, all outputs in the backend will be collected instead of printing on console. Once the uploading is finished, the collected outputs will be displayed in the "Server Output" section. If unchecking this box, the output can be monitored in real-time in the server console.
+                    </label>
+                </div>
+            </div>
+        </form>
+
+        <div>
+
+            <template v-if="task_type == 'pwma'">
+
+                <!-- Check Files endpoints  -->
+                <button v-on:click="check_files_pwma"
+                v-bind:disabled="is_uploading"
+                class="btn btn-primary">
+                <span v-if="is_uploading">
+                    Checking File ... Please wait ...
+                    <br>
+                    It may take a few minutes, please do NOT refresh this page.
+                </span>
+                <span v-else>
+                    <i class="fa fa-file-upload"></i>
+                    Check  PWMA file
+                </span>
+                </button>
+                <!-- Check Files Endpoints -->
+            </template>
+
+            <template v-if="task_type == 'nma'">
+
+                <!-- Check Files endpoints  -->
+                <button v-on:click="check_files_nma"
+                v-bind:disabled="is_uploading"
+                class="btn btn-primary">
+                <span v-if="is_uploading">
+                    Checking File ... Please wait ...
+                    <br>
+                    It may take a few minutes, please do NOT refresh this page.
+                </span>
+                <span v-else>
+                    <i class="fa fa-file-upload"></i>
+                    Check  NMA file
+                </span>
+                </button>
+                <!-- Check Files Endpoints -->
+            </template>
+
+
+
+
+            <template v-if="task_type == 'itable'">
+
+                <!-- Check Files endpoints  -->
+                <button v-on:click="check_files_itable"
+                v-bind:disabled="is_uploading"
+                class="btn btn-primary">
+                <span v-if="is_uploading">
+                    Checking File ... Please wait ...
+                    <br>
+                    It may take a few minutes, please do NOT refresh this page.
+                </span>
+                <span v-else>
+                    <i class="fa fa-file-upload"></i>
+                    Check  iTable file
+                </span>
+                </button>
+                <!-- Check Files Endpoints -->
+            </template>
+
+
+             <template v-if="task_type == 'result_table'">
+
+                <!-- Check Files endpoints  -->
+                <button v-on:click="check_files_result_table"
+                v-bind:disabled="is_uploading"
+                class="btn btn-primary">
+                <span v-if="is_uploading">
+                    Checking File ... Please wait ...
+                    <br>
+                    It may take a few minutes, please do NOT refresh this page.
+                </span>
+                <span v-else>
+                    <i class="fa fa-file-upload"></i>
+                    Check Result Table file
+                </span>
+                </button>
+                <!-- Check Files Endpoints -->
+            </template>
+
+
+
+
+            <button v-on:click="upload_files"
+                v-bind:disabled="is_uploading"
+                class="btn btn-primary">
+                <span v-if="is_uploading">
+                    Uploading ... Please wait ...
+                    <br>
+                    It may take a few minutes, please do NOT refresh this page.
+                </span>
+                <span v-else>
+                    <i class="fa fa-file-upload"></i>
+                    Upload the above files with parameters
+                </span>
+            </button>
+        </div>
+    </div>
+   <div id="content_output_itable" class="d-display-none col-md-8">
+
+
+
+    <div class="continer mt-3  content_output_itable d-display-none ">
+        <h4>Missing/Wrong Data</h4>
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-tools mx-2"></i> Troubleshooting / Insights</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 vertical-tabs">
+                        <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                           
+
+                            <a class="nav-link" id="insight44-tab" data-toggle="pill" href="#insight44" role="tab" aria-controls="insight4" aria-selected="false">
+                                <i class="fas fa-chart-bar"></i> Missing PIDS
+                            </a>
+
+                           
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="tab-content max-h-300 overflow-y-scroll  rounded" id="v-pills-tabContent">
+                            
+
+                            <div class="tab-pane fade show " id="insight44" role="tabpanel" aria-labelledby="insight44-tab"></div>
+                           
+                 
+                        </div>
+
+                       
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="accordion_itable"></div>
+
+   </div>
+   <div id="accordian_result_table" class=" col-md-8">
+    <div class="row">
+
+        <iframe id="ifm_itable" frameborder="0" style="width: 100%; min-height: 820px;"></iframe>
+        <!-- <iframe id="ifm_itable" 
+            src="[[ url_for('pub.result_table_pub_check', prj='LPR', cq='mcspc', src='cache', version='1') ]]" 
+            frameborder="0" 
+            style="width: 100%; min-height: 820px;">
+        </iframe> -->
+    </div>
+
+   </div>
+   <div id="content_output_pwma" class="d-display-none col-md-8">
+    <div id="content_output_nma" class="d-display-none col-md-8"></div>
+    
+
+
+    <div class="container mt-3">
+        <h4>MetaData</h4>
+        <div class="row">
+            <div id = "card-container" class ='col-12'></div>
+        </div>
+
+        <div class="row">
+            <div id = "card-container-nma" class ='col-12'></div>
+        </div>
+
+
+        
+        <div id="accordion"></div>
+    </div>
+    <div class="container mt-3">
+        <h4>Missing/Wrong Data</h4>
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-tools mx-2"></i> Troubleshooting / Insights</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 vertical-tabs">
+                        <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                            <a class="nav-link active" id="insight1-tab" data-toggle="pill" href="#insight1" role="tab" aria-controls="insight1" aria-selected="true">
+                                <i class="fas fa-exclamation-circle"></i> Missing Sheets 
+                            </a>
+
+                            <a class="nav-link" id="insight4-tab" data-toggle="pill" href="#insight4" role="tab" aria-controls="insight4" aria-selected="false">
+                                <i class="fas fa-chart-bar"></i> Missing PIDS
+                            </a>
+
+                            <a class="nav-link" id="insight5-tab" data-toggle="pill" href="#insight5" role="tab" aria-controls="insight5" aria-selected="false">
+                                <i class="fas fa-chart-bar"></i> Wrong Data
+                            </a>
+
+                            <a class="nav-link d-display-none" id="insight6-tab" data-toggle="pill" href="#insight6" role="tab" aria-controls="insight6" aria-selected="false">
+                                <i class="fas fa-chart-bar"></i> Missing COE Files
+                            </a>
+
+                            <a class="nav-link d-display-none" id="insight7-tab" data-toggle="pill" href="#insight6" role="tab" aria-controls="insight6" aria-selected="false">
+                                <i class="fas fa-chart-bar"></i> Wrong Analysis Files
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="tab-content max-h-300 overflow-y-scroll  rounded" id="v-pills-tabContent">
+                            <div class="tab-pane fade show active" id="insight1" role="tabpanel" aria-labelledby="insight1-tab"></div>
+
+                            <div class="tab-pane fade show " id="insight4" role="tabpanel" aria-labelledby="insight4-tab"></div>
+                            <div class="tab-pane fade show " id="insight5" role="tabpanel" aria-labelledby="insight5-tab">
+
+
+                                               </div>
+                            <div class="tab-pane fade show  d-display-none" id="insight6" role="tabpanel" aria-labelledby="insight6-tab">
+                                
+                            </div>
+                            <div class="tab-pane fade show  d-display-none" id="insight7" role="tabpanel" aria-labelledby="insight7-tab">
+                                
+                            </div>
+                 
+                        </div>
+
+                       
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+  
+
+
+
+
+    </div>
+ 
+    <div id="item_List"></div>
+    <div  id="server_logs" class="col-md-8"
+        style="height: 500px; overflow-y: auto;">
+        <h4>
+            Server Outputs
+        </h4>
+        <pre v-html="sys_output">
+
+        </pre>
+    </div>
+
+    
+
+</div>
+
+</div> <!--/#app -->
+</div>
+</div>
+{% endblock %}
+
+
+{% block script %}
+
+<script>
+{% include "js/srv_extractor.js" %}
+srv_extractor.project = [[ project_json_str|safe ]];
+
+
+var app = {
+    vpp_id: '#app',
+    vpp: null,
+
+    init: function() {
+        
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                task_type: 'itable', // itable, pwma, nma
+                task_purpose: 'evaluation', // evaluation, update
+                task_confirm: false,
+
+                is_uploading: false,
+
+                // what returned by the server
+                sys_output: '',
+
+                // for itable
+                itable_flag_overwrite_decision: true,
+                itable_flag_overwrite_piece: true,
+                itable_flag_redirect_sys_stdout: true,
+
+                // for pwma
+                pwma_flag_unselect_existing_pieces: false,
+                pwma_flag_exclude_existing_outcomes_from_public: false,
+                pwma_flag_redirect_sys_stdout: true,
+
+                // for nma
+                nma_flag_unselect_existing_pieces: false,
+                nma_flag_exclude_existing_outcomes_from_public: false,
+                nma_flag_has_coe: true,
+                nma_flag_redirect_sys_stdout: true,
+            },
+
+            computed: {
+                cq_abbr: function() {
+                    return Cookies.get('cq_abbr');
+                }
+            },
+
+            methods: {
+                done_uploading: function() {
+                    this.is_uploading = false;
+                },
+
+    
+
+
+                show_sys_output: function(sys_output) {
+                    this.sys_output = sys_output;
+                },
+                createList: function(items){
+                    const ul = document.createElement('ul');
+                    ul.classList.add('item-list');
+                    items.forEach(item => {
+                        const li = document.createElement('li');
+                        li.textContent = item;
+                        ul.appendChild(li);
+        });
+        return ul;
+
+                },
+                createGroup: function(name, subgroups){
+
+
+                    const groupDiv = document.createElement('div');
+                    groupDiv.classList.add('group');
+
+                    const totalItems = Object.values(subgroups).flat().length;
+                    const groupName = document.createElement('div');
+                    groupName.classList.add('group-name');
+                    groupName.textContent = `${name.charAt(0).toUpperCase() + name.slice(1)} (${totalItems} items)`;
+                    groupDiv.appendChild(groupName);
+
+                    groupName.addEventListener('click', () => {
+                        groupDiv.classList.toggle('collapsed');
+                    });
+
+                    Object.keys(subgroups).forEach(subgroupName => {
+                        const subgroupDiv = document.createElement('div');
+                        subgroupDiv.classList.add('subgroup');
+                        const subgroupContent = document.createElement('div');
+                        subgroupContent.classList.add('subgroup-content');
+
+                        const subgroupItemsCount = subgroups[subgroupName].length;
+                        const subgroupTitle = document.createElement('div');
+                        subgroupTitle.classList.add('subgroup-name');
+                        subgroupTitle.textContent = `${subgroupName} (${subgroupItemsCount} items)`;
+                        subgroupDiv.appendChild(subgroupTitle);
+
+                        subgroupTitle.addEventListener('click', () => {
+                            subgroupContent.classList.toggle('collapsed');
+                        });
+
+                        const itemList = app.vpp.createList(subgroups[subgroupName]);
+                        subgroupContent.appendChild(itemList);
+
+                        subgroupDiv.appendChild(subgroupContent);
+                        groupDiv.appendChild(subgroupDiv);
+                    });
+
+                    return groupDiv;
+                },
+                 createNavItem(container, id, href, text, badgeCount, isActive = false, section) {
+                    const li = document.createElement('li');
+                    li.classList.add('nav-item');
+                    
+                    const a = document.createElement('a');
+                    a.classList.add('nav-link');
+                    if (isActive) {
+                        a.classList.add('active');
+                    }
+                    a.id = `${id}-tab`;
+                    a.setAttribute('data-toggle', 'tab');
+                    a.href = href;
+                    a.setAttribute('role', 'tab');
+                    a.setAttribute('aria-controls', id);
+                    a.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                    
+                    const textNode = document.createTextNode(` ${text} `);
+                    
+                    const span = document.createElement('span');
+                    span.classList.add('badge', 'badge-custom');
+                    span.textContent = badgeCount;
+                    
+                    a.appendChild(textNode);
+                    a.appendChild(span);
+                    li.appendChild(a);
+                    
+                    container.appendChild(li);
+                },
+
+                 createTabContent(container, id, items, isActive = false) {
+                    const div = document.createElement('div');
+                    div.classList.add('tab-pane', 'fade');
+                    if (isActive) {
+                        div.classList.add('show', 'active');
+                    }
+                    div.id = id;
+                    div.setAttribute('role', 'tabpanel');
+                    div.setAttribute('aria-labelledby', `${id}-tab`);
+                    
+                    const ul = document.createElement('ul');
+                    ul.classList.add('list-group');
+                    
+                    items.forEach(item => {
+                        const li = document.createElement('li');
+                        li.classList.add('list-group-item');
+                        
+                        const itemDescription = document.createElement('span');
+                        itemDescription.classList.add('item-description');
+                        itemDescription.textContent = item;
+                        
+                        li.appendChild(itemDescription);
+                        ul.appendChild(li);
+                    });
+                    
+                    div.appendChild(ul);
+                    container.appendChild(div);
+                },
+
+
+                groupItemsByPrefix(items) {
+            const groupedItems = {};
+            items.forEach(item => {
+                const levels = item.split('|');
+                let currentLevel = groupedItems;
+                levels.forEach(level => {
+                    if (!currentLevel[level]) {
+                        currentLevel[level] = {};
+                    }
+                    currentLevel = currentLevel[level];
+                });
+            });
+            return groupedItems;
+        },
+                 createNestedList(items) {
+            const topLevelList = document.createElement('div');
+            const groupedItems = app.vpp.groupItemsByPrefix(items);
+
+            topLevelList.classList.add('nested-list');
+
+
+            function createListItems(itemGroup) {
+                const list = document.createElement('ul');
+                Object.keys(itemGroup).forEach(key => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = key;
+
+                    const nestedItems = itemGroup[key];
+                    if (nestedItems && Object.keys(nestedItems).length > 0) {
+                        listItem.appendChild(createListItems(nestedItems));
+                    }
+
+                    list.appendChild(listItem);
+                });
+                return list;
+            }
+
+            topLevelList.appendChild(createListItems(groupedItems));
+            return topLevelList;
+        },
+       
+
+    show_check_file_output_itable(cq_plots_relations){
+        const contentDiv = document.getElementById('content_output_itable');
+        $('#content_output_itable').removeClass('d-display-none');
+        $('.content_output_itable').removeClass('d-display-none');
+        $("#server_logs").addClass('d-display-none');
+        $('#content_output_pwma').addClass('d-display-none');
+        $('#content_output_nma').addClass('d-display-none');
+        $('#accordian_result_table').addClass('d-display-none');
+
+                  
+    const container = document.getElementById('accordion_itable');
+    const sections = Object.keys(cq_plots_relations);
+    sections.forEach((section, index) => {
+
+        const sectionId = `section-${section.replace(/\s/g,'')}`;
+
+        const card = document.createElement('div');
+
+        card.classList.add('card');
+
+        const cardHeader = document.createElement('div');
+
+        cardHeader.classList.add('card-header', 'd-flex', 'flex-row', 'align-items-center');
+
+        cardHeader.id = `heading-${section.replace(/\s/g,'')}`;
+
+
+        // Card Header 
+        const cardHeaderTitle = document.createElement('h5');
+
+        cardHeaderTitle.textContent = section.replace(/_/g, ' ').charAt(0).toUpperCase() + section.replace(/_/g, ' ').slice(1).toLowerCase();
+
+        cardHeaderTitle.classList.add('mb-0', 'btn', 'btn-link')
+
+        // Count Badge
+
+        const cardHeaderBadge = document.createElement('span');
+
+        cardHeaderBadge.classList.add('badge', 'bg-info');
+
+        cardHeaderBadge.textContent = cq_plots_relations[section].length
+
+        cardHeader.appendChild(cardHeaderTitle);
+
+        cardHeader.appendChild(cardHeaderBadge)
+
+        cardHeader.setAttribute('data-toggle', 'collapse');
+
+        cardHeader.setAttribute('data-target', `#${sectionId}`);
+
+        cardHeader.setAttribute('aria-expanded', index === 0 ? 'true' : 'false');
+
+        cardHeader.setAttribute('aria-controls', sectionId);
+
+
+        // const h5 = document.createElement('h5');
+
+        // h5.classList.add('mb-0');
+
+        // const button = document.createElement('button');
+
+        // button.classList.add('btn', 'btn-link');
+
+        // button.setAttribute('data-toggle', 'collapse');
+
+        // button.setAttribute('data-target', `#${sectionId}`);
+
+        // button.setAttribute('aria-expanded', index === 0 ? 'true' : 'false');
+
+        // button.setAttribute('aria-controls', sectionId);
+
+        // button.textContent = section.replace(/_/g, ' ').charAt(0).toUpperCase() + section.replace(/_/g, ' ').slice(1).toLowerCase();
+
+        // h5.appendChild(button);
+
+        // cardHeader.appendChild(h5);
+
+        card.appendChild(cardHeader);
+
+        const collapse = document.createElement('div');
+
+        collapse.id = sectionId;
+
+        collapse.classList.add('collapse');
+
+        if (index === 0) {
+
+            collapse.classList.add('show');
+
+        }
+
+        collapse.setAttribute('aria-labelledby', `heading-${section}`);
+
+        collapse.setAttribute('data-parent', '#accordion_itable');
+
+        const cardBody = document.createElement('div');
+
+        cardBody.classList.add('card-body');
+
+        // Create nested List
+
+        const list = app.vpp.createNestedList(cq_plots_relations[section]);
+
+        cardBody.appendChild(list);
+
+        collapse.appendChild(cardBody);
+
+        card.appendChild(collapse);
+
+        container.appendChild(card);
+
+        });               
+
+
+
+},
+
+                show_check_file_output_nma(cq_plots_relations, missing_tabs, missing_pids, total_files, sof_files, plot_files, coe_files ){
+
+
+
+                    const contentDiv = document.getElementById('content_output_pwma');
+                    $('#content_output_pwma').removeClass('d-display-none');
+                    $("#server_logs").addClass('d-display-none');
+                    $("#accordian_result_table").addClass('d-display-none');
+                    $("#insight6-tab").removeClass('d-display-none');
+                    $("#insight6").removeClass('d-display-none');
+                    $("#insight7-tab").removeClass('d-display-none');
+                    $("#insight7").removeClass('d-display-none');
+                    document.getElementById('insight5').innerHTML= '';
+                    const cardData = [
+                    { title: "Total Files", description: total_files },
+                    { title: "Sof Files", description: sof_files },
+                    { title: "Plot Files", description: plot_files },
+                    {title: "COE Files", description: coe_files}
+
+                    ];
+                    const card_container = document.getElementById('card-container-nma');
+                    cardData.forEach(item => {
+                    // Create card element
+                    const card_ = document.createElement('div');
+                    card_.className = 'card_d';
+
+                    // Create title element
+                    const title_ = document.createElement('h3');
+                    title_.innerText = item.title;
+
+                    // Create description element
+                    const description = document.createElement('p');
+                    description.innerText = item.description;
+
+                    // Append title and description to card
+                    card_.appendChild(title_);
+                    card_.appendChild(description);
+
+                    // Append card to container
+                    card_container.appendChild(card_);
+                    });
+
+
+                    const container = document.getElementById('accordion');
+                    const sections = Object.keys(cq_plots_relations);
+
+                    sections.forEach((section, index) => {
+                    const sectionId = `section-${section}`;
+                    const card = document.createElement('div');
+                    card.classList.add('card');
+
+                    const cardHeader = document.createElement('div');
+                    cardHeader.classList.add('card-header');
+                    cardHeader.id = `heading-${section}`;
+
+                    const h5 = document.createElement('h5');
+                    h5.classList.add('mb-0');
+
+                    const button = document.createElement('button');
+                    button.classList.add('btn','btn-heading');
+                    button.setAttribute('data-toggle', 'collapse');
+                    button.setAttribute('data-target', `#${sectionId}`);
+                    button.setAttribute('aria-expanded', index === 0 ? 'true' : 'false');
+                    button.setAttribute('aria-controls', sectionId);
+
+                    button.textContent = section.charAt(0).toUpperCase() + section.slice(1);
+
+                    h5.appendChild(button);
+                    cardHeader.appendChild(h5);
+                    card.appendChild(cardHeader);
+
+                    const collapse = document.createElement('div');
+                    collapse.id = sectionId;
+                    collapse.classList.add('collapse');
+                    if (index === 0) {
+                        collapse.classList.add('show');
+                    }
+                    collapse.setAttribute('aria-labelledby', `heading-${section}`);
+                    collapse.setAttribute('data-parent', '#accordion');
+
+                    const cardBody = document.createElement('div');
+                    cardBody.classList.add('card-body');
+
+                    const tabs = document.createElement('ul');
+                    tabs.classList.add('nav', 'nav-tabs');
+                    tabs.id = `tabs-${section}`;
+                    tabs.setAttribute('role', 'tablist');
+
+                    const tabContent = document.createElement('div');
+                    tabContent.classList.add('tab-content','max-h-300','overflow-y-scroll');
+                    tabContent.id = `tab-content-${section}`;
+
+                    const sectionKeys = Object.keys(cq_plots_relations[section]);
+                    sectionKeys.forEach((key, tabIndex) => {
+                        const items = cq_plots_relations[section][key];
+                        const isActive = tabIndex === 0;
+                        const tabId = `${section}-${key.replace(/\s+/g, '-')}`; // i added - whom have space in their words like in our scenrio it was adverse events  
+                        app.vpp.createNavItem(tabs, tabId, `#${tabId}`, key, items.length, isActive);
+                    
+                        app.vpp.createTabContent(tabContent, `${section}-${key}`, items, isActive);
+                    });
+
+                    cardBody.appendChild(tabs);
+                    cardBody.appendChild(tabContent);
+                    collapse.appendChild(cardBody);
+                    card.appendChild(collapse);
+                    container.appendChild(card);
+                    });
+
+
+                    // Missing Excel sheets  Section 
+                    const insightDiv = document.getElementById('insight1');
+                    const table = document.createElement('table');
+                    table.classList.add('table', 'table-striped');
+
+                    const tbody = document.createElement('tbody');
+
+                    missing_tabs.forEach(pid => {
+                    const items = pid.split('|');
+                    const sheet_name = items[0]
+                    const outcome_name = items[1]
+
+
+                        const tr = document.createElement('tr');
+                        const iconTd = document.createElement('td');
+                        const icon = document.createElement('i');
+                        icon.classList.add('fas', 'fa-file-alt', 'file-icon');
+                        iconTd.appendChild(icon);
+                        const itemTd = document.createElement('td');
+                        itemTd.textContent = sheet_name ;
+                        
+                        tr.appendChild(iconTd);
+                        tr.appendChild(itemTd);
+                        
+                        tbody.appendChild(tr);
+
+                    });
+
+                    table.appendChild(tbody);
+                    insightDiv.appendChild(table);
+
+
+                    // missing pids  and their depenedent outocmes 
+
+                    const insightDiv_ = document.getElementById('insight4');
+                    const table_ = document.createElement('table');
+                    table.classList.add('table', 'table-striped');
+
+                    const tbody_ = document.createElement('tbody');
+
+
+                    Object.keys(missing_pids).forEach(pid => {
+                    item_text = '';
+                    const tr_parent = document.createElement('tr');
+                        const iconTd_parent = document.createElement('td');
+                        
+                        
+                        const itemTd_parent = document.createElement('td');
+                        itemTd_parent.textContent = "Study: "+pid;
+                        tr_parent.appendChild(itemTd_parent)
+                        
+                        tbody_.appendChild(tr_parent);
+                    missing_pids[pid].forEach(item => {
+                        
+
+                        const tr_ = document.createElement('tr');
+                        const iconTd_ = document.createElement('td');
+                        const icon_ = document.createElement('i');
+                        icon_.classList.add('fas', 'fa-file-alt', 'file-icon');
+                        iconTd_.appendChild(icon_);
+                        
+                        const itemTd_ = document.createElement('td');
+                        itemTd_.textContent = item;
+                        
+                        tr_.appendChild(iconTd_);
+                        tr_.appendChild(itemTd_);
+                        
+                        tbody_.appendChild(tr_);
+                    });
+                    });
+
+                    table_.appendChild(tbody_);
+                    insightDiv_.appendChild(table_);
+
+
+                },
+
+    show_check_file_output_pwma(cq_plots_relations, missing_tabs, missing_pids, total_files, sof_files, plot_files , wrong_formatted_data){
+        const contentDiv = document.getElementById('content_output_pwma');
+        $('#content_output_pwma').removeClass('d-display-none');
+        $('#content_output_nma').addClass('d-display-none');
+        $("#server_logs").addClass('d-display-none');
+        $("#accordian_result_table").addClass('d-display-none');
+        $("#insight6-tab").addClass('d-display-none');
+        $("#insight6").addClass('d-display-none');
+        $("#insight7-tab").addClass('d-display-none');
+        $("#insight7").addClass('d-display-none');
+
+                const cardData = [
+            { title: "Total Files", description: total_files },
+            { title: "Sof Files", description: sof_files },
+            { title: "Plot Files", description: plot_files },
+            
+        ];
+
+                
+
+        const card_container = document.getElementById('card-container');
+        cardData.forEach(item => {
+            // Create card element
+            const card_ = document.createElement('div');
+            card_.className = 'card_d';
+
+            // Create title element
+            const title_ = document.createElement('h3');
+            title_.innerText = item.title;
+
+            // Create description element
+            const description = document.createElement('p');
+            description.innerText = item.description;
+
+            // Append title and description to card
+            card_.appendChild(title_);
+            card_.appendChild(description);
+
+            // Append card to container
+            card_container.appendChild(card_);
+        });
+
+
+        const container = document.getElementById('accordion');
+        const sections = Object.keys(cq_plots_relations);
+        
+        sections.forEach((section, index) => {
+            const sectionId = `section-${section}`;
+            const card = document.createElement('div');
+            card.classList.add('card');
+            
+            const cardHeader = document.createElement('div');
+            cardHeader.classList.add('card-header');
+            cardHeader.id = `heading-${section}`;
+            
+            const h5 = document.createElement('h5');
+            h5.classList.add('mb-0');
+            
+            const button = document.createElement('button');
+            button.classList.add('btn','btn-heading');
+            button.setAttribute('data-toggle', 'collapse');
+            button.setAttribute('data-target', `#${sectionId}`);
+            button.setAttribute('aria-expanded', index === 0 ? 'true' : 'false');
+            button.setAttribute('aria-controls', sectionId);
+            
+            button.textContent = section.charAt(0).toUpperCase() + section.slice(1);
+            
+            h5.appendChild(button);
+            cardHeader.appendChild(h5);
+            card.appendChild(cardHeader);
+            
+            const collapse = document.createElement('div');
+            collapse.id = sectionId;
+            collapse.classList.add('collapse');
+            if (index === 0) {
+                collapse.classList.add('show');
+            }
+            collapse.setAttribute('aria-labelledby', `heading-${section}`);
+            collapse.setAttribute('data-parent', '#accordion');
+            
+            const cardBody = document.createElement('div');
+            cardBody.classList.add('card-body');
+            
+            const tabs = document.createElement('ul');
+            tabs.classList.add('nav', 'nav-tabs');
+            tabs.id = `tabs-${section}`;
+            tabs.setAttribute('role', 'tablist');
+            
+            const tabContent = document.createElement('div');
+            tabContent.classList.add('tab-content','max-h-300','overflow-y-scroll');
+            tabContent.id = `tab-content-${section}`;
+            
+            const sectionKeys = Object.keys(cq_plots_relations[section]);
+            sectionKeys.forEach((key, tabIndex) => {
+                const items = cq_plots_relations[section][key];
+                const isActive = tabIndex === 0;
+                const tabId = `${section}-${key.replace(/\s+/g, '-')}`; // i added - whom have space in their words like in our scenrio it was adverse events  
+                app.vpp.createNavItem(tabs, tabId, `#${tabId}`, key, items.length, isActive);
+                
+                app.vpp.createTabContent(tabContent, `${section}-${key}`, items, isActive);
+            });
+            
+            cardBody.appendChild(tabs);
+            cardBody.appendChild(tabContent);
+            collapse.appendChild(cardBody);
+            card.appendChild(collapse);
+            container.appendChild(card);
+        });
+
+
+        // Missing Excel sheets  Section 
+        const insightDiv = document.getElementById('insight1');
+        const table = document.createElement('table');
+        table.classList.add('table', 'table-striped');
+        
+        const tbody = document.createElement('tbody');
+        
+        missing_tabs.forEach(pid => {
+            const items = pid.split('|');
+            const sheet_name = items[0]
+            const outcome_name = items[1]
+            
+            
+                const tr = document.createElement('tr');
+                const iconTd = document.createElement('td');
+                const icon = document.createElement('i');
+                icon.classList.add('fas', 'fa-file-alt', 'file-icon');
+                iconTd.appendChild(icon);
+                const itemTd = document.createElement('td');
+                itemTd.textContent = sheet_name ;
+                
+                tr.appendChild(iconTd);
+                tr.appendChild(itemTd);
+                
+                tbody.appendChild(tr);
+            
+        });
+        
+        table.appendChild(tbody);
+        insightDiv.appendChild(table);
+
+
+        // missing pids  and their depenedent outocmes 
+
+        const insightDiv_ = document.getElementById('insight4');
+        const table_ = document.createElement('table');
+        table.classList.add('table', 'table-striped');
+        
+        const tbody_ = document.createElement('tbody');
+        
+        
+        Object.keys(missing_pids).forEach(pid => {
+            item_text = '';
+            const tr_parent = document.createElement('tr');
+                const iconTd_parent = document.createElement('td');
+                
+                
+                const itemTd_parent = document.createElement('td');
+                itemTd_parent.textContent = "Study: "+pid;
+                tr_parent.appendChild(itemTd_parent)
+                
+                tbody_.appendChild(tr_parent);
+            missing_pids[pid].forEach(item => {
+                
+
+                const tr_ = document.createElement('tr');
+                const iconTd_ = document.createElement('td');
+                const icon_ = document.createElement('i');
+                icon_.classList.add('fas', 'fa-file-alt', 'file-icon');
+                iconTd_.appendChild(icon_);
+                
+                const itemTd_ = document.createElement('td');
+                itemTd_.textContent = item;
+                
+                tr_.appendChild(iconTd_);
+                tr_.appendChild(itemTd_);
+                
+                tbody_.appendChild(tr_);
+            });
+        });
+        
+        table_.appendChild(tbody_);
+        insightDiv_.appendChild(table_);
+
+
+        const wrong_data = document.getElementById('insight5');
+
+        // Iterate over the data and create cards
+        Object.keys(wrong_formatted_data).forEach(key => {
+            const _card = document.createElement('div');
+            _card.className = 'card';
+            key_ = key.split('|')
+
+            const _title = document.createElement('h4');
+            _title.textContent = key_.join('\n');
+
+            const valueParagraph = document.createElement('p');
+            valueParagraph.textContent = wrong_formatted_data[key].join('\n');
+
+            _card.appendChild(_title);
+            _card.appendChild(valueParagraph);
+            wrong_data.appendChild(_card);
+        });
+          
+
+
+ 
+                },
+
+                upload_files: function() {
+                    if (this.task_confirm) {
+
+                    } else {
+                        var msg = 'Please confirm the project and clinical question you are going to overwrite by uploading the XLS files.';
+                        alert(msg);
+                        return;
+                    }
+
+                    var project_id = Cookies.get('project_id');
+                    if (project_id == undefined) {
+                        alert('Set working project first.');
+                        return;
+                    }
+                    var cq_abbr = Cookies.get('cq_abbr');
+
+                    this.is_uploading = true;
+                    this.sys_output = 'Uploading ...'
+                    if (this.task_type == 'itable') {
+
+                        var form_data = new FormData($('#form_itable')[0]);
+                        form_data.append('project_id', project_id);
+                        form_data.append('cq_abbr', cq_abbr);
+
+                        // submit!
+                        srv_extractor.upload_xls_files_itable(
+                            form_data,
+                            function(rsp) {
+                                console.log(rsp);
+                                if (rsp.success) {
+                                    app.vpp.done_uploading();
+                                    app.vpp.show_sys_output(rsp.sys_output);
+                                } else {
+                                    app.vpp.show_sys_output(rsp.msg);
+                                }
+                            }
+                        );
+                        return;
+                    }
+                    
+
+                    if (this.task_type == 'pwma') {
+                        var form_data = new FormData($('#form_extracts_pwma')[0]);
+                        form_data.append('project_id', project_id);
+                        form_data.append('cq_abbr', cq_abbr);
+
+                        // submit!
+                        srv_extractor.upload_xls_files_pwma(
+                            form_data,
+                            function(rsp) {
+                                console.log(rsp);
+                                if (rsp.success) {
+                                    app.vpp.done_uploading();
+                                    app.vpp.show_sys_output(rsp.sys_output);
+                                } else {
+                                    app.vpp.show_sys_output(rsp.msg);
+                                }
+                            }
+                        );
+                        return;
+                    }
+                    
+
+                    if (this.task_type == 'nma') {
+                        var form_data = new FormData($('#form_extracts_nma')[0]);
+                        form_data.append('project_id', project_id);
+                        form_data.append('cq_abbr', cq_abbr);
+
+                        // submit!
+                        srv_extractor.upload_xls_files_nma(
+                            form_data,
+                            function(rsp) {
+                                console.log(rsp);
+                                if (rsp.success) {
+                                    app.vpp.done_uploading();
+                                    app.vpp.show_sys_output(rsp.sys_output);
+                                } else {
+                                    app.vpp.show_sys_output(rsp.msg);
+                                }
+                            }
+                        );
+                        return;
+                    }
+                    
+
+                             
+
+                    if (this.task_type == 'result_table') {
+                        var form_data = new FormData($('#form_result_table')[0]);
+                        form_data.append('project_id', project_id);
+                        form_data.append('cq_abbr', cq_abbr);
+
+                        // submit!
+                        srv_extractor.upload_xls_result_table(
+                            form_data,
+                            function(rsp) {
+                                console.log(rsp);
+                                if (rsp.success) {
+                                    app.vpp.done_uploading();
+                                    app.vpp.show_sys_output(rsp.sys_output);
+                                } else {
+                                    app.vpp.show_sys_output(rsp.msg);
+                                }
+                            }
+                        );
+                        return;
+                    }
+                    // what???                    
+                    this.is_uploading = false;
+                },
+
+                check_files_result_table(){
+
+
+                    if (this.task_confirm) {
+
+                } else {
+                    var msg = 'Please confirm the project and clinical question you are going to overwrite by uploading the XLS files.';
+                    alert(msg);
+                    return;
+                }
+
+                var project_id = Cookies.get('project_id');
+                if (project_id == undefined) {
+                    alert('Set working project first.');
+                    return;
+                }
+                var cq_abbr = Cookies.get('cq_abbr');
+
+                this.is_uploading = true;
+                this.sys_output = 'Uploading ...'
+
+                var form_data = new FormData($('#form_result_table')[0]);
+                    form_data.append('project_id', project_id);
+                    form_data.append('cq_abbr', cq_abbr);
+
+                    // submit!
+                    srv_extractor.check_xls_files_result_table(
+                        form_data,
+                        function(rsp) {
+                            console.log(rsp);
+                            if (rsp.success) {
+                                app.vpp.done_uploading();
+                                console.log("****************************************")
+                                console.log(rsp)
+                                localStorage.setItem('cate_attrs_relations', JSON.stringify(rsp.cate_attrs_relations))
+                                localStorage.setItem('parent_nested_realtion', JSON.stringify(rsp.parent_nested_realtion))
+                                localStorage.setItem('comaparator_name', rsp.comaparator_name)
+                                localStorage.setItem('varaiable_name', rsp.varaiable_name)
+                                localStorage.setItem('abbr_list_updated', JSON.stringify(rsp.abbr_list_updated))
+                                localStorage.setItem('result_table_records', JSON.stringify(rsp.result_table_records))
+                                localStorage.setItem('result_table_records_seq', JSON.stringify(rsp.result_table_records_seq))
+                                
+                               
+                                iframeUrl = "/pub/result_table_pub_check.html?prj=LPR&cq=mcspc&src=cache&version=1"
+                                $('#ifm_itable').attr('src', iframeUrl);
+                                $("#server_logs").addClass('d-display-none');
+
+
+                              
+                            } else {
+                                app.vpp.show_sys_output(rsp.msg);
+                            }
+                        }
+                    );
+                    return;
+
+                },
+                check_files_itable(){
+
+                    if (this.task_confirm) {
+
+                    } else {
+                        var msg = 'Please confirm the project and clinical question you are going to overwrite by uploading the XLS files.';
+                        alert(msg);
+                        return;
+                    }
+
+                    var project_id = Cookies.get('project_id');
+                    if (project_id == undefined) {
+                        alert('Set working project first.');
+                        return;
+                    }
+                    var cq_abbr = Cookies.get('cq_abbr');
+
+                    this.is_uploading = true;
+                    this.sys_output = 'Uploading ...'
+
+                    var form_data = new FormData($('#form_itable')[0]);
+                        form_data.append('project_id', project_id);
+                        form_data.append('cq_abbr', cq_abbr);
+
+                        // submit!
+                        srv_extractor.check_xls_files_itable(
+                            form_data,
+                            function(rsp) {
+                                console.log(rsp);
+                                if (rsp.success) {
+                                    app.vpp.done_uploading();
+                                    app.vpp.show_check_file_output_itable(rsp.itable_dict);
+                                } else {
+                                    app.vpp.show_sys_output(rsp.msg);
+                                }
+                            }
+                        );
+                        return;
+
+                },
+                check_files_nma(){
+
+
+                    if (this.task_confirm) {
+
+                    } else {
+                        var msg = 'Please confirm the project and clinical question you are going to overwrite by uploading the XLS files.';
+                        alert(msg);
+                        return;
+                    }
+
+                    var project_id = Cookies.get('project_id');
+                    if (project_id == undefined) {
+                        alert('Set working project first.');
+                        return;
+                    }
+                    var cq_abbr = Cookies.get('cq_abbr');
+
+                    this.is_uploading = true;
+                    this.sys_output = 'Uploading ...'
+
+                    var form_data = new FormData($('#form_extracts_nma')[0]);
+                        form_data.append('project_id', project_id);
+                        form_data.append('cq_abbr', cq_abbr);
+
+                        // submit!
+                        srv_extractor.check_xls_files_nma(
+                            form_data,
+                            function(rsp) {
+                                console.log(rsp);
+                                if (rsp.success) {
+                                    app.vpp.done_uploading();
+                                    app.vpp.show_check_file_output_nma(rsp.cq_plots_relations, rsp.missing_tabs, rsp.missing_pids, rsp.total_files, rsp.sof_files, rsp.plot_files, rsp.coe_count);
+                                } else {
+                                    app.vpp.show_sys_output(rsp.msg);
+                                }
+                            }
+                        );
+                        return;
+
+                },
+
+
+                check_files_pwma(){
+
+                    if (this.task_confirm) {
+
+                    } else {
+                        var msg = 'Please confirm the project and clinical question you are going to overwrite by uploading the XLS files.';
+                        alert(msg);
+                        return;
+                    }
+
+                    var project_id = Cookies.get('project_id');
+                    if (project_id == undefined) {
+                        alert('Set working project first.');
+                        return;
+                    }
+                    var cq_abbr = Cookies.get('cq_abbr');
+
+                    this.is_uploading = true;
+                    this.sys_output = 'Uploading ...'
+
+                    var form_data = new FormData($('#form_extracts_pwma')[0]);
+                        form_data.append('project_id', project_id);
+                        form_data.append('cq_abbr', cq_abbr);
+
+                        // submit!
+                        srv_extractor.check_xls_files_pwma(
+                            form_data,
+                            function(rsp) {
+                                console.log(rsp);
+                                if (rsp.success) {
+                                    app.vpp.done_uploading();
+                                    app.vpp.show_check_file_output_pwma(rsp.cq_plots_relations, rsp.missing_tabs, rsp.missing_pids, rsp.total_files, rsp.sof_files, rsp.plot_files, rsp.wrong_data);
+                                } else {
+                                    app.vpp.show_sys_output(rsp.msg);
+                                }
+                            }
+                        );
+                        return;
+
+                }
+            }
+        });
+    }
+}
+
+
+
+
+var jarvis = {
+    goto_screener: function(project_id, title) {
+        Cookies.set('project_id', project_id);
+        Cookies.set('project_title', title);
+
+        location.href = '[[ url_for("screener.overview") ]]';
+    },
+
+    init: function() {
+        // set cq_abbr if not 
+        this.set_default_cq();
+        app.init();
+    },
+
+    prompt: function(text, value) {
+        return window.prompt(text, value);
+    },
+
+    confirm: function(text) {
+        return window.confirm(text);
+    },
+
+    toast: function(s) {
+        toast(s);
+    },
+
+};
+{% include 'js/jarvis_ext_utils.js' %}
+
+
+$(document).ready(function() {
+
+
+    jarvis.init();
+
+
+
+    function createList(items) {
+        const ul = document.createElement('ul');
+        ul.classList.add('item-list');
+        items.forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = item;
+            ul.appendChild(li);
+        });
+        return ul;
+    }
+
+    function createGroup(name, subgroups) {
+        const groupDiv = document.createElement('div');
+        groupDiv.classList.add('group');
+
+        const totalItems = Object.values(subgroups).flat().length;
+        const groupName = document.createElement('div');
+        groupName.classList.add('group-name');
+        groupName.textContent = `${name.charAt(0).toUpperCase() + name.slice(1)} (${totalItems} items)`;
+        groupDiv.appendChild(groupName);
+
+        groupName.addEventListener('click', () => {
+            groupDiv.classList.toggle('collapsed');
+        });
+
+        Object.keys(subgroups).forEach(subgroupName => {
+            const subgroupDiv = document.createElement('div');
+            subgroupDiv.classList.add('subgroup');
+            const subgroupContent = document.createElement('div');
+            subgroupContent.classList.add('subgroup-content');
+
+            const subgroupItemsCount = subgroups[subgroupName].length;
+            const subgroupTitle = document.createElement('div');
+            subgroupTitle.classList.add('subgroup-name');
+            subgroupTitle.textContent = `${subgroupName} (${subgroupItemsCount} items)`;
+            subgroupDiv.appendChild(subgroupTitle);
+
+            subgroupTitle.addEventListener('click', () => {
+                subgroupContent.classList.toggle('collapsed');
+            });
+
+            const itemList = createList(subgroups[subgroupName]);
+            subgroupContent.appendChild(itemList);
+
+            subgroupDiv.appendChild(subgroupContent);
+            groupDiv.appendChild(subgroupDiv);
+        });
+
+        return groupDiv;
+    }
+});
+</script>
+{% endblock %}

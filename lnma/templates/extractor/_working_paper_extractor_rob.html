@@ -1,0 +1,132 @@
+<!-- special extraction task for ROB -->
+<div class="w-cate-item-name w-cate-item-rob">
+    <i class="fas fa-balance-scale"></i>
+    Risk of Bias
+
+    <!-- <a class="w-attr-item-name-link mr-3"
+        style="float: right;"
+        href="javascript:void(0);"
+        title="Load the existing risk of bias assessment from the clinical trial of this study if available"
+        @click="load_rob_from_same_trial">
+        Load from Trial
+    </a> -->
+</div>
+
+<div class="w-cate-attrs">
+    <div class="d-flex flex-row mt-1 mb-1"
+        style="border-bottom: 1px dotted #cacaca; padding: 0 0 2px 0;">
+        <div style="width: 50px; padding: 0 2px 0 0;">
+            Overall Bias: 
+        </div>
+        <div>
+            <div class="d-flex flex-row">
+                <div style="width: 90px; line-height: 8px; text-align: center;">
+                    <span class="txt-xs">
+                        Reviewer
+                        <br>
+                        Judgement
+                    </span>
+                </div>
+                <div style="width: 100px;">
+                    <div>
+                        
+                        <select v-model="get_working_arm_attrs()['g0']['COE_RCT_ROB_OVERALL_RJ']"
+                            :class="'rob-rst-icon-' + get_working_arm_attrs()['g0']['COE_RCT_ROB_OVERALL_RJ']"
+                            @change="on_change_rob_overall"
+                            style="width: 88px;">
+                            <optgroup label="Reviewer Judgement">
+                                <option value="L">+ Low</option>
+                                <option value="M">! Some Concerns</option>
+                                <option value="H">- High Risk</option>
+                                <option value="NA">? Not Decided</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex flex-row mt-1">
+                <div style="width: 90px; line-height: 8px; text-align: center;">
+                    <span class="txt-xs">
+                        Algorithm 
+                        <br>
+                        Result
+                    </span>
+                </div>
+                <div style="width: 30px;">
+                    <div v-html="to_rob_symbol(get_working_arm_attrs()['g0']['COE_RCT_ROB_OVERALL_AR'])">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="d-flex flex-row mt-1">
+        <div v-for="d_idx in 5"
+            class="rob-rst-box"
+            :class="{'rob-rst-box-active':coe_rob_d_active==d_idx}"
+            :title="coe_rob_d_name[d_idx]"
+            v-on:click="show_coe_rob_d(d_idx)">
+            <div class="w-100 text-center">
+                <select v-model="get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_RJ']"
+                    @change="on_change_rob_ds"
+                    :class="'rob-rst-icon-' + get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_RJ']"
+                    class="rob-rst-rj-d">
+                    <optgroup label="Reviewer Judgement">
+                        <option value="L">+  Low</option>
+                        <option value="M">!  Some Concerns</option>
+                        <option value="H">-  High Risk</option>
+                        <option value="NA">?  Not Decided</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div v-html="to_rob_symbol(get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_AR'])">
+            </div>
+            <div class="rob-rst-text">
+                D{{ d_idx }}
+            </div>
+        </div>
+    </div>
+    <div v-for="d_idx in 5"
+        v-if="coe_rob_d_active == d_idx"
+        class="rob-rst-qs-box">
+        <div v-if="d_idx == 2"
+            style="margin: 3px 0 5px 0;">
+            Aim to assess: 
+            <select v-model="get_working_arm_attrs()['g0']['COE_RCT_ROB_D2_AIM']"
+                @change="on_change_rob_qs"
+                style="width: 140px;">
+                <option value="a">assignment to intervention (the "intention-to-treat" effect)</option>
+                <option value="b">adhering to intervention (the "per-protocol" effect)</option>
+            </select>
+        </div>
+        
+        <div v-for="q, q_idx in get_qs(d_idx)"
+            class="rob-dx-q">
+            <div class="rob-q-text">
+                <span>
+                    {{ q }}
+                </span>
+            </div>
+            <div class="d-flex flex-row">
+                <select class="rob-select"
+                    v-model="get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_Q'+q_idx]"
+                    :disabled="disable_rob_domain_question(d_idx, q_idx, get_working_arm_attrs()['g0'])"
+                    @change="on_change_rob_qs">
+                    <option value="Y"><b>Y</option>
+                    <option value="PY">PY</option>
+                    <option value="PN">PN</option>
+                    <option value="N">N</option>
+                    <option value="NI">NI</option>
+                    <option v-if="show_coe_rob_option_NA(d_idx, q_idx)" value="NA">NA (Not Applicable)</option>
+                </select>
+                <input type="text" 
+                    class="rob-comment"
+                    :disabled="disable_rob_domain_question(d_idx, q_idx, get_working_arm_attrs()['g0'])"
+                    @input="on_change_rob_q_coment"
+                    v-model="get_working_arm_attrs()['g0']['COE_RCT_ROB_C'+d_idx+'_Q'+q_idx]">
+            </div>
+        </div>
+    </div>
+</div>

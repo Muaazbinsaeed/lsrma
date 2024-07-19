@@ -1,0 +1,1305 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+PWMA Analyzer
+{% endblock %}
+
+{% block style %}
+<style>
+
+.box {
+    display: flex;
+    flex-direction: column;
+}
+.box-header {
+    width: 100%;
+    padding: 3px 0;
+    display: flex;
+    align-items: center;
+}
+.box-header a {
+    font-size: .8em;
+}
+.box-header h4 {
+    padding: 0;
+    margin: 0;
+    font-size: .95em;
+    height: 1.6em;
+    line-height: 1.6em;
+    margin: 3px 0;
+    font-weight: bold;
+}
+.box-header button, 
+.box-body button,
+.box-footer button {
+    height: 1.7em;
+    line-height: 1em;
+    font-size: .8em;
+    margin: 3px;
+    background: white;
+    border: 1px solid #333333;
+    border-radius: 3px;
+}
+.box-header select {
+    height: 1.6em;
+    line-height: 1.2em;
+    font-size: .8em;
+    margin: 3px;
+}
+.box-header span {
+    font-size: .9em;
+}
+.box-header a {
+    padding: 1px 3px;
+    margin: 0 5px;
+    height: 1.6em;
+    line-height: 1.6em;
+}
+.box-header a:hover {
+    text-decoration: underline;
+
+}
+.box-body {
+    width: 100%;
+}
+.box-bodyitem {
+    padding: 0 0 3px 0;
+}
+.box-bodyitem-hl {
+    display: flex;
+    flex-direction: row;
+}
+.box-bodyitem-label {
+    width: 54%;
+    font-size: .9em;
+    line-height: 1.8em;
+}
+.box-bodyitem-value {
+    width: 45%;
+}
+.box-bodyitem select {
+    width: 100%;
+}
+.box img {
+    width: 100%;
+}
+.box-p {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    font-size: .9em;
+    line-height: 1.1em;
+}
+.box-p-fixlen {    
+    white-space: nowrap;
+    text-overflow:ellipsis;
+    overflow: hidden;
+}
+.box-footer {
+    width: 100%;
+    min-height: 20px;
+    padding: 5px 0 5px 0;
+    border-bottom: 1px dotted #CCCCCC;
+}
+.box-smalltable th,
+.box-smalltable td {
+    border-bottom: 1px dotted #cccccc;
+    padding: 0 3px;
+    font-size: .9em;
+}
+.box-chk-fix {
+    display: table-cell; 
+    vertical-align: middle;
+    padding: 2px 0 0 0;
+    line-height: 10px;
+}
+.box-smalltable td label{
+    font-weight: normal;
+}
+
+.content-wrapper {
+    background: white;
+}
+.d-display-block {
+    display: block;
+}
+.d-display-none {
+    display: none !important;
+}
+.flex-container {
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    height: 100%;
+}
+/* for this page */
+.footer {
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    font-size: .75em;
+}
+.footer div {
+    height: 35px;
+    line-height: 4em;
+}
+.footer-link a {
+    padding: 0 5px;
+    color: #999999;
+}
+#wrapper {
+    font-size: 13px;
+}
+#left-pane {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 310px;
+    width: 310px;
+    /* height: calc(100% - 10px); */
+    margin: 0 10px 0 0;
+    padding: 5px 10px;
+    /* border-right: 1px solid lightgray; */
+    /* background-color: #FCFCFC; */
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+#main-pane {
+    /* width: calc(100% - 240px);
+    height: calc(100% - 10px); */
+    margin: 0 10px 0 0;
+    padding: 5px;
+    /* background-color: #FFFFFF; */
+
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+}
+#main-pane .box {
+    /* border-right: 1px dotted #ccc; */
+    /* border-bottom: 1px dotted #ccc; */
+    margin: 0 10px 10px 0;
+    border-radius: 5px;
+}
+.pane-row {
+    display: flex;
+    flex-direction: row;
+}
+/* network plot */
+.fg-net-node-text {
+    cursor: pointer;
+}
+.fg-net-node-text:hover {
+    fill: darkred;
+}
+.selected .fg-net-node-text{
+    font-weight: bold;
+    fill: red;
+}
+/* forest plot styles */
+.fg-title {
+    fill: black;
+    font-weight: bold;
+}
+.fg-subtitle {
+    fill: black;
+    text-decoration: italic;
+}
+.fg-frs-th {
+    font-weight: bold;
+}
+.fg-frs-td {
+    font-weight: normal;
+}
+.fg-frs-item text {
+    font-size: .9em;
+}
+.fg-frs-item:hover text {
+    font-weight: bold;
+}
+.fg-row-bg {
+    fill: white;
+}
+.fg-frs-item:hover .fg-row-bg {
+    fill: whitesmoke;
+}
+.fg-frs-line {
+    stroke-width: 1;
+    stroke: black;
+}
+.fg-frs-box {
+    fill: dodgerblue;
+    fill-opacity: .7;
+}
+.fg-frs-guideline {
+    stroke-width: 1;
+    stroke: black;
+}
+.fg-frs-mddot {
+    fill: black;
+    fill-opacity: .8;
+}
+/* League Table */
+#tb-nma-league-div {
+    display: flex;
+    flex-direction: column;
+}
+.tb-colname {
+    text-align: center;
+    border-bottom: 1px solid dimgray;
+}
+.tb-rowname {
+    width: 30px;
+}
+.tb-th {
+    width: 70px;
+    text-align: center;
+    margin: 0 2px 2px 0;
+}
+.tb-row {
+    display: flex;
+    flex-direction: row;
+}
+.tb-row-lead {
+    width: 80px;
+    height: 35px;
+    line-height: 40px;
+    margin: 0 2px 2px 0;
+    padding: 0 3px 0 0;
+}
+.tb-cell {
+    width: 69px;
+    height: 34px;
+    padding: 1px 0 0 1px;
+    border-right: 2px solid white;
+    border-bottom: 2px solid white;
+    text-align: center;
+    background-color: whitesmoke;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+}
+.tb-cell:hover {
+    padding: 0 1px 1px 0;
+    border-right: 2px solid gray;
+    border-bottom: 2px solid gray;
+}
+.tb-cell-value {
+    width: 69px;
+    height: 24px;
+    line-height: .9em;
+}
+.tb-cell-blank {
+    width: 69px;
+    height: 16px;
+    font-weight: bold;
+}
+.tb-league-luci {
+    font-size: .8em;
+}
+#start-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    display: flex;
+    background: white;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#ss-msg {
+    width: 100%;
+    padding: 10px 0;
+    text-align: center;
+}
+
+#dataset_summary {
+    font-size: .7rem;
+    padding: 10px 0 5px 0; 
+    margin: 10px 0 5px 0; 
+    border-top: 1px dotted #EAEAEA;
+    border-bottom: 1px dotted #EAEAEA;
+}
+#dataset_summary p {
+    margin: 0 0 .5rem 0;
+}
+#dataset_summary h4 {
+    margin: 0 0 .5rem 0;
+}
+.rank_table {
+    width: 100%;
+}
+.rank_table th {
+    text-align: left;
+    border-bottom: 1px solid #666666;
+}
+.rank_table td {
+    border-bottom: 1px solid #666666;
+}
+
+.d3-tip {
+    line-height: 1;
+    padding: 6px;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    border-radius: 4px;
+    font-size: 12px;
+}
+#league_table_explain {
+    margin: 0 0 10px 0;
+    padding: 0 0 0 40px;
+    font-size: 12px;
+}
+.dynamic_padding_iframe {
+    margin-left: unset !important;
+}
+</style>
+{% endblock %}
+
+{% block page_name %}
+<i class="fas fa-chart-line"></i>
+PWMA Analyzer
+{% endblock %}
+
+{% block content %}
+
+<div id="wrapper" class="flex-container">
+
+<div id="left-pane">
+    <div class="upper">
+        <div class="box" style="width: 300px;" id="fm_loader">
+            <div class="box-header" id="analysis-sys">
+                <h4>
+                    <span class="fa fa-database"></span>
+                    DATASET
+                </h4>
+            </div>
+            
+            <div class="box-body ">
+                <div class="uploading-fie-section">
+                    <form id="upload-file" method="post" enctype="multipart/form-data">
+                        <label for="file">Select Data File</label>
+                        <input id="ipt-csv-file" name="file" type="file" style="width:200px;">
+                    </form>
+                    <button v-on:click="upload">
+                        <span class="fa fa-upload"></span>
+                        Upload &amp; Read Data File
+                    </button>
+                </div>
+                <div id="dataset_summary"
+                    v-html="dataset_summary">
+                </div>
+                <div id="multiple_subsheet"
+                    v-html="multiple_subsheet">
+                </div>
+            </div>
+            
+        </div><!-- .box / upload file -->
+    
+        <div class="box" style="width: 300px;" id="fm_config">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-sliders-h"></span>
+                    SETTINGS
+                </h4>
+            </div>
+            
+            <div class="box-body">
+                <!-- <div class="box-bodyitem box-bodyitem-hl">
+                    <div class="box-bodyitem-label">
+                        <label>Data Input Format:</label>
+                    </div>
+                    <div class="box-bodyitem-value">
+                        <select v-model="cfgs.input_format.selected"
+                            v-bind:disabled="cfgs.input_format.disabled">
+                            <option
+                                v-for="option in cfgs.input_format.options"
+                                v-bind:value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                </div> -->
+                <!-- /.box-bodyitem -->
+
+                <div class="box-bodyitem box-bodyitem-hl">
+                    <div class="box-bodyitem-label">
+                        <label>Pairwise Analysis Method:</label>
+                    </div>
+                    <div class="box-bodyitem-value">
+                        <select v-model="cfgs.pairwise_analysis.selected"
+                            v-bind:disabled="cfgs.pairwise_analysis.disabled">
+                            <option v-for="option in cfgs.pairwise_analysis.options" v-bind:value="option.value"
+                            v-if="show_cfg_option('pairwise_analysis', option.value)">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                </div><!-- /.box-bodyitem -->
+
+                <div class="box-bodyitem box-bodyitem-hl">
+                    <div class="box-bodyitem-label">
+                        <label>Model:</label>
+                    </div>
+                    <div class="box-bodyitem-value">
+                        <select v-model="cfgs.fixed_or_random.selected"
+                            v-bind:disabled="cfgs.fixed_or_random.disabled">
+                            <option v-for="option in cfgs.fixed_or_random.options" v-bind:value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                </div><!-- /.box-bodyitem -->
+
+                <div class="box-bodyitem box-bodyitem-hl">
+                    <div class="box-bodyitem-label">
+                        <label>Measure of Effect:</label>
+                    </div>
+                    <div class="box-bodyitem-value">
+                        <select v-model="cfgs.measure_of_effect.selected"
+                            v-bind:disabled="cfgs.measure_of_effect.disabled">
+                            <option 
+                                v-for="option in cfgs.measure_of_effect.options"
+                                v-bind:value="option.value"
+                                v-if="show_cfg_option('measure_of_effect', option.value)">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                </div><!-- /.box-bodyitem -->
+
+                <div class="box-bodyitem box-bodyitem-hl">
+                    <div class="box-bodyitem-label">
+                        <label>Pooling Method:</label>
+                    </div>
+                    <div class="box-bodyitem-value">
+                        <select v-model="cfgs.pooling_method.selected"
+                            v-bind:disabled="cfgs.pooling_method.disabled">
+                            <option 
+                                v-for="option in cfgs.pooling_method.options"
+                                v-bind:value="option.value"
+                                v-if="show_cfg_option('pooling_method', option.value)">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                </div><!-- /.box-bodyitem -->
+
+                <div class="box-bodyitem box-bodyitem-hl">
+                    <div class="box-bodyitem-label">
+                        <label>Tau Estimation Method:</label>
+                    </div>
+                    <div class="box-bodyitem-value">
+                        <select v-model="cfgs.tau_estimation_method.selected"
+                            v-bind:disabled="cfgs.tau_estimation_method.disabled">
+                            <option v-for="option in cfgs.tau_estimation_method.options" v-bind:value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                </div><!-- /.box-bodyitem -->
+
+                <div class="box-bodyitem box-bodyitem-hl" v-if="show_cfg('hakn_adjustment')">
+                    <div class="box-bodyitem-label">
+                        <label>Hartung-Knapp Adjustment:</label>
+                    </div>
+                    <div class="box-bodyitem-value">
+                        <select v-model="cfgs.hakn_adjustment.selected"
+                            v-bind:disabled="cfgs.hakn_adjustment.disabled">
+                            <option v-for="option in cfgs.hakn_adjustment.options" v-bind:value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                </div><!-- /.box-bodyitem -->
+
+                <div class="box-bodyitem box-bodyitem-hl" v-if="show_cfg('smd_estimation_method')">
+                    <div class="box-bodyitem-label">
+                        <label>SMD Estimation Method:</label>
+                    </div>
+                    <div class="box-bodyitem-value">
+                        <select v-model="cfgs.smd_estimation_method.selected"
+                            v-bind:disabled="cfgs.smd_estimation_method.disabled">
+                            <option v-for="option in cfgs.smd_estimation_method.options" v-bind:value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                </div><!-- /.box-bodyitem -->
+
+                <div class="box-bodyitem box-bodyitem-hl"
+                    v-if="show_cfg('prediction_interval')">
+                    <div class="box-bodyitem-label">
+                        <label>Prediction Interval:</label>
+                    </div>
+                    <div class="box-bodyitem-value">
+                        <select v-model="cfgs.prediction_interval.selected"
+                            v-bind:disabled="cfgs.prediction_interval.disabled">
+                            <option v-for="option in cfgs.prediction_interval.options" v-bind:value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                </div><!-- /.box-bodyitem -->
+
+
+                <div class="box-bodyitem box-bodyitem-hl">
+                    <div class="box-bodyitem-label">
+                        <label title="">Which is Better: </label>
+                    </div>
+                    <div class="box-bodyitem-value">
+                        <select v-model="cfgs.which_is_better.selected">
+                            <option v-for="option in cfgs.which_is_better.options" v-bind:value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="box-bodyitem box-bodyitem-hl"
+                    v-if="show_cfg('sensitivity_analysis')">
+                    <div class="box-bodyitem-label">
+                        <label>Sensitivity Analysis:</label>
+                    </div>
+                    <div class="box-bodyitem-value" style="padding-top: 3px;">
+                        <input type="radio" id="cfgs_sensitivity_analysis_1" value="yes" v-model="cfgs.sensitivity_analysis.selected"><label style="padding: 0 5px;" for="cfgs_sensitivity_analysis_1">Yes</label>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <input type="radio" id="cfgs_sensitivity_analysis_2" value="no" v-model="cfgs.sensitivity_analysis.selected"><label style="padding: 0 5px;" for="cfgs_sensitivity_analysis_2">No</label>
+                    </div>
+                    
+                </div><!-- /.box-bodyitem -->
+
+                <div class="box-bodyitem" style="padding: 0 0 0 10px;"
+                    v-if="show_cfg('sensitivity_analysis') && cfgs.sensitivity_analysis.selected == 'yes'">
+                    <p>Select the studies to be <b>EXCLUDED</b>:</p>
+                    <table class="box-smalltable" style="margin-bottom: 20px;">
+                        <tr>
+                            <th>&nbsp;</th>
+                            <th>Study</th>
+                            <th>Year</th>
+                        </tr>
+                        <tr v-for="r, idx in cfgs.study_list.selected">
+                            <td>
+                                <div class="box-chk-fix">
+                                    <input type="checkbox"
+                                    v-bind:id="'sens-chk-' + idx" 
+                                    v-bind:value="r.study"
+                                    v-model="cfgs.sensitivity_analysis_excluded_study_list.selected">
+                                </div>
+                            </td>
+                            <td><label v-bind:for="'sens-chk-' + idx">{{ r.study }}</label></td>
+                            <td><label v-bind:for="'sens-chk-' + idx">{{ r.year }}</label></td>
+                        </tr>
+                    </table>
+                </div><!-- /.box-bodyitem -->
+
+                <div class="box-bodyitem box-bodyitem-hl"
+                    v-if="show_cfg('cumulative_meta_analysis')">
+                    <div class="box-bodyitem-label">
+                        <label>Cumulative Meta-Analysis:</label>
+                    </div>
+                    <div class="box-bodyitem-value" style="padding-top: 3px;">
+                        <input type="radio" id="cfgs_cumulative_meta_analysis_1" value="yes" v-model="cfgs.cumulative_meta_analysis.selected"><label style="padding: 0 5px;" for="cfgs_cumulative_meta_analysis_1">Yes</label>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <input type="radio" id="cfgs_cumulative_meta_analysis_2" value="no" v-model="cfgs.cumulative_meta_analysis.selected"><label style="padding: 0 5px;" for="cfgs_cumulative_meta_analysis_2">No</label>
+                    </div>
+                    
+                </div><!-- /.box-bodyitem -->
+                
+                <div class="box-bodyitem box-bodyitem-hl"
+                    v-if="show_cfg('cumulative_meta_analysis') && cfgs.cumulative_meta_analysis.selected == 'yes'">
+                    <div class="box-bodyitem-label" style="text-indent: 1em;">
+                        <label>Sort by:</label>
+                    </div>
+                    <div class="box-bodyitem-value" style="padding-top: 3px;">
+                        <select v-model="cfgs.cumulative_meta_analysis_sortby.selected"
+                            v-bind:disabled="cfgs.cumulative_meta_analysis_sortby.disabled">
+                            <option v-for="option in cfgs.cumulative_meta_analysis_sortby.options" v-bind:value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                </div><!-- /.box-bodyitem -->
+
+                
+    
+            </div>
+            <div class="box-footer">
+                
+                <button v-on:click="analyze" 
+                    v-bind:disabled="btn_analyze.disabled">
+                    <span class="fa fa-project-diagram"></span>
+                    <span v-if="btn_analyze.disabled">
+                        {{ btn_analyze.txt_working }}
+                    </span>
+                    <span v-else>
+                        {{ btn_analyze.txt_normal }}
+                    </span>
+                </button>
+    
+            </div>
+        </div>
+
+    </div>
+
+    
+</div><!-- #left-pane -->
+
+<div id="main-pane">
+    <div id="fg_imglst" class="box" style="width: 700px;">
+        <div class="box-header">
+            <h4>
+                <i class="fa fa-tree"></i>
+                PAIRWISE META-ANALYSIS RESULTS
+            </h4>
+            <div>
+                <button
+                    v-if="r_source!=''"
+                    v-on:click="download_source_code()">
+                    <i class="fa fa-download"></i>
+                    Download Source Code
+                </button>&nbsp;
+                
+            </div>
+        </div>
+        <div class="box-body">
+            <div v-for="plot in plots">
+                <p>
+                    <i class="far fa-file-image"></i>
+                    <span>
+                        {{ get_header(plot.plot_id)() }}
+                    </span>
+                    <button
+                        v-on:click="download_img(plot.fn)">
+                        <i class="fa fa-download"></i>
+                        Download Figure
+                    </button>
+                </p>
+                <img class="img" v-bind:src="'/f/' + plot.fn">
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+{% endblock %}
+
+{% block active_nav_link %}analyzer-pwma{% endblock %}
+
+{% block script %}
+<!-- D3.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.1/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.9.1/d3-tip.min.js"></script>
+<!-- ECharts -->
+<script src="/static/lib/echarts/echarts.js"></script>
+<!-- FileSavaer -->
+<script src="/static/lib/file-saver/FileSaver.min.js"></script>
+<!-- My Scripts -->
+<script>
+
+{% include 'js/fm_loader.js' %}
+{% include "js/fig_saver.js" %}
+
+
+var fm_config = {
+    vpp: null,
+    vpp_id: '#fm_config',
+
+    cfg_optval2text: function(cfg_name, optval) {
+        for (let i = 0; i < this.cfgs[cfg_name].options.length; i++) {
+            const opt = this.cfgs[cfg_name].options[i];
+            if (opt.value == optval) {
+                return opt.text;
+            }
+        }
+        return '';
+    },
+
+    cfgs: {
+        _analyze_type: {
+            selected: 'pwma',
+            use: true,
+            disabled: false,
+        },
+
+        treatment: {
+            selected: '',
+            use: true,
+            disabled: false,
+            options: []
+        },
+
+        control: {
+            selected: '',
+            use: true,
+            disabled: false,
+            options: []
+        },
+
+        study_list: {
+            selected: []
+        },
+
+        input_format: {
+            selected: 'PRIM_CAT_PRE',
+            use: true,
+            disabled: false,
+            options: [
+                {text: 'Prim | Categorical + Precalculated', value: 'PRIM_CAT_PRE'},
+                {text: 'Prim | Categorical + Raw', value: 'PRIM_CAT_RAW'},
+                {text: 'Prim | Categorical + Raw (Incidence Rate Ratios)', value: 'PRIM_CATIRR_RAW'},
+                {text: 'Prim | Continuous + Precalculated', value: 'PRIM_CONTD_PRE'},
+                {text: 'Prim | Continuous + Raw', value: 'PRIM_CONTD_RAW'},
+
+                {text: 'Subg | Categorical + Precalculated', value: 'SUBG_CAT_PRE'},
+                {text: 'Subg | Categorical + Raw', value: 'SUBG_CAT_RAW'},
+                {text: 'Subg | Categorical + Raw (Incidence Rate Ratios)', value: 'SUBG_CATIRR_RAW'},
+                {text: 'Subg | Continuous + Precalculated', value: 'SUBG_CONTD_PRE'},
+                {text: 'Subg | Continuous + Raw', value: 'SUBG_CONTD_RAW'},
+            ]
+        },
+
+        pairwise_analysis: {
+            selected: 'PRIM',
+            use: true,
+            disabled: false,
+            options: [
+                {text: 'Primary Analysis', value: 'PRIM'},
+                {text: 'Subgroup Analysis', value: 'SUBG'}
+            ]
+        },
+
+        fixed_or_random: {
+            selected: 'random',
+            use: true,
+            disabled: false,
+            options: [
+                {text: 'Random-Effect', value: 'random'},
+                {text: 'Fixed-Effect', value: 'fixed'}
+            ]
+        },
+
+        pooling_method: {
+            selected: 'Inverse',
+            use: true,
+            disabled: false,
+            options: [
+                {text: 'Inverse Variance', value: 'Inverse'},
+                {text: 'Mantel-Haenszel', value: 'MH'},
+                {text: 'Peto', value: 'Peto'}
+            ]
+
+        },
+
+        measure_of_effect: {
+            selected: 'OR',
+            use: true,
+            disabled: false,
+            options: [
+                {text: 'Hazard Ratio', value: 'HR'},
+                {text: 'Odds Ratio', value: 'OR'},
+                {text: 'Relative Risk', value: 'RR'},
+                {text: 'Risk Difference', value: 'RD'},
+                {text: 'Incidence Rate Ratio', value: 'IRR'},
+                {text: 'Mean Difference', value: 'MD'},
+                {text: 'Standardized Mean Difference', value: 'SMD'}
+            ]
+        },
+
+        tau_estimation_method: {
+            selected: 'DL',
+            use: true,
+            disabled: false,
+            options: [
+                { text: 'DerSimonian-Laird', value: 'DL' },
+                { text: 'Restricted Maximum-likelihood', value: 'REML' },
+                { text: 'Maximum Likelihood', value: 'ML' },
+                { text: 'Empirical Bayes', value: 'EB' },
+                { text: 'Sidik-Jonkman', value: 'SJ' },
+                { text: 'Hedges', value: 'HE' },
+                { text: 'Hunter-Schmidt', value: 'HS' },
+                { text: 'Paul-Mendel', value: 'PM' }
+            ]
+        },
+
+        hakn_adjustment: {
+            selected: 'FALSE',
+            use: true,
+            disabled: false,
+            options: [
+                {text: 'No', value: 'FALSE'},
+                {text: 'Yes', value: 'TRUE'}
+            ]
+        },
+
+        smd_estimation_method: {
+            selected: 'Hedges',
+            use: true,
+            disabled: false,
+            options: [
+                {text: 'Hedges', value: 'Hedges'},
+                {text: "Cohen's d", value: 'Cohen'},
+                {text: "Glass delta", value: 'Glass'}
+            ]
+        },
+
+        prediction_interval: {
+            selected: 'FALSE',
+            use: true,
+            disabled: false,
+            options: [
+                {text: 'Yes', value: 'TRUE'},
+                {text: "No", value: 'FALSE'}
+            ]
+        },
+
+        which_is_better: {
+            selected: 'small',
+            options: [
+                {text: 'Lower is Better', value: 'small'},
+                {text: 'Larger is Better', value: 'big'}
+            ]
+        },
+
+        sensitivity_analysis: {
+            selected: 'no',
+            use: true,
+            disabled: false,
+            options: [
+                {text: 'Yes', value: 'yes'},
+                {text: "No", value: 'no'}
+            ]
+        },
+
+        sensitivity_analysis_excluded_study_list: {
+            selected: []
+        },
+
+        cumulative_meta_analysis: {
+            selected: 'no',
+            use: true,
+            disabled: false,
+            options: [
+                {text: 'Yes', value: 'yes'},
+                {text: "No", value: 'no'}
+            ]
+        },
+
+        cumulative_meta_analysis_sortby: {
+            selected: 'year',
+            options: [
+                {text: 'Year', value: 'year'},
+                {text: "TE", value: 'TE'}
+            ]
+        },
+
+        assumed_baseline: {
+            selected: 100,
+            use: true,
+            disabled: false,
+            options: [
+                {text: '100', value: 100},
+                {text: "1000", value: 1000}
+            ]
+        }
+    },
+
+    init: function() {
+
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                cfgs: this.cfgs,
+                btn_analyze: {
+                    disabled: false,
+                    txt_working: 'Analyze',
+                    txt_normal: 'Analyze'
+                }
+            },
+            methods: {
+                show_cfg: function(cfg_name) {
+                    switch (cfg_name) {
+                        case 'hakn_adjustment':
+                            if (this.cfgs.fixed_or_random.selected == 'random')
+                                this.cfgs.hakn_adjustment.use = true;
+                            else
+                                this.cfgs.hakn_adjustment.use = false;
+                            break;
+                        case 'smd_estimation_method':
+                            if (this.cfgs.input_format.selected.includes('CONTD_RAW') &&
+                                this.cfgs.measure_of_effect.selected == 'SMD')
+                                this.cfgs.smd_estimation_method.use = true;
+                            else
+                                this.cfgs.smd_estimation_method.use = false;
+                            break;
+                        case 'sensitivity_analysis':
+                            if (this.cfgs.pairwise_analysis.selected == 'PRIM')
+                                this.cfgs.sensitivity_analysis.use = true;
+                            else
+                                this.cfgs.sensitivity_analysis.use = false;
+                            break;
+                        case 'cumulative_meta_analysis':
+                            if (this.cfgs.pairwise_analysis.selected == 'PRIM')
+                                this.cfgs.cumulative_meta_analysis.use = true;
+                            else
+                                this.cfgs.cumulative_meta_analysis.use = false;
+                            break;
+                        case 'prediction_interval':
+                            if (this.cfgs.pairwise_analysis.selected == 'PRIM')
+                                this.cfgs.prediction_interval.use = true;
+                            else
+                                this.cfgs.prediction_interval.use = false;
+                            break;
+                    }
+
+                    return this.cfgs[cfg_name].use;
+                },
+
+                show_cfg_option: function(cfg_name, option) {
+                    switch (cfg_name) {
+                        case 'pooling_method':
+                            switch (option) {
+                                case 'MH':
+                                    if (this.cfgs.input_format.selected.includes('CAT_RAW') ||
+                                        this.cfgs.input_format.selected.includes('CATIRR_RAW')) return true;
+                                    else return false;
+                                    break;
+                                case 'Peto':
+                                    if (this.cfgs.input_format.selected.includes('CAT_RAW') &&
+                                        this.cfgs.measure_of_effect.selected == 'OR' &&
+                                        this.cfgs.fixed_or_random.selected == 'fixed') return true;
+                                    else return false;
+                                    break;
+                                case 'Inverse':
+                                    return true;
+                            }
+                            break;
+                        case 'measure_of_effect':
+                            switch (option) {
+                                case 'HR':
+                                    if (this.cfgs.input_format.selected.includes('CAT_PRE')) return true;
+                                    else return false;
+                                    break;
+                                case 'OR':
+                                    if (this.cfgs.input_format.selected.includes('CAT_PRE') ||
+                                        this.cfgs.input_format.selected.includes('CAT_RAW')) return true;
+                                    else return false;
+                                case 'RR':
+                                    if (this.cfgs.pooling_method.selected == 'Peto') return false;
+                                    if (this.cfgs.input_format.selected.includes('CAT_PRE') ||
+                                        this.cfgs.input_format.selected.includes('CAT_RAW')) return true;
+                                    else return false;
+                                case 'RD':
+                                    if (this.cfgs.pooling_method.selected == 'Peto') return false;
+                                    if (this.cfgs.input_format.selected.includes('CAT_PRE') ||
+                                        this.cfgs.input_format.selected.includes('CAT_RAW')) return true;
+                                    else return false;
+                                    break;
+                                case 'IRR':
+                                    if (this.cfgs.input_format.selected.includes('CATIRR_RAW')) return true;
+                                    else return false;
+                                    break;
+                                case 'MD':
+                                case 'SMD':
+                                    if (this.cfgs.input_format.selected.includes('CONTD_RAW') ||
+                                        this.cfgs.input_format.selected.includes('CONTD_PRE')) return true;
+                                    else return false;
+                                    break;
+                            }
+                            break;
+                        case 'pairwise_analysis':
+                            switch (option) {
+                                case 'PRIM':
+                                    if (this.cfgs.input_format.selected.includes('PRIM')) return true;
+                                    else return false;
+                                case 'SUBG':
+                                    if (this.cfgs.input_format.selected.includes('SUBG')) return true;
+                                    else return false;
+                            }
+                            break;
+                    }
+                    return true;
+                },
+
+                analyze: function() {
+                    this.btn_analyze.disabled = false;
+                    jarvis.analyze();
+                }
+            },
+            computed: {
+
+            }
+        })
+    },
+
+    enable_btn_analyze: function() {
+        this.vpp.btn_analyze.disabled = false;
+    },
+
+    disable_btn_analyze: function() {
+        this.vpp.btn_analyze.disabled = true;
+    },
+
+    update_settings: function(data) {
+        var input_format = data.coltype;
+
+        // set the input format
+        this.vpp.cfgs.input_format.selected = input_format;
+        // set prim or subg
+        this.vpp.cfgs.pairwise_analysis.selected = input_format.substring(0, 4);
+        // update study list
+        this.vpp.cfgs.study_list.selected = data.raw;
+        // update selected for sensitivity analysis
+        this.vpp.cfgs.sensitivity_analysis_excluded_study_list.selected = [];
+        // update the treatment and control
+        this.vpp.cfgs.treatment.selected = data.treatment;
+        this.vpp.cfgs.control.selected = data.control;
+        // update special rules
+        if (input_format.includes('CATIRR_')) {
+            this.vpp.cfgs.measure_of_effect.selected = 'IRR';
+        }
+        if (input_format.includes('CONTD')) {
+            this.vpp.cfgs.measure_of_effect.selected = 'MD';
+        }
+        if (input_format.includes('CAT_')) {
+            this.vpp.cfgs.measure_of_effect.selected = 'OR';
+        }
+    },
+
+    get_config: function() {
+        var cfg = {};
+        Object.keys(this.vpp.cfgs).map(function(k) {
+            cfg[k] = fm_config.vpp.cfgs[k].selected;
+        });
+        return cfg;
+    }
+};
+
+
+var fg_imglst = {
+    vpp: null,
+    vpp_id: "#fg_imglst",
+    headers: {
+        // fn_outplt1: function(){
+        //     return fm_config.cfg_optval2text('pairwise_analysis', fm_config.vpp.cfgs.pairwise_analysis.selected) + ' Result';
+        // },
+
+        // fn_fnnlplt: function(){
+        //     return fm_config.cfg_optval2text('pairwise_analysis', fm_config.vpp.cfgs.pairwise_analysis.selected) + ' Result Funnel Plot';
+        // },
+
+        fn_outplt1: ()=>'Analysis Result',
+        fn_fnnlplt: ()=>'Analysis Result Funnel Plot',
+        fn_sensplt: ()=>'Sensitivity Analysis Result',
+        fn_cumuplt: ()=>'Cumulative Meta-Analysis Result'
+    },
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                plots: [],
+                r_source: '',
+            },
+            methods: {
+                download_source_code: function() {
+                    jarvis.download_file(this.r_source);
+                },
+
+                download_img: function(fn) {
+                    jarvis.download_file(fn);
+                },
+
+                get_header: function(plot_id) {
+                    return fg_imglst.headers[plot_id];
+                }
+            }
+        })
+    },
+
+    draw: function(data) {
+        // update the r source code file
+        this.vpp.r_source = data.params.fn_rscript;
+        // update the imgs
+        this.vpp.plots = [];
+        for (let i = 0; i < data.params.result_plots.length; i++) {
+            const plot_id = data.params.result_plots[i];
+            // add file name to data
+            var fn = data.params[plot_id];
+            this.vpp.plots.push({
+                plot_id: plot_id,
+                fn: fn
+            });
+        }
+    },
+
+    clear: function() {
+        this.vpp.plots = [];
+        this.vpp.r_source = '';
+    }
+}
+
+var jarvis = {
+    data: null,
+    
+    download_file: function(fn) {
+        // fixed image download bug
+        // Thanks to https://stackoverflow.com/questions/17311645/download-image-with-javascript
+        var a = $('<a>').attr('href', '/f/' + fn)
+            .attr('download', fn)
+            .appendTo("body");
+        a[0].click()
+        a.remove();
+    },
+
+    init: function() {
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+        var isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
+
+        console.log('* User is using IE:', isIE);
+        if (isIE) {
+            return;
+        }
+
+        fm_loader.init();
+        fm_config.init();
+
+        fg_imglst.init();
+
+        const queryString = window.location.search;
+        console.log(queryString);
+        const urlParams = new URLSearchParams(queryString);
+
+        const searchParams = new URLSearchParams(window.location.search);
+        standalone_page = searchParams.has('standalone');
+        sys_analysis = urlParams.get('system_analysis');
+        analyzer_content = Cookies.get('analyzer_content')
+        if(!( standalone_page)){
+            
+            fm_loader.upload_data_file();
+             $('.uploading-fie-section').html('');
+             $('.sidebar-actions').removeClass('main-sidebar');
+             $('.sidebar-actions').removeClass('sidebar-dark-primary')
+             $('.sidebar-actions').html('');
+             $('#analysis-sys').html(`
+    
+                <h4>
+                    <span class="fa fa-database"></span>
+                    DATASET
+                </h4>`);
+
+        }
+    },
+
+    on_read_data_file: function(data) {
+        // bind data to local object first
+        this.xlsx_data = data;
+
+        // clear the old figures
+        this.clear_all();
+
+        // update loader info        
+        // update loader info   
+        if (data.hasOwnProperty('sheets_name')){
+
+        dropdwon_html = `<p class="box-p"><b>Multiple SubSheest</b></p>
+        <div class="box-bodyitem-value"> <select id="multiple_sub_sheets"
+            onchange=select_sheet()>
+            <option value=''>Select Sheet</option>`;
+            data.sheets_name.forEach(function(sheet) {
+                dropdwon_html += '<option value='+sheet+'>'+ sheet + '</option>';
+        }); 
+        dropdwon_html+=` </select>
+                </div>`
+
+        fm_loader.set_multiple_subsheet(
+        dropdwon_html
+        );
+
+        } 
+        else{    
+        fm_loader.set_dataset_summary(
+        '<p class="box-p"><b>Input Data Summary</b></p>' + 
+        '<p class="box-p"><i class="fa fa-file"></i>: ' + data.filename + '</p>' +
+        '<p class="box-p"><i class="fa fa-shapes"></i>: ' + data.coltype + ' format</p>' +
+        '<p class="box-p"><i class="fa fa-tablets"></i>: <b>' + data.treats.length + '</b> treats: ' + data.treats.join(', ') + '</p>' + 
+        '<p class="box-p"><i class="far fa-sticky-note"></i>: <b>' + data.n_studies + '</b> studies of ' + data.raw.length +' lines </p>'
+        );
+            // TODO check if the uploaded file works for this analysis
+
+            // update the configs
+            fm_config.enable_btn_analyze();
+            fm_config.update_settings(data);
+        }
+
+        
+    },
+
+    analyze: function() {
+        var cfg = fm_config.get_config();
+        var rs = this.xlsx_data.raw;
+        fm_config.disable_btn_analyze();
+        this.clear_all();
+
+        $.post(
+            './analyze',
+            {rs: JSON.stringify(rs), cfg: JSON.stringify(cfg)},
+            function(data) {
+                fm_config.enable_btn_analyze();
+                jarvis.msg('Data File is analyzed');
+                jarvis.update(data);
+            }, 'json'
+
+        ).fail(function() {
+            fm_config.enable_btn_analyze();
+            jarvis.msg('System error when analyzing, try again later');
+        });
+    },
+
+    update: function(data) {
+        console.log(data);
+        // bind the result data
+        this.plot_data = data;
+
+        // show plots
+        fg_imglst.draw(data);
+    },
+
+    clear_all: function() {
+        fg_imglst.clear();
+    },
+
+    msg: function(s) {
+        console.log('* ' + s);
+        // this is provided by bootstrap
+        toast(s);
+    }
+};
+
+$(document).ready(function() {
+    jarvis.init();
+})
+sub_sheets = document.querySelector("#multiple_sub_sheets");
+
+function select_sheet(params) {
+    if($('#multiple_sub_sheets').val()==''){
+        alert('Please select any sheet')
+        return;
+    }
+    fm_loader.upload_data_file();
+}
+
+</script>
+{% endblock %}

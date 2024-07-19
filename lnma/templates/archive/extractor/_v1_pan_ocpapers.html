@@ -1,0 +1,559 @@
+<div id="pan_ocpapers" class="panel-m panel-container">
+    <div class="panel-info" v-if="extract != null">
+        <div class="oc-attr d-flex flex-row">
+            <span style="font-size: 1.2em;" class="mr-2">
+                <b>[{{ extract.meta.full_name }}]</b> Details
+            </span>
+
+            <div class="btn-group mr-2">
+                <button v-on:click="toggle_show_settings();"
+                    type="button" class="btn btn-default btn-sm">
+                    <i class="fa" v-bind:class="{'fa-toggle-on': show_settings, 'fa-toggle-off': !show_settings}"></i>
+                    Toggle
+                </button>
+                <button type="button" class="btn btn-default btn-sm dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                <div class="dropdown-menu">
+                    <a v-on:click="toggle_show_settings();"
+                        class="dropdown-item" href="javascript:void(0);">
+                        <i class="far fa-caret-square-up"></i>
+                        Toggle settings
+                    </a>
+                    <a v-on:click="toggle_on_all_attributes();"
+                        class="dropdown-item" href="javascript:void(0);">
+                        <i class="far fa-check-square"></i>
+                        Select all attributes
+                    </a>
+                    <a v-on:click="toggle_off_all_attributes();"
+                        class="dropdown-item" href="javascript:void(0);">
+                        <i class="far fa-square"></i>
+                        Unselect all attributes
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a v-on:click="return false;"
+                        class="dropdown-item" href="javascript:void(0);">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input"
+                                id="customCheck_only_show_selected"
+                                v-on:change="on_change_only_show_selected($event);">
+                            <label class="custom-control-label" for="customCheck_only_show_selected">Only show selected studies</label>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="btn-group mr-2">
+                <button v-on:click="update_extract();"
+                    type="button" class="btn btn-default btn-sm">
+                    <i class="fa fa-save"></i>
+                    Save all
+                </button>
+                <button type="button" class="btn btn-default btn-sm dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                <div class="dropdown-menu">
+                    <a v-on:click="copy_extract();"
+                        class="dropdown-item" href="javascript:void(0);">
+                        <i class="far fa-copy"></i>
+                        Save a copy
+                    </a>
+                    <!-- <a class="dropdown-item" href="javascript:void(0);">
+                        Something else here
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="javascript:void(0);">
+                        Separated link
+                    </a> -->
+                </div>
+            </div>
+
+            <div class="btn-group mr-2" role="group" aria-label="Extract information">
+                <button onclick="jarvis.switch_layout('extract_information');"
+                    type="button" class="btn btn-default btn-sm">
+                    <i class="fa fa-edit"></i>
+                    Extract
+                </button>
+            </div>
+
+            <div class="btn-group mr-2" role="group" aria-label="Analyze outcome">
+                <button onclick="jarvis.switch_layout('analyze_outcome');"
+                    type="button" class="btn btn-default btn-sm">
+                    <i class="fa fa-chart-bar"></i>
+                    Analyze
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <div v-bind:class="{hide: !show_settings}">
+    
+    <!-- panel for the pwma -->
+    <div class="panel-info" v-if="extract != null && extract.meta.oc_type == 'pwma'">
+
+        <div v-if="mode == 'manage_outcomes'" class="oc-attr">
+            <span class="oc-attr-name">Full Name</span>
+            <input class="oc-attr-value" v-model="extract.meta.full_name">
+        </div>
+
+        <div v-if="mode == 'manage_outcomes'" class="oc-attr">
+            <span class="oc-attr-name">Category</span>
+            <input class="oc-attr-value" v-model="extract.meta.category">
+        </div>
+
+        <div v-if="mode == 'manage_outcomes'" class="oc-attr">
+            <span class="oc-attr-name">Analysis Group</span>
+            <input class="oc-attr-value" v-model="extract.meta.group">
+        </div>
+
+        <div v-if="mode == 'manage_outcomes'" class="oc-attr">
+            <span class="oc-attr-name">Include this outcome in SoF Table</span>
+            <select v-model="extract.meta.included_in_sof">
+                <option value="yes">Yes, include this outcome</option>
+                <option value="no">No, exclude this outcome</option>
+            </select>
+        </div>
+
+        <div v-if="mode == 'manage_outcomes'" class="oc-attr">
+            <span class="oc-attr-name">Include this outcome in result plots</span>
+            <select v-model="extract.meta.included_in_plots">
+                <option value="yes">Yes, include this outcome</option>
+                <option value="no">No, exclude this outcome</option>
+            </select>
+        </div>
+
+        <div v-if="mode == 'manage_outcomes' || mode == 'analyze_outcome'" class="oc-attr">
+            <span class="oc-attr-name">Analysis Measure</span>
+            <select v-model="extract.meta.measure_of_effect">
+                <option value="HR">Hazard Ratio (HR)</option>
+                <option value="RR">Relative Risk (RR)</option>
+                <option value="OR">Odds Ratio (OR)</option>
+                <option value="RD">Risk Difference (RD)</option>
+            </select>
+        </div>
+
+        <div v-if="mode == 'manage_outcomes' || mode == 'extract_information'" class="oc-attr">
+            <span class="oc-attr-name">Data Type</span>
+            <select v-model="extract.meta.input_format"
+                v-on:change="on_change_input_format($event)">
+                <option value="PRIM_CAT_PRE">Categorical Precalculated Data</option>
+                <option value="PRIM_CAT_RAW">Categorical Raw Data</option>
+                <option value="PRIM_CATIRR_RAW">Categorical Raw (Incidence Rate Ratios) Data</option>
+                <option value="PRIM_CONTD_PRE">Continuous Precalculated Data</option>
+                <option value="PRIM_CONTD_RAW">Continuous Raw Data</option>
+                <option value="PRIM_CAT_RAW_G5">Categorical Raw Data of Grades (IO)</option>
+            </select>
+        </div>
+
+        <div v-if="mode == 'manage_outcomes' || mode == 'analyze_outcome'" class="oc-attr">
+            <span class="oc-attr-name">Fixed or Random</span>
+            <select v-model="extract.meta.fixed_or_random">
+                <option value="fixed">Fixed Effect</option>
+                <option value="random">Random Effects</option>
+            </select>
+        </div>
+
+        <div v-if="mode == 'manage_outcomes' || mode == 'analyze_outcome'" class="oc-attr">
+            <span class="oc-attr-name">Which is better</span>
+            <select v-model="extract.meta.which_is_better">
+                <option value="lower">Lower is better</option>
+                <option value="higher">Higher is better</option>
+            </select>
+        </div>
+
+        <div v-if="mode == 'manage_outcomes' || mode == 'extract_information' || mode == 'analyze_outcome'">
+
+            <div>
+                <span class="oc-attr-name">The attributes of this outcome</span>
+            </div>
+
+            <div v-for="cate, cate_idx in extract.meta.cate_attrs" class="oc-attr">
+                <div>
+                    <input type="checkbox" v-bind:id="'toggle-cate-' + cate.abbr"
+                        v-on:change="on_toggle_itable_select_category(cate_idx, $event)">
+                    <label :for="'toggle-cate-' + cate.abbr" class="extract-attr-label">
+                        <b>{{ cate.name }}</b>
+                    </label>
+                </div>
+                <div :id="'cate-' + cate.abbr" class="d-flex flex-row flex-wrap">
+                    <div v-for="attr, attr_idx in cate.attrs"
+                        class="mr-2 border-end">
+                        
+                        <input type="checkbox" 
+                                v-model="show_attrs[attr.abbr]"
+                                v-on:change="on_toggle_attr_selection($event)"
+                                :id="'attr-' + attr.abbr">
+                        <label class="extract-attr-label" :for="'attr-' + attr.abbr">{{ attr.name }}</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- /.panel-info -->
+
+    <!-- panel for the subg -->
+    <div class="panel-info" v-if="extract != null && extract.meta.oc_type == 'subg'">
+        <div class="oc-attr">
+            <span class="oc-attr-name">Full Name</span>
+            <input class="oc-attr-value" v-model="extract.meta.full_name">
+        </div>
+        <div class="oc-attr">
+            <span class="oc-attr-name">Category</span>
+            <input class="oc-attr-value" v-model="extract.meta.category">
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Analysis Group</span>
+            <input class="oc-attr-value" v-model="extract.meta.group">
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Analysis Measure</span>
+            <select v-model="extract.meta.measure_of_effect">
+                <option value="HR">Hazard Ratio (HR)</option>
+                <option value="RR">Relative Risk (RR)</option>
+                <option value="OR">Odds Ratio (OR)</option>
+                <option value="RD">Risk Difference (RD)</option>
+            </select>
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Data Type</span>
+            <select v-model="extract.meta.input_format">
+                <option value="SUBG_CAT_PRE">Categorical Precalculated Data</option>
+                <option value="SUBG_CAT_RAW">Categorical Raw Data</option>
+                <option value="SUBG_CATIRR_RAW">Categorical Raw (Incidence Rate Ratios) Data</option>
+                <option value="SUBG_CONTD_PRE">Continuous Precalculated Data</option>
+                <option value="SUBG_CONTD_RAW">Continuous Raw Data</option>
+            </select>
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Treatment Arm</span>
+            <input class="oc-attr-value" v-model="extract.meta.treatment.abbr"> | 
+            <input class="oc-attr-value" v-model="extract.meta.treatment.full_name">
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Control Arm</span>
+            <input class="oc-attr-value" v-model="extract.meta.control.abbr"> | 
+            <input class="oc-attr-value" v-model="extract.meta.control.full_name">
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Fixed or Random</span>
+            <select v-model="extract.meta.fixed_or_random">
+                <option value="fixed">Fixed Effect</option>
+                <option value="random">Random Effects</option>
+            </select>
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Which is better</span>
+            <select v-model="extract.meta.which_is_better">
+                <option value="lower">Lower is better</option>
+                <option value="higher">Higher is better</option>
+            </select>
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Include this outcome in SoF Table</span>
+            <select v-model="extract.meta.included_in_sof">
+                <option value="yes">Yes, include this outcome</option>
+                <option value="no">No, exclude this outcome</option>
+            </select>
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Include this outcome in result plots</span>
+            <select v-model="extract.meta.included_in_plots">
+                <option value="yes">Yes, include this outcome</option>
+                <option value="no">No, exclude this outcome</option>
+            </select>
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">The attributes to extract</span>
+            <span>{{ extract.meta.attrs }}</span>
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Subgroups</span>
+            <input class="oc-attr-value" v-model="extract.meta.subgroups[0]"> , 
+            <input class="oc-attr-value" v-model="extract.meta.subgroups[1]">
+        </div>
+
+    </div>
+    <!-- /.panel-info -->
+
+    <!-- panel for the itable -->
+    <div class="panel-info" v-if="extract != null && extract.meta.oc_type == 'itable'">
+        <div v-for="cate, cate_idx in extract.meta.cate_attrs">
+            <div>
+                <input type="checkbox" v-bind:id="'toggle-cate-' + cate.abbr"
+                    v-on:change="on_toggle_itable_select_category(cate_idx, $event)">
+                <label :for="'toggle-cate-' + cate.abbr" class="extract-attr-label">
+                    <b>{{ cate.name }}</b>
+                </label>
+            </div>
+            <div :id="'cate-' + cate.abbr" class="d-flex flex-row flex-wrap">
+                <div v-for="attr, attr_idx in cate.attrs"
+                    class="mr-2 border-end">
+                    
+                    <span v-if="attr.subs == null">
+                        <input type="checkbox" 
+                            v-model="show_attrs[attr.abbr]"
+                            v-on:change="on_toggle_attr_selection($event)"
+                            :id="'attr-' + attr.abbr">
+                        <label class="extract-attr-label" :for="'attr-' + attr.abbr">{{ attr.name }}</label>
+                    </span>
+                    <span v-else>
+                        {{ attr.name }}
+                        [
+                        <span class="mr-2" v-for="sub, sub_idx in attr.subs">
+                            <input type="checkbox" v-model="show_attrs[sub.abbr]"
+                                v-on:change="on_toggle_attr_selection($event)"
+                                :id="'sub-' + sub.abbr">
+                            <label class="extract-attr-sub-label" :for="'sub-' + sub.abbr">{{ sub.name }}</label>
+                        </span>
+                        ]
+                    </span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- /.panel-info -->
+
+    </div>
+    <!-- /div of settings -->
+
+
+
+    <div class="panel-paperlist" v-if="extract != null">
+
+        <!-- table for pwma -->
+        <table class="table" v-if="extract.meta.oc_type === 'pwma'">
+            <thead class="paper-table-header">
+                <tr>
+                    <th class="paper-table-header-th" style="width: 20px;">
+                        <input type="checkbox" title="Toggle selection"
+                            v-on:click="toggle_select_all_papers($event);">
+                    </th>
+                    <th class="paper-table-header-th" style="width: 90px;">NCT</th>
+                    <th class="paper-table-header-th" style="width: 130px;">Paper ({{ n_selected }} selected) </th>
+                    <th class="paper-table-header-th" style="width: 90px;">Checked</th>
+                    <th class="paper-table-header-th" style="width: 50px;"># Arms</th>
+
+                    <!-- the attributes of pwma -->
+                    <th class="paper-table-header-th" 
+                        v-for="attr_sub in all_attrs"
+                        v-show="show_attrs[attr_sub.abbr]">
+                        <span v-if="show_attrs[attr_sub.abbr]">
+                            {{ attr_sub.name }}
+                        </span>
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr class="paper-table-row" 
+                    v-for="paper in papers"
+                    v-bind:id="'paper-table-row-' + paper.pid"
+                    v-on:click="on_click_paper(paper.pid)"
+                    v-show="!only_show_selected || extract.data[paper.pid].is_selected">
+                    <td class="paper-table-body-td">
+                        <input type="checkbox" id="" v-model="extract.data[paper.pid].is_selected" >
+                    </td>
+                    <td class="paper-table-body-td">
+                        {{ paper.meta.rct_id }}
+                    </td>
+                    <td class="paper-name paper-table-body-td">
+                        {{ paper.seq_num }} - {{ get_first_author(paper.authors) }} {{ get_year(paper.pub_date) }}
+                    </td>
+                    <td class="paper-table-body-td">
+                        <input type="checkbox" 
+                            v-bind:id="'paper-row-checked'+paper.pid"
+                            v-model="extract.data[paper.pid].is_checked">
+                    </td>
+                    <td class="paper-table-body-td">
+                        <select name="" id="" v-model="extract.data[paper.pid].n_arms"
+                            v-on:change="on_change_itable_n_arms(paper.pid, $event)">
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </td>
+                    
+                    <!-- the attributes of pwma -->
+                    <td v-for="attr_sub in all_attrs" 
+                        v-show="show_attrs[attr_sub.abbr]"
+                        class="paper-table-body-td paper-value">
+                        
+                        <!-- the main track -->
+                        <span class="cell-input">
+                            <input class="paper-extract-input-auto" type="text" 
+                                v-bind:abbr="attr_sub.abbr"
+                                v-bind:size="get_input_size(extract.data[paper.pid].attrs.main[attr_sub.abbr])"
+                                v-model="extract.data[paper.pid].attrs.main[attr_sub.abbr]">    
+                        </span>
+
+                        <!-- the other tracks if n_arms > 2 -->
+                        <hr class="n-arms-hr" v-if="extract.data[paper.pid].n_arms > 2">
+
+                        <span v-for="other, other_idx in extract.data[paper.pid].attrs.other"
+                            class="cell-input">
+                            <br v-if="other_idx > 0">
+                            <input class="paper-extract-input-auto" type="text" 
+                                v-bind:size="get_input_size(extract.data[paper.pid].attrs.other[other_idx][attr_sub.abbr])"
+                                v-model="extract.data[paper.pid].attrs.other[other_idx][attr_sub.abbr]">  
+                        </span>                        
+
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- table for subg -->
+        <table class="table" v-else-if="extract.meta.oc_type === 'subg'">
+            <tr>
+                <th>&nbsp;</th>
+                <th style="width: 90px;">RCT ID</th>
+                <th style="">Paper</th>
+                <th style="">Year</th>
+                <th>Subgroup</th>
+                <th v-for="attr in extract.meta.attrs">
+                    {{ attr }}
+                </th>
+            </tr>
+
+            <tbody>
+            <tr v-for="paper in papers">
+                <td><input type="checkbox" id="" v-model="extract.data[paper.pid].is_selected" ></td>
+                <td>{{ paper.meta.rct_id }}</td>
+                <td>{{ paper.seq_num }} | {{ get_first_author(paper.authors) }}</td>
+                <td>{{ get_year(paper.pub_date) }}</td>
+                <td>
+                    <span>{{ extract.meta.subgroups[0] }}</span><br>
+                    <span>{{ extract.meta.subgroups[1] }}</span>
+                </td>
+                <td v-for="attr in extract.meta.attrs">
+                    <input class="paper-extract-input" type="text" 
+                        v-model="extract.data[paper.pid].attrs[attr]">
+                </td>
+            </tr>
+            </tbody>
+
+        </table>
+
+        <!-- table for itable -->
+        <table class="table" v-else-if="extract.meta.oc_type === 'itable'">
+            <thead class="paper-table-header">
+                <tr>
+                    <th class="paper-table-header-th" style="width: 20px;">
+                        <input type="checkbox" title="Toggle selection"
+                            v-on:click="toggle_select_all_papers($event);">
+                    </th>
+                    <th class="paper-table-header-th" style="width: 90px;">NCT</th>
+                    <th class="paper-table-header-th" style="width: 130px;">Paper ({{ n_selected }} selected) </th>
+                    <th class="paper-table-header-th" style="width: 90px;">Checked</th>
+                    <th class="paper-table-header-th" style="width: 50px;"># Arms</th>
+                    
+                    <!-- the attributes need to collect -->
+                    <th class="paper-table-header-th" 
+                        v-for="attr_sub in all_attrs"
+                        v-show="show_attrs[attr_sub.abbr]">
+                        <span v-if="show_attrs[attr_sub.abbr]">
+                            {{ attr_sub.name }}
+                        </span>
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr class="paper-table-row" 
+                    v-for="paper in papers"
+                    v-bind:id="'paper-table-row-' + paper.pid"
+                    v-on:click="on_click_paper(paper.pid)"
+                    v-show="!only_show_selected || extract.data[paper.pid].is_selected">
+                    <td class="paper-table-body-td">
+                        <input type="checkbox" id="" v-model="extract.data[paper.pid].is_selected" >
+                    </td>
+                    <td class="paper-table-body-td">
+                        {{ paper.meta.rct_id }}
+                    </td>
+                    <td class="paper-name paper-table-body-td">
+                        {{ paper.seq_num }} - {{ get_first_author(paper.authors) }} {{ get_year(paper.pub_date) }}
+                    </td>
+                    <td class="paper-table-body-td">
+                        <input type="checkbox" 
+                            v-bind:id="'paper-row-checked'+paper.pid"
+                            v-model="extract.data[paper.pid].is_checked">
+                    </td>
+                    <td class="paper-table-body-td">
+                        <select name="" id="" v-model="extract.data[paper.pid].n_arms"
+                            v-on:change="on_change_itable_n_arms(paper.pid, $event)">
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </td>
+                    
+                    <!-- the attributes of pwma -->
+                    <td v-for="attr_sub in all_attrs" 
+                        v-show="show_attrs[attr_sub.abbr]"
+                        class="paper-table-body-td paper-value">
+                        
+                        <!-- the main track -->
+                        <span class="cell-input">
+                            <input class="paper-extract-input-auto" type="text" 
+                                v-bind:abbr="attr_sub.abbr"
+                                v-bind:size="get_input_size(extract.data[paper.pid].attrs.main[attr_sub.abbr])"
+                                v-model="extract.data[paper.pid].attrs.main[attr_sub.abbr]">    
+                        </span>
+
+                        <!-- the other tracks if n_arms > 2 -->
+                        <hr class="n-arms-hr" v-if="extract.data[paper.pid].n_arms > 2">
+
+                        <span v-for="other, other_idx in extract.data[paper.pid].attrs.other"
+                            class="cell-input">
+                            <br v-if="other_idx > 0">
+                            <input class="paper-extract-input-auto" type="text" 
+                                v-bind:size="get_input_size(extract.data[paper.pid].attrs.other[other_idx][attr_sub.abbr])"
+                                v-model="extract.data[paper.pid].attrs.other[other_idx][attr_sub.abbr]">  
+                        </span>                        
+
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+    <!-- /.panel-paperlist -->
+
+</div>
+<!-- /#pan_ocpapers -->
+
+<!-- <div class="dropdown-menu dropdown-menu-sm" id="pan_ocpapers_ctx_menu">
+    <h6 class="dropdown-header text-left">
+        <a href="javascript:void(0);"
+            title="Close this menu"
+            onclick="$('#pan_ocpapers_ctx_menu').hide();"
+            class="mr-2">
+            <i class="fa fa-times"></i>
+        </a><br>
+
+        Select text <b id="pan_ocpapers_ctx_menu_txt">&nbsp;</b> is:
+    </h6>
+    <div id="pan_ocpapers_ctx_menu_items">
+        &nbsp;
+    </div>
+</div> -->
+
+<ul id="pan_ocpapers_ctx_menu" style="display: none;">
+    
+</ul>

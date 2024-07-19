@@ -1,0 +1,1339 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Extract by outcome
+{% endblock %}
+
+{% block section_cq %}
+{% include 'shared_module/_cq_selector_toolbar.html' %}
+{% endblock %}
+
+{% block page_name %}
+<i class="fa fa-edit"></i>
+Extract by outcome 
+<!-- of 
+<a href="javascript:void(0);" onclick="alert('test')">
+    []
+</a> -->
+{% endblock %}
+
+{% block active_nav_link %}extractor-extract-data{% endblock %}
+
+{% block style %}
+<!-- jQuery UI Theme -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css">
+
+<style>
+    
+{% include 'css/basic.css' %}
+{% include 'css/extractor.css' %}
+{% include 'css/util.css' %}
+
+html {
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+#main {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    margin: 0 0 0 10px;
+    overflow: hidden;
+}
+
+.cie-val-text {
+    font-weight: normal !important;
+}
+
+.cie-rob-val-l, 
+.cie-rob-val-1 {
+    background-color: #68f168;
+}
+
+.cie-rob-val-m, 
+.cie-rob-val-2 {
+    background-color: orange;
+}
+
+.cie-rob-val-h, 
+.cie-rob-val-3 {
+    background-color: red;
+}
+</style>
+
+
+{% endblock %}
+
+{% block content %}
+
+<div id="main">
+
+
+    <div id="pan_ocpapers" class="d-flex flex-column" 
+    style="height: 500px;">
+    
+
+    <div class="d-flex flex-column" style="height: 100%;"
+        v-if="working_oc != null">
+
+        <div id="pan_ocpapers_toolbar" class="panel-info">
+            <div class="oc-attr d-flex flex-row">
+                
+                <span style="font-size: 1.2em;" class="mr-2">
+                    <a href="javascript:void(0);" onclick="pan_ocpapers.show_ocs_menu();">
+                        <b v-if='working_oc.abbr != "itable"'>
+                        [
+                            {{ _lbl(working_oc.oc_type) }} | 
+                            {{ _lbl(working_oc.meta.group) }} | 
+                            {{ working_oc.meta.category }} | 
+                            {{ working_oc.meta.full_name }}
+                        ]
+                        </b>
+                        <b v-else>
+                        [
+                            {{ _lbl(working_oc.meta.full_name) }}
+                        ]
+                        </b>
+                    </a>
+                </span>
+
+                <div class="input-group input-group-sm mr-2"
+                    style="width: 200px">
+                    <input type="text" class="form-control" placeholder="PMID, short #, first author name"
+                        v-model="keywords">
+                    <button class="btn btn-sm btn-outline-secondary" type="button"
+                        title="Reset search"
+                        v-on:click="reset_keywords()">
+                        <i class="fa fa-close"></i>
+                    </button>
+                    
+                </div>
+
+                <!-- <div class="btn-group mr-2">
+                    <button v-on:click="toggle_only_show_selected();"
+                        type="button" class="btn btn-default btn-sm">
+                        <i class="fa" v-bind:class="{'fa-toggle-on': only_show_selected, 'fa-toggle-off': !only_show_selected}"></i>
+                        Toggle all studies
+                    </button>
+                </div> -->
+
+                <div class="btn-group mr-2">
+                    <button v-on:click="save_extract();"
+                        type="button" 
+                        class="btn btn-default btn-sm">
+                        <span v-if="is_saving"
+                            v-bind:class="{'wpc-data-has-not-saved':!has_saved}">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            Saving
+                        </span>
+                        <span v-else
+                            v-bind:class="{'wpc-data-has-not-saved':!has_saved}">
+                            <i class="fa fa-save"></i>
+                            Save
+                        </span>
+                    </button>
+                </div>
+
+                <div class="btn-group mr-2">
+                    <button v-on:click="edit_extract_meta();"
+                        type="button" class="btn btn-default btn-sm">
+                        <i class="fa fa-edit"></i>
+                        Edit this outcome
+                    </button>
+                </div>
+
+                <div class="btn-group mr-2"
+                    v-if="working_oc.oc_type!='itable'">
+                    <button v-on:click="goto_analysis();"
+                        type="button" class="btn btn-default btn-sm">
+                        <i class="fa fa-chart-bar"></i>
+                        Analyze this outcome
+                    </button>
+                </div>
+
+            </div>
+        </div>
+        
+        <div id="pan_ocpapers_attrs" 
+            class="panel-info d-flex flex-column" 
+            v-if="working_oc != null">
+            <div v-for="cate, cate_idx in working_oc.meta.cate_attrs"
+                style="border-bottom: 1px dotted #dddddd; margin: 5px 0 5px 0;"
+                class="d-flex flex-column">
+
+                <div :id="'cate-' + cate.abbr"
+                    class="d-flex flex-row flex-wrap">
+
+                    <div style="background: #dddddd;"
+                        class="mr-2 pr-2">
+                        <input type="checkbox" v-bind:id="'toggle-cate-' + cate.abbr"
+                            v-model="show_attrs[cate.abbr]"
+                            v-on:change="on_toggle_itable_select_category(cate_idx, $event)">
+                        <label :for="'toggle-cate-' + cate.abbr" class="extract-attr-label">
+                            <b>{{ cate.name }}</b>
+                        </label>
+                    </div>
+
+                    <div v-for="attr, attr_idx in cate.attrs"
+                        class="mr-2 border-end">
+                        
+                        <span v-if="attr.subs == null" v-bind:abbr="attr.abbr">
+                            <input type="checkbox" 
+                                v-model="show_attrs[attr.abbr]"
+                                v-on:change="on_toggle_attr_selection(attr.abbr, $event)"
+                                :id="'attr-' + attr.abbr">
+                            <label class="extract-attr-label" :for="'attr-' + attr.abbr">{{ attr.name }}</label>
+                        </span>
+
+                        <span v-else v-bind:abbr="attr.abbr">
+                            <input type="checkbox" 
+                                v-model="show_attrs[attr.abbr]"
+                                v-on:change="on_toggle_attr_selection(attr.abbr, $event)"
+                                :id="'attr-' + attr.abbr">
+
+                            {{ attr.name }}
+                            [
+                            <span class="mr-2" v-for="sub, sub_idx in attr.subs">
+                                <input type="checkbox" v-model="show_attrs[sub.abbr]"
+                                    v-on:change="on_toggle_attr_selection(attr.abbr, $event)"
+                                    :id="'sub-' + sub.abbr">
+                                <label class="extract-attr-sub-label" :for="'sub-' + sub.abbr">
+                                    {{ sub.name }}
+                                </label>
+                            </span>
+                            ]
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!-- /.panel-info -->
+
+        <div id="pan_cielist"
+            v-if="is_editing_cie"
+            class="panel-info d-flex flex-column"
+            style="margin: 5px; width: 700px;">
+            <div v-if="working_oc.meta.oc_type == 'pwma'"
+                class="row">
+                <div class="col">
+                    <div>
+                        <label style="width: 150px;">Risk of Bias:</label>
+                        <input type="radio" id="oc_cie_rob_3" value="3" class="ml-2" v-model="working_oc.meta.certainty.risk_of_bias"> <label class="cie-val-text" for="oc_cie_rob_3"> Very serious </label>
+                        <input type="radio" id="oc_cie_rob_2" value="2" class="ml-2" v-model="working_oc.meta.certainty.risk_of_bias"> <label class="cie-val-text" for="oc_cie_rob_2"> Serious </label>
+                        <input type="radio" id="oc_cie_rob_1" value="1" class="ml-2" v-model="working_oc.meta.certainty.risk_of_bias"> <label class="cie-val-text" for="oc_cie_rob_1"> No serious </label>
+                        <input type="radio" id="oc_cie_rob_0" value="0" class="ml-2" v-model="working_oc.meta.certainty.risk_of_bias"> <label class="cie-val-text" for="oc_cie_rob_0"> Not specified </label>
+                    </div>
+
+                    <div>
+                        <label style="width: 150px;">Inconsistency:</label>
+                        <input type="radio" id="oc_cie_inc_3" value="3" class="ml-2" v-model="working_oc.meta.certainty.inconsistency"> <label class="cie-val-text" for="oc_cie_inc_3"> Very serious </label>
+                        <input type="radio" id="oc_cie_inc_2" value="2" class="ml-2" v-model="working_oc.meta.certainty.inconsistency"> <label class="cie-val-text" for="oc_cie_inc_2"> Serious </label>
+                        <input type="radio" id="oc_cie_inc_1" value="1" class="ml-2" v-model="working_oc.meta.certainty.inconsistency"> <label class="cie-val-text" for="oc_cie_inc_1"> No serious </label>
+                        <input type="radio" id="oc_cie_inc_0" value="0" class="ml-2" v-model="working_oc.meta.certainty.inconsistency"> <label class="cie-val-text" for="oc_cie_inc_0"> Not specified </label>
+
+                    </div>
+
+                    <div>
+                        <label style="width: 150px;">Indirectness:</label>
+                        <input type="radio" id="oc_cie_ind_3" value="3" class="ml-2" v-model="working_oc.meta.certainty.indirectness"> <label class="cie-val-text" for="oc_cie_ind_3"> Very serious </label>
+                        <input type="radio" id="oc_cie_ind_2" value="2" class="ml-2" v-model="working_oc.meta.certainty.indirectness"> <label class="cie-val-text" for="oc_cie_ind_2"> Serious </label>
+                        <input type="radio" id="oc_cie_ind_1" value="1" class="ml-2" v-model="working_oc.meta.certainty.indirectness"> <label class="cie-val-text" for="oc_cie_ind_1"> No serious </label>
+                        <input type="radio" id="oc_cie_ind_0" value="0" class="ml-2" v-model="working_oc.meta.certainty.indirectness"> <label class="cie-val-text" for="oc_cie_ind_0"> Not specified </label>
+
+                    </div>
+
+                    <div>
+                        <label style="width: 150px;">Imprecision:</label>
+                        <input type="radio" id="oc_cie_imp_4" value="4" class="ml-2" v-model="working_oc.meta.certainty.imprecision"> <label class="cie-val-text" for="oc_cie_imp_4"> Extreme serious </label>
+                        <input type="radio" id="oc_cie_imp_3" value="3" class="ml-2" v-model="working_oc.meta.certainty.imprecision"> <label class="cie-val-text" for="oc_cie_imp_3"> Very serious </label>
+                        <input type="radio" id="oc_cie_imp_2" value="2" class="ml-2" v-model="working_oc.meta.certainty.imprecision"> <label class="cie-val-text" for="oc_cie_imp_2"> Serious </label>
+                        <input type="radio" id="oc_cie_imp_1" value="1" class="ml-2" v-model="working_oc.meta.certainty.imprecision"> <label class="cie-val-text" for="oc_cie_imp_1"> No serious </label>
+                        <input type="radio" id="oc_cie_imp_0" value="0" class="ml-2" v-model="working_oc.meta.certainty.imprecision"> <label class="cie-val-text" for="oc_cie_imp_0"> Not specified </label>
+
+                    </div>
+
+                    <div>
+                        <label style="width: 150px;">Publication Bias</label>
+                        <input type="radio" id="oc_cie_pub_2" value="2" class="ml-2" v-model="working_oc.meta.certainty.publication_bias"> <label class="cie-val-text" for="oc_cie_pub_2"> Strongly suspected </label>
+                        <input type="radio" id="oc_cie_pub_1" value="1" class="ml-2" v-model="working_oc.meta.certainty.publication_bias"> <label class="cie-val-text" for="oc_cie_pub_1"> Undetected </label>
+                        <input type="radio" id="oc_cie_pub_0" value="0" class="ml-2" v-model="working_oc.meta.certainty.publication_bias"> <label class="cie-val-text" for="oc_cie_pub_0"> Not applicable </label>
+
+                    </div>
+
+                    <div>
+                        <label style="width: 150px;">Importance</label>
+                        <input type="radio" id="oc_cie_ipt_2" value="2" class="ml-2" v-model="working_oc.meta.certainty.importance"> <label class="cie-val-text" for="oc_cie_ipt_2"> Critical </label>
+                        <input type="radio" id="oc_cie_ipt_1" value="1" class="ml-2" v-model="working_oc.meta.certainty.importance"> <label class="cie-val-text" for="oc_cie_ipt_1"> Important </label>
+                        <input type="radio" id="oc_cie_ipt_0" value="0" class="ml-2" v-model="working_oc.meta.certainty.importance"> <label class="cie-val-text" for="oc_cie_ipt_0"> Not applicable </label>
+
+                    </div>
+                </div>
+                
+                
+            </div>
+        </div>
+
+
+        <div id="pan_ocpapers_paperlist" style="overflow: auto;">
+
+            <!-- table for itable -->
+            <table class="paper-table">
+                <thead class="paper-table-header">
+                    <tr>
+                        <th v-if="working_oc.meta.is_subg_analysis" class="paper-table-header-th" colspan="7"></th>
+                        <th v-else class="paper-table-header-th" colspan="7"></th>
+
+                        <th v-for="thr1 in thr1s"
+                            v-bind:colspan="thr1.cols"
+                            v-show="show_attrs[thr1.abbr]"
+                            class="paper-table-header-th"
+                            style="text-align: center;">
+                            {{ thr1.name }}
+                        </th>
+
+                        <th v-if="is_editing_cie"
+                            colspan="5"
+                            style="text-align: center;"
+                            class="paper-table-header-th">
+                            Risk of Bias
+                        </th>
+                    </tr>
+
+                    <tr>
+                        <th class="paper-table-header-th" style="width: 20px;">
+                            &nbsp;
+                        </th>
+                        <th class="paper-table-header-th" style="width: 40px;">
+                            #
+                        </th>
+                        <th class="paper-table-header-th" style="width: 90px;">
+                            NCT
+                        </th>
+                        <th class="paper-table-header-th" style="width: 90px;">
+                            PID/PMID
+                        </th>
+                        <th class="paper-table-header-th" style="width: 130px;">
+                            ({{ n_selected }} selected)
+                        </th>
+                        <th class="paper-table-header-th" style="width: 90px;">
+                            Checked
+                        </th>
+                        <th class="paper-table-header-th" style="width: 50px;">
+                            Arms
+                        </th>
+
+                        <!-- for subg analysis -->
+                        <th v-if="working_oc.meta.is_subg_analysis == 'yes'">
+                           Sub Group 
+                        </th>
+                        
+                        <!-- the attributes need to collect -->
+                        <th class="paper-table-header-th" 
+                            style="text-align: center;"
+                            v-for="thr2 in thr2s"
+                            v-bind:colspan="thr2.cols"
+                            v-show="show_attrs[thr2.abbr]">
+                            <span>
+                                {{ thr2.name }}
+                            </span>
+                        </th>
+
+                        <!-- for editing the study level cie -->
+                        <th v-if="is_editing_cie"
+                            style="text-align: center;"
+                            v-for="rob_idx in [1,2,3,4,5]">
+                            R{{ rob_idx }}
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody class="paper-list">
+                    <tr v-for="ext, pid in working_oc.data"
+                        class="paper-table-row"
+                        :class="get_paper_row_cls(paper_dict[pid])"
+                        :id="'paper-table-row-' + paper_dict[pid].paper_id"
+                        v-show="(is_search_match(paper_dict[pid])) && (!only_show_selected || working_oc.data[pid].is_selected)">
+                        <td class="paper-table-body-td paper-table-td-label">
+                            <input type="checkbox" 
+                                v-model="working_oc.data[pid].is_selected"
+                                disabled="disabled">
+                        </td>
+
+                        <td class="paper-table-body-td paper-table-td-label cursor-pointer"
+                            v-on:click="on_click_paper(paper_dict[pid])">
+                            {{ paper_dict[pid].seq_num }}
+                        </td>
+
+                        <td class="paper-table-body-td paper-table-td-label cursor-pointer"
+                            v-on:click="on_click_paper(paper_dict[pid])">
+                            {{ paper_dict[pid].meta.rct_id }}
+                        </td>
+
+                        <td class="paper-table-body-td paper-table-td-label cursor-pointer"
+                            v-on:click="on_click_paper(paper_dict[pid])">
+                            {{ srv_shared.get_paper_pmid_if_exists(paper_dict[pid]).id }}
+                        </td>
+
+                        <td class="paper-table-body-td paper-table-td-label"
+                            v-on:click="on_click_paper(paper_dict[pid])">
+                            <div class="paper-table-body-td-author"
+                                v-bind:title="get_first_author(paper_dict[pid].authors)">
+                                {{ paper_dict[pid].short_name }}
+                            </div>
+                        </td>
+
+                        <td class="paper-table-body-td">
+                            <input type="checkbox" 
+                                v-bind:id="'paper-row-checked'+paper_dict[pid].paper_id"
+                                v-model="working_oc.data[pid].is_checked">
+                        </td>
+
+                        <td class="paper-table-body-td">
+                            <select v-model="working_oc.data[pid].n_arms"
+                                @change="on_change_itable_n_arms(paper_dict[pid], $event)">
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                        </td>
+
+                        <!-- for subg analysis -->
+                        <td v-if="working_oc.meta.is_subg_analysis == 'yes'">
+                            <div v-for="g, g_idx in working_oc.meta.sub_groups">
+                                {{ g }}
+                            </div>
+                        </td>
+                        
+                        <!-- the attributes of pwma -->
+                        <td v-for="attr_sub in all_attrs" 
+                            v-show="show_attrs[attr_sub.abbr]"
+                            class="paper-table-body-td paper-value">
+                            
+                            <!-- the main track -->
+                            <div v-for="g, g_idx in working_oc.meta.sub_groups">
+
+                                <span class="cell-input">
+                                    <input class="paper-extract-input-auto-100" type="text" 
+                                        v-bind:abbr="attr_sub.abbr"
+                                        @input="on_change_list_input_value(paper_dict[pid], $event)"
+                                        v-model="working_oc.data[pid].attrs.main['g'+g_idx][attr_sub.abbr]">    
+                                </span>
+                            </div>
+
+                            <!-- the other tracks if n_arms > 2 -->
+                            <hr class="n-arms-hr" v-if="working_oc.data[pid].n_arms > 2">
+
+                            <div v-for="g, g_idx in working_oc.meta.sub_groups">
+
+                                <span v-for="other, other_idx in working_oc.data[pid].attrs.other"
+                                    class="cell-input">
+                                    <br v-if="other_idx > 0">
+                                    <input class="paper-extract-input-auto-100" 
+                                        type="text" 
+                                        @input="on_change_list_input_value(paper_dict[pid], $event)"
+                                        v-model="working_oc.data[pid].attrs.other[other_idx]['g'+g_idx][attr_sub.abbr]">  
+                                </span>
+                            </div>
+
+                        </td>
+
+                        <!-- for cie -->
+                        <td v-if="is_editing_cie"
+                            v-for="rob_idx in [0,1,2,3,4]">
+                            <select v-model="oc_paper_rob[pid][rob_idx]"
+                                v-on:change="on_change_cie"
+                                v-bind:class="'cie-rob-val-' + oc_paper_rob[pid][rob_idx]">
+                                <option value="1">L</option>
+                                <option value="2">M</option>
+                                <option value="3">H</option>
+                            </select>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+        <!-- /.panel-paperlist -->
+
+        <div id="pan_ocpapers_working_paper"
+            class="d-flex flex-row"
+            v-if="show_working_paper_pan">
+        {% include 'extractor/_working_paper_extractor.html' %}
+        </div>
+        <!-- /#pan_ocpapers_working_paper -->
+
+    </div>
+
+    <div v-else>
+        <div id="pan_ocpapers_toolbar" class="panel-info">
+            <div class="oc-attr d-flex flex-row">
+                <span style="font-size: 1.2em;" class="mr-2">
+                    <a href="javascript:void(0);" onclick="pan_ocpapers.show_ocs_menu();">
+                        <b>Select an outcome</b>
+                    </a>
+                </span>
+
+            </div>
+        </div>
+    </div>
+
+    
+</div>
+<!-- /#pan_ocpapers -->
+
+
+<ul id="pan_ocpapers_ctx_menu" style="display: none;"></ul>
+
+
+<ul id="pan_ocpapers_ocs_menu" style="display: none;"></ul>
+
+
+{% include 'extractor/_win_collector.html' %}
+
+
+</div>
+<!-- /#main -->
+
+
+{% endblock %}
+
+
+{% block script %}
+<!-- mark.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js"></script>
+
+<script>
+
+{% include 'js/coe_helper.js' %}
+{% include 'js/srv_shared.js' %}
+{% include 'js/srv_analyzer.js' %}
+{% include "js/srv_extractor.js" %}
+{% include "js/srv_pdfworker.js" %}
+
+///////////////////////////////////////////////////////////
+// bind the project information to srv_extractor.js
+///////////////////////////////////////////////////////////
+
+srv_extractor.project = [[ project_json_str|safe ]];
+
+///////////////////////////////////////////////////////////
+// pan_collector for viewing basic information and PDF
+///////////////////////////////////////////////////////////
+
+{% include "js/pan_collector.js" %}
+
+var pan_ocpapers = {
+    vpp_id: "#pan_ocpapers",
+    vpp: null,
+    vpp_data: {
+        // page name by_oc or by_pp
+        page_name: 'by_oc', 
+
+        // flags
+        show_settings: true,
+        only_show_selected: true,
+        show_col_nct: false,
+
+        // for display:
+        thr1s: [],
+        thr2s: [],
+
+        // working pmid when clicking on paper
+        show_working_paper_pan: false,
+        show_working_paper_collector: false,
+
+        // the working paper
+        working_paper: null,
+
+        // working arm
+        // null means main arm
+        // numbers mean other arm
+        working_paper_arm: null,
+
+        // working oc
+        working_oc: null,
+
+        // mode
+        mode: 'extract_data',
+
+        // data
+        all_attrs: null,
+        show_attrs: null,
+        extract: null,
+        papers: [],
+        paper_dict: {},
+
+        // search
+        keywords: '',
+
+        // for tracking which pid(s) are updated
+        modified_paper_pids: new Set([]),
+
+        // for cie
+        is_editing_cie: false,
+        
+        // for test
+        oc_paper_rob: {},
+
+        // for quick access
+        srv_shared: srv_shared
+    },
+
+    vpp_methods: {
+        // label converting function from srv_shared
+        _lbl: function(v) {
+            return srv_shared._lbl(v);
+        },
+
+        on_change_cie: function() {
+            this.$forceUpdate();
+        },
+
+        get_paper_row_cls: function(paper) {
+            if (this.modified_paper_pids.has(paper.pid)) {
+                return 'paper-table-row-modified';
+            }
+
+            return '';
+        },
+
+        clear_modified_paper_pids: function() {
+            this.modified_paper_pids.clear();
+        },
+
+        ///////////////////////////////////////////////////
+        // for search
+        ///////////////////////////////////////////////////
+        reset_keywords: function() {
+            this.keywords = '';
+        },
+
+        is_search_match: function(paper) {
+            if (this.keywords == '') {
+                return true;
+            }
+
+            if (paper.pid.indexOf(this.keywords)>=0 ||
+                paper.seq_num == parseInt(this.keywords) ||
+                paper.short_name.toLocaleUpperCase().indexOf(this.keywords.toLocaleUpperCase())>=0
+            ) {
+                return true;
+            }
+
+            return false;
+        },
+
+        toggle_only_show_selected: function() {
+            this.only_show_selected = !this.only_show_selected;
+        },
+
+        toggle_on_all_attributes: function() {
+            for (const key in this.show_attrs) {
+                if (Object.hasOwnProperty.call(this.show_attrs, key)) {
+                    this.show_attrs[key] = true;
+                }
+            }
+            this.$forceUpdate();
+        },
+
+        toggle_off_all_attributes: function() {
+            for (const key in this.show_attrs) {
+                if (Object.hasOwnProperty.call(this.show_attrs, key)) {
+                    this.show_attrs[key] = false;
+                }
+            }
+            this.$forceUpdate();
+        },
+
+        // save all!
+        save_extract: function() {
+            // update all?
+            var project_id = Cookies.get('project_id');
+            var oc_type = this.working_oc.oc_type;
+            var extract_id = this.working_oc.extract_id;
+            var meta = this.working_oc.meta;
+            var data = this.working_oc.data;
+
+            // start saving! by wpc
+            this.saving_start();
+
+            // now need to extract those modified
+            // we don't want to send to much unmodified data to backend
+            var modified_data = {};
+            var pids = Array.from(this.modified_paper_pids);
+            for (let i = 0; i < pids.length; i++) {
+                const pid = pids[i];
+                modified_data[pid] = data[pid];
+            }
+
+            // send request!
+            srv_extractor.update_extract_incr_data(
+                project_id,
+                extract_id,
+                oc_type,
+                data,
+                false, // flag_skip_is_selected, 2022-12-12: for fixing the overwrite bug
+                function(data) {
+                    // stop saving
+                    pan_ocpapers.vpp.saving_end();
+
+                    // clear modified_pids
+                    pan_ocpapers.vpp.clear_modified_paper_pids();
+                    // show result
+                    jarvis.toast('Saved the outcome [' + data.extract.meta.full_name + ']');
+
+                    // reload the outcomes
+                    pan_ocpapers.show_extract_and_papers(
+                        pan_ocpapers.extract_abbr
+                    );
+                }
+            );
+        },
+
+        edit_extract_meta: function() {
+            location.href = srv_extractor.url.manage_outcomes + 
+                '?abbr=' + this.working_oc.abbr;
+        },
+
+        goto_analysis: function() {
+            location.href = srv_analyzer.url.azoc + 
+                '?abbr=' + this.working_oc.abbr;
+        },
+        
+        get_input_size: function(str) {
+            // // convert null to empty
+            // if (typeof(str) == 'undefined' || str == null) {
+            //     str = '';
+            // }
+            // // convert number to string
+            // str = '' + str;
+            // var s = str.length;
+            // if (s<pan_ocpapers.MIN_INPUT_AUTO_SIZE) {
+            //     return pan_ocpapers.MIN_INPUT_AUTO_SIZE;
+            // } else if (s > pan_ocpapers.MAX_INPUT_AUTO_SIZE) {
+            //     return pan_ocpapers.MAX_INPUT_AUTO_SIZE;
+            // } else {
+            //     return s;
+            // }
+            return srv_extractor.get_input_size(str);
+        },
+
+        // update the value
+        // on_change_input_value: function(event) {
+        //     let val = event.target.value;
+        //     console.log('Changed input_format: ' + val);
+        // },
+
+        // get year
+        get_year: function(s) {
+            return jarvis.get_year(s);
+        },
+
+        get_first_author: function(s) {
+            return jarvis.get_first_author(s);
+        },
+
+        on_change_input_format: function(event) {
+            let val = event.target.value;
+            console.log('Changed input_format: ' + val);
+
+            // update the attrs
+            this.working_oc.meta.cate_attrs = srv_extractor.tpl.input_format[
+                this.working_oc.oc_type
+            ][val];
+            
+            // update the papers setting
+            pan_ocpapers.update_all_and_show_attrs();
+        },
+
+        on_toggle_attr_selection: function(attr_abbr, event) {
+            this.$forceUpdate();
+        },
+
+        on_click_paper: function(paper) {
+            // set the working pmid ?
+            this.working_paper = paper;
+            this.show_working_paper_pan = true;
+            // this.show_working_paper_collector = true;
+
+            // get the pid / pmid
+            var pmid = paper.pid;
+
+            // highlight this line
+            $('.paper-table-row').removeClass('paper-table-row-clicked');
+            $('#paper-table-row-' + paper.paper_id).addClass('paper-table-row-clicked');
+
+            // call collector to do something
+            pan_collector.show_paper(
+                pmid, 
+                pan_ocpapers.vpp.$data.working_oc.data[pmid]
+            );
+
+            // the draggable 
+            // $( "#pan_ocpapers_working_paper" ).draggable({ 
+            //     handle: "div#pan_ocpapers_working_paper_title",
+            //     containment: "#pan_ocpapers", 
+            //     scroll: false
+            // });
+            // send request
+            var project_id = Cookies.get('project_id');
+            srv_extractor.get_extract_piece(
+                project_id,
+                this.working_oc.extract_id,
+                this.working_paper.pid,
+                this._on_click_paper_callback
+            );
+        },
+
+        _on_click_paper_callback: function(rsp) {
+            if (rsp.success) {
+                // update the working piece. defined by wpc
+                this.working_piece = rsp.data.piece;
+                console.log("* got db piece", rsp.data.piece);
+                jarvis.toast('Loaded extraction from database');
+            } else {
+                // which means this paper on this extract no data yet
+                let oc = this.working_oc;
+                let piece_data = srv_extractor.mk_oc_data(oc);
+                this.working_piece = srv_extractor.mk_piece(
+                    Cookies.get('project_id'),
+                    oc.extract_id,
+                    this.working_paper.pid,
+                    piece_data
+                );
+                console.log("* made local piece", this.working_piece);
+                jarvis.toast('Initialized extraction for the current paper');
+            }
+
+            // show the panel only when piece is ready
+            this.show_working_paper_collector = true;
+        },
+
+        toggle_select_all_papers: function(event) {
+            let val = event.srcElement.checked;
+            console.log('* set all papers selected: ', val);
+            for (const pmid in this.working_oc.data) {
+                if (Object.hasOwnProperty.call(this.working_oc.data, pmid)) {
+                    this.working_oc.data[pmid].is_selected = val;
+                }
+            }
+            // this.$forceUpdate();
+        },
+
+        on_toggle_itable_select_category: function(cate_idx, event) {
+            let val = event.srcElement.checked;
+
+            for (let i = 0; i < this.working_oc.meta.cate_attrs[cate_idx].attrs.length; i++) {
+                const attr = this.working_oc.meta.cate_attrs[cate_idx].attrs[i];
+
+                if (attr.subs == null) {
+                    this.show_attrs[attr.abbr] = val;
+
+                } else {
+                    this.show_attrs[attr.abbr] = val;
+                    for (let j = 0; j < attr.subs.length; j++) {
+                        const sub = attr.subs[j];
+                        this.show_attrs[sub.abbr] = val;
+                    }
+                }
+            }
+            // force update the UI because change a lot
+            this.$forceUpdate();
+        },
+
+        on_change_list_input_value: function(paper, event) {
+            let pid = paper.pid;
+
+            // add affeced pid
+            this.modified_paper_pids.add(pid);
+
+            // update unsaved from wpc
+            this.set_has_change_unsaved();
+        },
+
+        on_change_itable_n_arms: function(paper, event) {
+            let pid = paper.pid;
+            let n_arms = event.target.value;
+            console.log('* change ' + pid + ' n_arms to ' + n_arms);
+
+            // fix the data type error
+            if (typeof(n_arms)=='string') {
+                n_arms = parseInt(n_arms);
+            }
+            
+            this.working_oc.data[pid] = srv_extractor.set_n_arms(
+                this.working_oc.data[pid], n_arms
+            );
+
+            // add affeced pid
+            this.modified_paper_pids.add(pid);
+            
+            this.$forceUpdate();
+        },
+
+        on_change_only_show_selected: function(event) {
+            // let val = event.srcElement.checked;                    
+            // this.only_show_selected = val;
+            this.$forceUpdate();
+        },
+
+        /////////////////////////////////////////////////////
+        // For the working paper extraction
+        /////////////////////////////////////////////////////
+        is_show_attr: function(abbr) {
+            return this.show_attrs[abbr];
+        },
+
+        set_n_arms: function() {
+            var n_arms = this.working_oc.data[this.working_paper.pid].n_arms;
+            console.log('* set n_arms to', n_arms);
+
+            // update the other to match the number
+            this.working_oc.data[this.working_paper.pid] = srv_extractor.set_n_arms(
+                this.working_oc.data[this.working_paper.pid], n_arms
+            );
+
+            // update current working arm to main
+            this.switch_working_arm(null);
+            
+            this.$forceUpdate();
+        },
+
+        switch_working_arm: function(arm_idx) {
+            console.log('* switch_working_arm', arm_idx);
+            this.working_paper_arm = arm_idx;
+
+            // update the working arm
+            $('.w-arm-tab').removeClass('btn-primary');
+            $('#working_paper_arm_tab_' + arm_idx).addClass('btn-primary');
+        },
+
+        get_working_arm_attrs: function() {
+            if (this.working_paper_arm == null) {
+                return this.working_oc.data[this.working_paper.pid].attrs.main;
+            } else {
+                return this.working_oc.data[this.working_paper.pid].attrs.other[
+                    this.working_paper_arm
+                ];
+            }
+        },
+    },
+
+    // the working abbr
+    extract_abbr: null,
+
+    // all extracts, a list and a dictionary
+    extracts: [],
+    extract_dict: {},
+
+    MIN_INPUT_AUTO_SIZE: 4,
+    MAX_INPUT_AUTO_SIZE: 16,
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: this.vpp_data,
+            computed: {
+                n_selected: function() {
+                    var n = 0;
+                    for (const pmid in this.working_oc.data) {
+                        if (Object.hasOwnProperty.call(this.working_oc.data, pmid)) {
+                            if (this.working_oc.data[pmid].is_selected) {
+                                n += 1;
+                            };
+                        }
+                    }
+                    return n;
+                }
+            },
+            updated: function() {
+                pan_ocpapers.resize();
+
+                // update the autocomplete
+                pan_ocpapers.update_autocomplete();
+            },
+            methods: this.vpp_methods
+        });
+    
+    },
+
+    set_mode: function(mode) {
+        this.vpp.$data.mode = mode;
+    },
+
+    load_all_outcomes: function() {
+        var project_id = Cookies.get('project_id');
+        var cq_abbr = Cookies.get('cq_abbr');
+
+        srv_extractor.get_extracts(
+            project_id, 
+            cq_abbr,
+            
+            function(data) {
+                // update the outcome selection menu
+                console.log(data);
+                pan_ocpapers.extracts = data.extracts;
+
+                // update the ocs_menu according to the extracts
+                pan_ocpapers.vpp.$data.extract_tree = srv_shared.create_extract_tree(
+                    data.extracts
+                );
+
+                // update the ocs menu
+                pan_ocpapers.update_ocs_menu(
+                    pan_ocpapers.vpp.$data.extract_tree
+                );
+            }
+        );
+    },
+
+    update: function(data) {
+        // the data is a combo of extract and papers
+        this.vpp.working_oc = data.extract;
+        this.vpp.papers = data.papers;
+
+        // update dict
+        this.vpp.paper_dict = {};
+        for (let i = 0; i < this.vpp.papers.length; i++) {
+            const p = this.vpp.papers[i];
+            this.vpp.paper_dict[p.pid] = p;
+        }
+
+        // update the test rob
+        this.vpp.$data.oc_paper_rob = {};
+        for (let i = 0; i < data.papers.length; i++) {
+            const p = data.papers[i];
+            this.vpp.$data.oc_paper_rob[p.pid] = ['1', '1', '1', '1', '1'];
+        }
+
+        // update the all_attrs and show_attrs variables for display
+        this.hide_working_paper_pan();
+        pan_collector.hide();
+
+        // shortcut
+        if (this.vpp.working_oc.oc_type == 'itable') {
+            this.update_all_and_show_attrs_for_itable();
+        } else {
+            this.update_all_and_show_attrs_for_outcome();
+        }
+
+        // update
+        this.vpp.$forceUpdate();
+    },
+
+    update_all_and_show_attrs_for_itable: function() {
+        // for itable, just show attr + sub
+        // for outcomes, just show cate + attr
+        // init the all_attrs which for list all the nested attrs
+        this.vpp.all_attrs = [];
+
+        // init the show_attrs
+        this.vpp.show_attrs = {}
+
+        // for display
+        this.vpp.thr1s = [];
+        this.vpp.thr2s = [];
+
+        // loop on the cate_attrs
+        for (let i = 0; i < this.vpp.working_oc.meta.cate_attrs.length; i++) {
+            const cate = this.vpp.working_oc.meta.cate_attrs[i];
+
+            for (let j = 0; j < cate.attrs.length; j++) {
+                const attr = cate.attrs[j];
+                
+                var thr1 = {
+                    name: '',
+                    abbr: attr.abbr,
+                    cols: 0
+                }
+
+                var thr2 = null;
+                if (attr.subs == null) {
+                    // which means this attr doesn't have a sub
+                    this.vpp.all_attrs.push(attr);
+                    this.vpp.show_attrs[attr.abbr] = false;
+                    
+                    // also increase the first row
+                    thr1.cols += 1;
+
+                    // just this attr
+                    thr2 = {
+                        name: attr.name,
+                        abbr: attr.abbr,
+                        cols: 1
+                    };
+                    this.vpp.thr2s.push(thr2);
+
+                } else {
+                    this.vpp.show_attrs[attr.abbr] = false;
+
+                    for (let k = 0; k < attr.subs.length; k++) {
+                        const sub = attr.subs[k];
+                        this.vpp.all_attrs.push(sub);
+                        this.vpp.show_attrs[sub.abbr] = false;
+
+                        // update the display count
+                        thr1.cols += 1;
+
+                        thr2 = {
+                            name: sub.name,
+                            abbr: sub.abbr,
+                            cols: 1
+                        };
+                        this.vpp.thr2s.push(thr2);
+                    }
+                }
+
+                this.vpp.thr1s.push(thr1);
+
+            }
+
+        }
+
+        // update
+        this.vpp.$forceUpdate();
+    },
+
+
+    update_all_and_show_attrs_for_outcome: function() {
+        // for itable, just show attr + sub
+        // for outcomes, just show cate + attr
+        // init the all_attrs which for list all the nested attrs
+        this.vpp.all_attrs = [];
+
+        // init the show_attrs
+        this.vpp.show_attrs = {}
+
+        // for display
+        this.vpp.thr1s = [];
+        this.vpp.thr2s = [];
+
+        // loop on the cate_attrs
+        for (let i = 0; i < this.vpp.working_oc.meta.cate_attrs.length; i++) {
+            const cate = this.vpp.working_oc.meta.cate_attrs[i];
+
+            var thr1 = {
+                name: cate.name,
+                abbr: cate.abbr,
+                cols: 0
+            }
+            this.vpp.show_attrs[cate.abbr] = true;
+            for (let j = 0; j < cate.attrs.length; j++) {
+                const attr = cate.attrs[j];
+                
+                thr1.cols += 1;
+
+                var thr2 = {
+                    name: attr.name,
+                    abbr: attr.abbr,
+                    cols: 0
+                }
+                if (attr.subs == null) {
+                    // which means this attr doesn't have a sub
+                    this.vpp.all_attrs.push(attr);
+                    this.vpp.show_attrs[attr.abbr] = true;
+                    
+                    // update the display row count
+                    thr2.cols += 1;
+
+                } else {
+                    this.vpp.show_attrs[attr.abbr] = true;
+
+                    for (let k = 0; k < attr.subs.length; k++) {
+                        const sub = attr.subs[k];
+                        this.vpp.all_attrs.push(sub);
+                        this.vpp.show_attrs[sub.abbr] = true;
+
+                        // update the display count
+                        thr2.cols += 1;
+
+                        // also increase the first row
+                        thr1.cols += 1;
+                    }
+                }
+                this.vpp.thr2s.push(thr2);
+            }
+
+            this.vpp.thr1s.push(thr1);
+        }
+
+        // update
+        this.vpp.$forceUpdate();
+    },
+
+    show_extract_and_papers: function(abbr) {
+        this.extract_abbr = abbr;
+
+        // update the url if not equal
+        var url = srv_extractor.url.extract_by_outcome + "?abbr=" + abbr;
+        window.history.pushState("", "", url);
+
+        // get the data 
+        var project_id = Cookies.get('project_id');
+        var cq_abbr = Cookies.get('cq_abbr');
+        
+        srv_extractor.get_extract_and_papers(
+            project_id,
+            cq_abbr,
+            abbr,
+            function(data) {
+                pan_ocpapers.update(data);
+            }
+        );
+    },
+
+    show_working_paper: function() {
+        var w_win_collector = $('#win_collector').width();
+        $('#pan_ocpapers_working_paper').css('top', 50);
+        $('#pan_ocpapers_working_paper').css('right', '65%');
+        $('#pan_ocpapers_working_paper').css('left', '');
+    },
+
+    // show: function() {
+    //     $(this.vpp_id).show();
+    // },
+
+    // hide: function() {
+    //     $(this.vpp_id).hide();
+    // },
+
+    hide_working_paper_pan: function() {
+        this.vpp.show_working_paper_pan = false;
+    },
+
+    set_size: function(size) {
+        $(this.vpp_id).removeClass('panel-s panel-m panel-l')
+            .addClass('panel-' + size);
+    },
+
+    resize: function() {
+        var w = $(window).width() - 90;
+        var h = $(window).height() - 50;
+        $(this.vpp_id)
+            .css('width', w)
+            .css('height', h);
+
+        var h_attrs = $('#pan_ocpapers_attrs').height();
+        $('#pan_ocpapers_paperlist').css('height', h - h_attrs - 40);
+
+        // resize the working paper panel
+        $('#pan_ocpapers_working_paper_collector_attr_list').css('max-height', h - 150);
+    }
+};
+
+{% include 'js/pan_ocpapers_ext_wpc.js' %}
+{% include 'js/pan_ocpapers_ext_wpc_coe_rob.js' %}
+{% include 'js/pan_ocpapers_ext_wpc_coe_ind.js' %}
+{% include 'js/pan_ocpapers_ext_ocmenu.js' %}
+
+
+var jarvis = {
+    goto_screener: function(project_id, title) {
+        Cookies.set('project_id', project_id);
+        Cookies.set('project_title', title);
+
+        location.href = '[[ url_for("screener.overview") ]]';
+    },
+
+    init: function() {
+        // set cq_abbr if not 
+        this.set_default_cq();
+        
+        // get the outcome abbr from url
+        var oc_abbr = jarvis.get_url_paramter('abbr');
+
+        // init the shared service
+        srv_shared.update_labels_by_project_settings(
+            srv_extractor.project.settings
+        );
+
+        // init the UI
+        pan_ocpapers.init();
+        pan_collector.init();
+
+        // resize
+        pan_ocpapers.resize();
+
+        // load all outcomes for generating the selection menu
+        pan_ocpapers.load_all_outcomes();
+
+        // the load the init outcomes
+        if (oc_abbr == '') {
+
+        } else {
+            pan_ocpapers.show_extract_and_papers(oc_abbr);
+
+        }
+
+        // bind resize event
+        this.bind_resize_event();
+
+        // remove the context menu for 
+        document.addEventListener('click', function(event) {
+            // close the menu when click anywhere
+            $("#pan_ocpapers_ctx_menu").hide();
+        });
+    },
+
+    prompt: function(text, value) {
+        return window.prompt(text, value);
+    },
+
+    confirm: function(text) {
+        return window.confirm(text);
+    },
+
+    toast: function(s, s_type) {
+        if (typeof(s_type) == 'undefined') {
+            s_type = 'info';
+        }
+        toast(s, s_type);
+    },
+
+
+    get_year: function(s) {
+        const regex = /\d{4}/gm;
+        let m;
+        if ((m = regex.exec(s)) !== null) {
+            return m[0];
+        }
+        return '';
+    },
+
+    get_first_author: function(s) {
+        var aus = s.split(';');
+        if (aus.length == 1) {
+            aus = s.split(',');
+        }
+        return aus[0];
+    },
+
+    download_file: function(fn) {
+        // fixed image download bug
+        // Thanks to https://stackoverflow.com/questions/17311645/download-image-with-javascript
+        var a = $('<a>').attr('href', '/f/' + fn)
+            .attr('download', fn)
+            .appendTo("body");
+        a[0].click()
+        a.remove();
+    },
+
+    bind_resize_event: function() {
+        $(window).on('resize', function(){
+            pan_ocpapers.resize();
+            pan_collector.resize();
+        });
+    }
+};
+
+{% include 'js/jarvis_ext_utils.js' %}
+
+$(document).ready(function() {
+    jarvis.init();
+});
+</script>
+{% endblock %}

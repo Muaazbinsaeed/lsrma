@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
+<title>Pairwise MA Results</title>
+<link rel="icon" href="/static/img/favicon.png" type="image/png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+<style>
+
+{% include 'css/basic.css' %}
+{% include 'css/box.css' %}
+{% include 'css/start_screen.css' %}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    font-size: 12px;
+}
+body {
+    overflow-y: hidden;
+}
+#oc_list {
+    width: 250px;
+    border-right: 1px solid #aaaaaa;
+    padding: 5px;
+    overflow-y: auto;
+}
+.chk-oc-group {
+    margin-bottom: 3px;
+}
+.chk-oc-h3 {
+    border-top: 1px solid whitesmoke;
+    padding-top: 3px;
+    font-weight: bold;
+}
+.chk-oc {
+    padding: 3px 5px;
+    cursor: pointer;
+}
+.chk-oc:hover {
+    background-color: whitesmoke;
+}
+.chk-oc-selected {
+    background-color: #cfcfcf;
+    font-weight: bold;
+}
+#forest_incidence_plot {
+    width: 860px;
+    height: auto;
+    min-height: 100px;
+    padding: 5px;
+    overflow-x: auto;
+}
+.rs-list {
+    width: 20%; 
+    overflow-y: auto; 
+    height: 300px; 
+    cursor: pointer; 
+    margin-right: 10px;
+}
+.rs-list-element:hover {
+    background-color: whitesmoke;
+}
+.rs-list-element-selected {
+    background-color: #cfcfcf;
+    font-weight: bold;
+}
+#bar {
+    margin-left: 35px;
+}
+.tabs {
+    display: flex;
+    padding: 0;
+    list-style-type: none;
+}
+
+.tab {
+    padding: 4px 30px;
+    border: 0;
+    color: #999999;
+    border-bottom: 1px solid #999999;
+    cursor: pointer;
+}
+
+.tab:hover {
+    color: #555555;
+    border-bottom: 1px solid #555555;}
+
+.active-tab {
+    color: #000000;
+    font-weight: bold;
+    border-bottom: 1px solid #000000;
+}
+.category-heading {
+    font-weight: bold;
+    min-width: 180px;
+    cursor: pointer;
+    padding: 2px 0;
+    margin-bottom: 5px;
+}
+.category-heading:hover {
+    border-bottom: 1px solid black;
+}
+.sub-category {
+    cursor: pointer;
+    margin-left: 15px;
+    font-size: 11px;
+    padding-left: 8px;
+    margin-bottom: 10px;
+    padding-top: 5px;
+    border-left: 1px solid black;
+}
+.sub-category div:hover {
+    background-color: #efefef;
+    border-bottom: 1px solid #cccccc;
+}
+.collapsed {
+    display: none;
+}
+#chart-container {
+    display: flex;
+    /* width: 700px; */
+}
+.toggle-button {
+    position: relative;
+    display: inline-block;
+    width: 30px;
+    height: 15px;
+  }
+  
+  .toggle-button input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+  }
+  
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 15px;
+    width: 15px;
+    left: 0px;
+    bottom: 0px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+  
+  input:checked + .slider {
+    background-color: #2196F3;
+  }
+  
+  input:focus + .slider {
+    box-shadow: 0 0 1px #2196F3;
+  }
+  
+  input:checked + .slider:before {
+    transform: translateX(15px);
+  }
+
+
+</style>
+</head>
+<body>
+<div id="start-screen">
+    <h1>
+        <i class="fa fa-chart-bar"></i>
+        Incidence Meta-Analysis Plots
+    </h1>
+    <div id="ss-msg">System initializing ...</div>
+</div>
+
+<div class="flex-container" style="width:100%; height:100%;">
+
+
+
+<div id="app_graphpma" style="height: 100%;" class="mt-3">
+
+    <template>
+        <div>
+            <!-- Tabs -->
+
+            <div class="row align-items-end pb-3">
+                <div class="col-3">
+                    <label for="analysis-type">Analysis Type</label>
+                    <select id="analysis-type" name="analysis-type" @click="selectAnalysisType($event)">
+                        <option value="meta_prop">
+                            Incidence MetaProp
+                        </option>
+                        <option value="meta_rate">
+                            Incidence MetaRate
+                        </option>
+                    </select>
+                </div>
+                <div class="col-4">
+                    <div class="tabs ml-0">
+                        <div class="tab" v-for="tab in tabs" :key="tab" @click="selectTab(tab)" :class="{'active-tab': currentTab === tab}">
+                            <i class="fa fa-chart-bar"></i>
+                            {{ tab }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-5">
+                    <div class="d-flex justify-content-end" v-if="analysisType === 'meta_rate'">
+                        <label for="irtype-type" style="padding-right: 5px;">IRscale </label>
+                        <select class="me-2" id="irtype-type" name="irtype-type" @click="selecttimeType($event)">
+                            <option value="10">
+                                10
+                            </option>
+                            <option value="100">
+                                100
+                            </option>
+                            <option value="1000">
+                                1000
+                            </option>
+                        </select>                
+                        <label for="filter23" style="padding-left: 5px; padding-right: 5px;">Timestamp Unit</label>
+                        <select id="filter23" selcted  class="filter-select" @click="selecttimeType($event)">
+                            <option value="person-months">
+                            Person-Months
+                        </option><option value="person-years">
+                            Person-Years
+                          
+                        </option></select>
+                    </div>
+
+                    <div class="d-flex justify-content-end" v-if="analysisType === 'meta_prop'">
+                        <label for="psclae-type" style="padding-right: 5px;">Pscale </label>
+                        <select class="me-2" id="psclae-type" name="psclae-type" @click="selecttimeType($event)">
+                            <option value="10">
+                                10
+                            </option>
+                            <option value="100">
+                                100
+                            </option>
+                            <option value="1000">
+                                1000
+                            </option>
+                        </select>                
+                      
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="tab-content d-flex">
+                <div class="rs-list">
+                    <div class="d-flex">
+                        <div style="margin-right: 10px;">Expand All</div>
+                        <div class="toggle-button" @click="expandAll">
+                            <input type="checkbox" class="checkbox" :checked="collapsedFlag">
+                            <span class="slider"></span>
+                        </div>
+                    </div>
+
+                    <div v-for="(data, key) in rsListNew" :key="key" @dragover.prevent @drop="dropHandler(key)">
+                        <div v-for="(value, label) in data" :key="label"          
+                        draggable="true"
+                        @dragstart="dragstartHandler(key, label)"
+                        @dragenter="dragenterHandler"
+                        @dragleave="dragleaveHandler"
+                        @dragend="dragendHandler">
+                            <div class="category-heading fw-bold d-flex" style="margin-right: 15px;" @click="toggleClicked(label)">
+                                <i :class="['far', {'fa-folder-open': !collapsedItems.includes(label), 'fa-folder': collapsedItems.includes(label)}]"></i>
+                                <div style="margin-left: 5px;">
+                                    {{label}}
+                                </div>
+                            </div>
+                            <div v-if="currentTab === 'Forest Plot'">
+                                <div v-for="(keyValues, keyName) in value">
+                                    <div :class="{
+                                       
+                                        'collapsed': collapsedItems.includes(label)
+                                    }" 
+                                    :id="label"
+                                    v-on:click="drawPlots(keyValues,label, keyName)">
+                                    <div class="sub-category"> {{process_key_name(keyName)}} </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-if="currentTab === 'Bar Chart'">
+                                <div v-for="(keyValues, keyName) in value">
+                                    <div :class="{
+                                        
+                                        'collapsed': collapsedItems.includes(label)
+                                    }"
+                                    v-on:click="drawPlots(value,label,keyName)">
+                                    <div class="sub-category"> {{process_key_name(keyName)}} </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div v-show="currentTab === 'Forest Plot'" id="forest_incidence_plot">
+                    <div id="fg_incd_incd_forest">
+                        <svg id="fg_incd_incd_forest_svg"></svg>
+                    </div>
+                </div>
+                <div v-show="currentTab === 'Bar Chart'">
+                    <div id="chart-container"></div>
+                </div>
+            </div>
+        </div>
+    </template>      
+</div>
+
+</div><!-- .flex-container -->
+
+<!-- use third party libs -->
+
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<!-- jQuery UI -->
+<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+<!-- Vue.js -->
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
+<!-- filesaver -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script>
+<!-- dayjs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.8.36/dayjs.min.js"></script>
+
+<!-- D3.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.0/d3.min.js"></script>
+
+<!-- chart.js -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+<!-- PapaParse -->
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.1/papaparse.min.js"></script> -->
+<!-- Shepherd -->
+<script src="https://cdn.jsdelivr.net/npm/shepherd.js@8.3.1/dist/js/shepherd.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@8.3.1/dist/css/shepherd.css">
+
+<!-- bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous"></script>
+
+
+<!-- for IE -->
+<script>
+var isIE = /*@cc_on!@*/false || !!document.documentMode;
+if (isIE) {
+    document.getElementById('ss-msg').innerHTML = 'The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.';
+}
+</script>
+
+<!-- My Scripts -->
+<script>
+
+{% include 'js/srv_pubmed.js' %}
+
+{% include 'js/srv_shared.js' %}
+
+///////////////////////////////////////////////////////////
+// The plots for PWMA
+///////////////////////////////////////////////////////////
+{% include 'js/fgmk_pwma_forest.js' %}
+{% include 'js/fgmk_subg_forest.js' %}
+
+{% include 'js/fgmk_incd_forest.js' %}
+{% include 'js/fgmk_incd_rate_forest.js' %}
+
+
+var draw_plot_payload = {
+    rs__val :'',
+    header_name: '',
+    gene_name: ''
+}
+// Alias for the pwma plots
+var fg_pwma_forest = fgmk_pwma_forest.make_fig(
+    'fg_pwma_forest'
+);
+// Alias for the subg plots
+var fg_subg_forest = fgmk_subg_forest.make_fig(
+    'fg_subg_forest'
+);
+
+// alias for the incidence plots
+var fg_incd_incd_forest = fgmk_incd_forest.make_fig(
+    'fg_incd_incd_forest'
+);
+
+var fg_incd_incd_rate_forest = fgmk_incd_rate_forest.make_fig(
+    'fg_incd_incd_forest'
+);
+
+// the main app
+var app_graphpma = {
+    vpp: null,
+    vpp_id: '#app_graphpma',
+
+    init: function(data, group, foc) {
+        if (typeof(group) == 'undefined') {
+            group = 'all';
+        }
+        if (typeof(foc) == 'undefined') {
+            foc = null;
+        }
+        this.data = data;
+        dict_ ={} 
+        console.log(data.rs)
+        rs_data = data.rs
+        for (i=0; i<rs_data.length; i++){
+            rs_data[i]['category_specific_outcome']= rs_data[i].oc_group + "|" +rs_data[i].category_outcome +"|" + rs_data[i].oc_name
+        }
+        // update_cq_plot_relation = {}
+        // for(const key in this.data.cq_plot_relation.incidence) {
+        //     _key = key.split("|")[0]+ "|" + key.split("|")[1]
+        //     if( update_cq_plot_relation[_key]){
+        //         update_cq_plot_relation[_key].push(cq_plot_relation[key])
+        //     }
+        //     else{
+        //         update_cq_plot_relation[_key] = [cq_plot_relation[key]]
+        //     }
+        // }
+
+        for (i =0 ; i<rs_data.length ; i++){
+            oc_name = rs_data[i].oc_group + "|" +rs_data[i].category_outcome +"|" + rs_data[i].oc_name
+        
+            if (dict_.hasOwnProperty(rs_data[i].oc_name)) {
+                dict_[rs_data[i].oc_name].push(rs_data[i])
+            }
+            else{
+                dict_[rs_data[i].oc_name] = [rs_data[i]]
+            }
+        }
+
+
+        var pIdsbyNct = {};
+        this.data.rs.forEach(element => {
+            pIdsbyNct[element.pid] = element.rct_id;
+        });
+
+        rs_dict_data = dict_
+
+        var oc_dict_updated_list = {};
+
+        for(const key in this.data.cq_plot_relation) {
+            for (let name in this.data.cq_plot_relation[key]) {
+                    if (this.data.cq_plot_relation[key].hasOwnProperty(name)) {
+                    const array = this.data.cq_plot_relation[key][name]
+                    for (const plot of array) {
+                        oc_dict_updated_list[name] = plot;
+                    }
+                }
+            }
+        }
+
+
+
+        const rsListNew = [];
+
+        // for (const key in rs_dict_data) {
+        //     if (rs_dict_data.hasOwnProperty(key) && oc_dict_updated_list.hasOwnProperty(key)) {
+        //         const abbreviation = oc_dict_updated_list[key];
+        //         rs_dict_data[key].forEach(data_point => {
+        //             const data_key = `${key}`;
+        //             let found = false;
+        //             rsListNew.forEach(item => {
+        //                 if (item[abbreviation] && item[abbreviation][data_key]) {
+        //                 item[abbreviation][data_key].push(data_point);
+        //                 found = true;
+        //                 }
+        //             });
+        //             if (!found) {
+        //                 const existingItem = rsListNew.find(item => item[abbreviation]);
+        //                 if (existingItem) {
+        //                 if (existingItem[abbreviation][data_key]) {
+        //                     existingItem[abbreviation][data_key].push(data_point);
+        //                 } else {
+        //                     existingItem[abbreviation][data_key] = [data_point];
+        //                 }
+        //                 } else {
+        //                 const newItem = {
+        //                     [abbreviation]: {
+        //                     [data_key]: [data_point]
+        //                     }
+        //                 };
+        //                 rsListNew.push(newItem);
+        //                 }
+        //             }
+        //         });
+        //     }
+        // }
+        new_dict_= {}
+        for (const key in rs_dict_data){
+            group = key.split("|")[0]
+            cat_outcome = key.split("|")[1]
+            outcome = key.split("|")[2]
+            outcome = oc_dict_updated_list[key]
+            if(new_dict_.hasOwnProperty(cat_outcome)){
+                 __key = new_dict_[cat_outcome]
+                if ( new_dict_.hasOwnProperty(outcome)){
+                    new_dict_[cat_outcome][outcome].push(rs_dict_data[key])
+                }
+                else{
+                    new_dict_[cat_outcome][outcome] = [rs_dict_data[key]]
+                }
+            }
+            else{
+                new_dict_[cat_outcome] = {
+                    [outcome]: [rs_dict_data[key]]
+                }
+            }
+
+        }
+        for (i=0; i<Object.keys(new_dict_).length; i++){
+            rsListNew.push({})
+        }
+        map_dict = {
+            "Risk of progression": 0,
+            "Risk of mortality": 1,
+            "PSA50% response": 2, 
+            "Objective response": 3,
+            "Composite response": 4, 
+            "Complete response": 5, 
+            "CTC conversion": 6, 
+            "Any adverse events": 7,
+            "Hematological grade 3 or higher": 8, 
+            "Genes prevalence": 9
+        }
+        for (const key in new_dict_){
+            index = map_dict[key]
+            rsListNew.splice(index , 0 , {[key]: new_dict_[key]})
+        }
+        console.log(rsListNew);
+        for (i =0; i<rsListNew.length; i++){
+            _key = Object.keys(rsListNew[i])[0]
+ 
+            a_ = rsListNew[i][_key]
+            if (a_){
+            records = Object.entries(a_);
+           // Step 2: Sort the array by keys with custom logic
+            records.sort((a, b) => {
+            const numA = parseInt(a[0]);
+            const numB = parseInt(b[0]);
+            
+            if (numA === numB) {
+                return a[0].localeCompare(b[0]);
+            }
+            return numA - numB;
+            });
+            a_ = Object.fromEntries(records);
+            rsListNew[i][_key] = a_
+            }
+
+
+
+        }
+
+        const keys = Object.keys(rs_dict_data);
+        const firstKey = keys[0];
+        const firstKeyValue = rs_dict_data[firstKey];
+        // init the vpp
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                showSvg: false,
+                rsList: rs_dict_data,
+                rsListNew: rsListNew,
+                oc_dict_updated_list: oc_dict_updated_list,
+
+                //PID and NCT
+                nctByPid: pIdsbyNct,
+                trialNamebyNct: this.data.updated_trail_name_dict,
+
+                collapsedItems: [],
+                collapsedFlag: true,
+                draggingCategory: null,
+                draggingItem: null,
+                selected_rs: firstKeyValue,
+                selectedGeneName: selectedGeneName,
+                transformedData: {},
+                currentTab: 'Forest Plot',
+                analysisType: 'meta_prop',
+                tabs: ['Forest Plot', 'Bar Chart'],
+            },
+
+            methods: {
+
+                drawPlots: function(rsVal,headerName, geneName) {
+                    geneName = geneName?geneName.split("*")[1]:geneName
+                    draw_plot_payload.rs__val = rsVal
+                    draw_plot_payload.gene_name = geneName
+                    draw_plot_payload.header_name = headerName
+                    const highlightedElements = document.querySelectorAll('.rs-list-element-selected');
+
+                    if(headerName == "Genes prevalence") {
+                        $('#analysis-type').val('meta_prop');
+                        $('#analysis-type option[value="meta_prop"]').click();
+                        $('#analysis-type').prop('disabled', true);
+                    } else {
+                        $('#analysis-type').prop('disabled', false);
+                    }
+
+                    const target = event.target || event.srcElement;
+                    if(this.currentTab != 'Bar Chart' || headerName != previousHeaderName) {
+                        // Remove the 'highlight' class from each element
+                        highlightedElements.forEach((element) => {                        
+                            element.classList.remove('rs-list-element-selected');
+                        });
+                    }
+                    // only toggle class for genName
+                    if(target.innerHTML.includes(geneName) && this.currentTab == 'Bar Chart') {
+                        target.classList.toggle('rs-list-element-selected');
+                    }
+                    
+                    if(this.currentTab == 'Forest Plot' && target.innerHTML.includes(geneName)) {
+                         target.classList.add('rs-list-element-selected');
+                    }
+                    pidList = this.nctByPid;
+                    nctList = this.trialNamebyNct;
+
+                    sm='PFT'
+                    if ($('#analysis-type').val() == 'meta_rate'){
+                            sm = 'IR'
+                    }
+
+                    if(this.currentTab === 'Bar Chart') {
+                    var totalIterations = Object.keys(rsVal).length; 
+                   
+                    barData = [];
+                    for(const key in rsVal) {
+                        this.selected_rs = geneName;
+                        modified_rs = []
+                        // for (r=0; r <rsVal[key].length; r++){
+                        //     modified_rs.push({
+                        //     'E':  parseInt(rsVal[key][r]['Et']),
+                        //     'N': parseInt(rsVal[key][r]['Nt']),
+                        //     'pid': rsVal[key][r]['pid'],
+                        //     'study': rsVal[key][r]['author'],
+                        //     'year': rsVal[key][r]['year']
+                        //     })
+                        // }
+                            for (r=0; r <rsVal[key][0].length; r++){
+                                time_unit =0;
+                                if (rsVal[key][0][r].hasOwnProperty('Pt')) {
+                                
+                                time_unit = parseInt(rsVal[key][0][r]['Pt']);
+                                
+                                } else {
+                                
+                                time_unit =0;
+                                    
+                                }
+                                n = parseInt(rsVal[key][0][r]['Nt'])
+                                person_time = 'person_months'
+                                if ($('#analysis-type').val() == 'meta_rate'){
+                                    n=time_unit
+                                    if ($("#filter23").val() == 'person-years'){
+                                        n =n/12
+                                        parseFloat(n.toFixed(2))
+                                        person_time = 'person_years'
+                                    }
+                                }
+                                modified_rs.push({
+                                'E':  parseInt(rsVal[key][0][r]['Et']),
+                                'N': n,
+                                'Pt': time_unit,
+                                'pid': rsVal[key][0][r]['pid'],
+                                'study': rsVal[key][0][r]['author'],
+                                'year':rsVal[key][0][r]['year'],
+                                'person_time':person_time
+                                })
+                        }
+                        url = 'https://rplt.living-evidence.com/rplt/PWMA_INCD';
+                            var params = {
+                            am: 'FORESTDATA',
+                            sm: sm,
+                            ir_scale: $("#irtype-type").val(),
+                            p_scale: $("#psclae-type").val(),
+                            rs: JSON.stringify(modified_rs),
+                            cf: 'NO',
+                            hk: 'FALSE',
+                            non_io: 'TRUE',
+                            analysis_type : $('#analysis-type').val(),
+                            apikey: '7323590e-577b-4f46-b19f-3ec402829bd6'
+                        };
+                        $.post(
+                            url,
+                            params,
+                            function(data) {
+                                console.log('* get return', data);
+                                showSvg = true;
+                                var gene_Name = key;
+                                var modifiedData = { ...data, geneName: gene_Name };
+                                barData.push(modifiedData);
+                                if (barData.length === totalIterations) {
+                                    renderD3Chart(barData, headerName, geneName);
+                                }
+                            }, 'json'
+                        );
+
+                 
+
+                       
+                    }
+                } else {
+                    this.selected_rs = rsVal[0][0].oc_name.split("|")[2];
+                    this.selected_rs_treatment = rsVal[0][0].treatment.split("|")[2];
+                    
+
+                    modified_rs = []
+                        // for (r=0; r <rsVal.length; r++){
+                        //     modified_rs.push({
+                        //     'E':  parseInt(rsVal[r]['Et']),
+                        //     'N': parseInt(rsVal[r]['Nt']),
+                        //     'pid': rsVal[r]['pid'],
+                        //     'study': rsVal[r]['author'],
+                        //     'year': rsVal[r]['year']
+                        //     })
+                        // }
+                        for (r=0; r <rsVal[0].length; r++){
+
+                            time_unit =0;
+                            if (rsVal[0][r].hasOwnProperty('Pt')) {
+                            
+                            time_unit = parseInt(rsVal[0][r]['Pt']);
+                            
+                            } else {
+                            
+                            time_unit =0;
+                            
+                        }
+                        n = parseInt(rsVal[0][r]['Nt'])
+                        person_time = 'person_months'
+                                if ($('#analysis-type').val() == 'meta_rate'){
+                                    n=time_unit
+                                    if ($("#filter23").val() == 'person-years'){
+                                        n =n/12
+                                        n = parseFloat(n.toFixed(2))
+                                        person_time = 'person_years'
+                                    }
+                                }
+                        modified_rs.push({
+                        'E':  parseInt(rsVal[0][r]['Et']),
+                        'N': n,
+                        'Pt': time_unit,
+                        'pid': rsVal[0][r]['pid'],
+                        'study': rsVal[0][r]['author'],
+                        'year': rsVal[0][r]['year'],
+                        'person_time' :person_time
+                        })
+                }
+
+            
+                
+                        url = 'https://rplt.living-evidence.com/rplt/PWMA_INCD';
+                        var params = {
+                            am: 'FORESTDATA',
+                            analysis_type : $('#analysis-type').val(),
+                            rs: JSON.stringify(modified_rs),
+                            cf: 'NO',
+                            hk: 'FALSE',
+                            sm: sm,
+                            ir_scale: $("#irtype-type").val(),
+                            p_scale: $("#psclae-type").val(),
+                            non_io: 'TRUE',
+                            apikey: '7323590e-577b-4f46-b19f-3ec402829bd6'
+                        };
+                        $.post(
+                            url,
+                            params,
+                            function(data) {
+                                console.log('* get return', data);
+                                showSvg = true;
+                                    draw_plots(data, rsVal[0].treatment, pidList, nctList);
+                            }, 'json'
+                        );
+                }
+                },
+                transformData() {
+                    let data = this.rsList;
+                    let transformed = {};
+
+                    for (let key in data) {
+                        if (data.hasOwnProperty(key)) {
+                        let splitKey = key.split(" (");
+                        let mainCategory = splitKey[0];
+                        let subCategory = splitKey[1]?.slice(0, -1);
+                        if (!transformed[mainCategory]) {
+                            transformed[mainCategory] = {};
+                        }
+                        if (subCategory) {
+                            if (!transformed[mainCategory][subCategory]) {
+                            transformed[mainCategory][subCategory] = [];
+                            }
+                            transformed[mainCategory][subCategory].push(...data[key]);
+                        } else {
+                            transformed[mainCategory] = data[key];
+                        }
+                        }
+                    }
+
+                    this.transformedData = transformed;
+                },
+                selectTab(tab) {
+                    geneArray = [];
+                    selectedGeneName = [];
+                    previousHeaderName = "";
+                    this.resetSelectedGen();
+                    this.currentTab = tab;
+                    this.$nextTick(() => {});
+                },
+                selectAnalysisType(event) {
+                    this.analysisType = event.target.value;
+                    //this.resetSelectedGen();
+                    this.drawPlots(draw_plot_payload.rs__val, draw_plot_payload.header_name,
+                    draw_plot_payload.gene_name)
+                },
+                selecttimeType(event) {
+                    // this.analysisType = event.target.value;
+                    this.drawPlots(draw_plot_payload.rs__val, draw_plot_payload.header_name,
+                    draw_plot_payload.gene_name)
+                },
+                resetSelectedGen() {
+                    const highlightedElements = document.querySelectorAll('.rs-list-element-selected');
+                    highlightedElements.forEach((element) => {        
+                        element.classList.remove('rs-list-element-selected');
+                    });
+                    d3.select("#chart-container").selectAll("*").remove();
+                    d3.select("#fg_incd_incd_forest_svg").selectAll("*").remove();
+                },
+                toggleClicked(headerName) {
+                    const index = this.collapsedItems.indexOf(headerName);
+                    if (index === -1) {
+                        this.collapsedItems.push(headerName);
+                    } else {
+                        this.collapsedItems.splice(index, 1);
+                    }
+                },
+                process_key_name(key_name){
+                    return key_name.split("*")[1]
+
+                },
+
+                expandAll() {
+                    this.collapsedFlag = !this.collapsedFlag;
+                    if(this.collapsedFlag) {
+                        this.collapsedItems = [];
+                    } else {
+                        this.rsListNew.forEach(item => {
+                            const keys = Object.keys(item);
+                            this.collapsedItems = this.collapsedItems.concat(keys);
+                        });
+                    }
+                },
+                dragstartHandler(category, item) {
+                    this.draggingCategory = category;
+                    this.draggingItem = item;
+                },
+                dragenterHandler(event) {
+                    event.target.classList.add('drag-over');
+                },
+                dragleaveHandler(event) {
+                    event.target.classList.remove('drag-over');
+                },
+                dropHandler(targetIndex) {
+                    const draggedItem = this.rsListNew.splice(this.draggingCategory, 1)[0];
+                    this.rsListNew.splice(targetIndex, 0, draggedItem);
+                    this.draggingCategory = null;
+                },
+                dragendHandler() {
+                    document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+                }
+            },
+
+            mounted: function() {
+                this.transformData();
+                this.drawPlots(this.selected_rs, firstKeyValue[0].treatment);
+            }
+        });
+    }
+};
+
+var jarvis = {
+    
+    init: function() {
+        
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+
+        console.log('* User is using IE:', isIE);
+        if (isIE) {
+            jarvis.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
+            return;
+        }
+
+        // get filename
+        var prj = jarvis.get_url_paramter('prj');
+        var version = jarvis.get_url_paramter('version');
+
+        // the cq abbr
+        var cq = jarvis.get_url_paramter('cq');
+        if (cq == '') {
+            cq = 'default';
+        }
+
+        // the analysis group
+        var gp = jarvis.get_url_paramter('gp');
+        if (gp == '') {
+            gp = 'primary';
+        }
+        
+        // the first oc to show
+        var foc = jarvis.get_url_paramter('foc');
+        if (foc == '') {
+            foc = null;
+        }
+
+        // where to get the data
+        var src = jarvis.get_url_paramter('src');
+        if (src == '') {
+            src = 'cache';
+        }
+        
+        // set the sorting
+        var od = jarvis.get_url_paramter('od');
+        if (od == '') {
+            jarvis.oc_orders = [];
+        } else {
+            od = od.toLocaleLowerCase();
+            jarvis.oc_orders = od.split(';');
+        }
+
+        jarvis.ssmsg('Loading data ...');
+
+        // send request to get data for initializing app
+        var url = "[[ url_for('pub.graphdata', keystr='__KEYSTR__', fn='GRAPH_PMA_INCIDENCE.json') ]]";
+        // update with url with the project keystr
+        url = url.replace('__KEYSTR__', prj);
+
+        $.get(
+            url,
+            {
+                ver: Math.random(), 
+                src: src, 
+                cq: cq,
+                gp: gp,
+                version: version
+            },
+            (function(gp, foc){
+                return function(data) {
+                    app_graphpma.init(data, gp, foc);
+                    jarvis.ssmsg('Data loaded!');
+                    setTimeout('jarvis.ssclose();', 300);
+                }
+            })(gp, foc), 'json'
+        );
+
+        
+    },
+
+    get_url_paramter: function(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    },
+
+    ssmsg: function(msg) {
+        $('#ss-msg').html(msg);
+    },
+
+    ssclose: function() {
+        $('#start-screen').hide();
+    }
+};
+
+// include the jarvis extensions
+{% include 'js/jarvis_ext_compare_oc_names.js' %}
+
+$(document).ready(function() {
+    jarvis.init();
+})
+
+
+    var sms = {
+            'OR': { sm: 'OR', name: 'Odds Ratio'},
+            'RR': { sm: 'RR', name: 'Risk Ratio'},
+            'HR': { sm: 'HR', name: 'Hazard Ratio'},
+            'RD': { sm: 'RD', name: 'Risk Difference'},
+            'PLOGIT': { sm: 'PLOGIT', name: 'Logit Trans.'},
+    }
+
+
+    function draw_plots(data, treatment, pId_dict, nct_dict) {
+            var cfg = {
+                sm: sms[data.params.sm],
+                mode: 'pwma_prcm',
+                params: data.params,
+                treatment: treatment
+            };
+            cfg.sm = {
+                name: 'Event Rate',
+                sm: 'Incidence (%)'
+            };
+            cfg.mode = 'pwma_incd';
+            analysis_type =  $('#analysis-type').val() 
+
+            if (analysis_type == "meta_rate"){
+                fg_incd_incd_rate_forest.draw(data.data.incdma, cfg, pId_dict, nct_dict);
+            }
+
+            
+            else{
+            fg_incd_incd_forest.draw(data.data.incdma, cfg, pId_dict, nct_dict);
+            }
+    }
+
+    var previousHeaderName = null;
+    var geneArray = [];
+    var selectedGeneName = [];
+
+    function renderD3Chart(data, headerName, gene) {
+        const outcomeName = headerName;
+        const sameHeader = headerName === previousHeaderName;
+        previousHeaderName = headerName;
+        proption_name = ''
+        if ($('#analysis-type').val()=="meta_rate"){
+            proption_name="Incidence Rate"
+        }
+        else{
+            proption_name="Incidence"
+        }
+
+        var barData = [];
+        data.forEach(element => {
+            barData.push(
+                {
+                    'value': element?.data?.incdma?.model?.random.bt_ab_TE,
+                    'lowerRange': element?.data?.incdma?.model?.random.bt_ab_lower,
+                    'upperRange': element?.data?.incdma?.model?.random.bt_ab_upper,
+                    'geneName': element?.geneName
+                }
+            )
+        });
+
+        barData.sort((a, b) => a.value - b.value);
+
+        if (!sameHeader && gene) {
+            geneArray = [];
+            geneArray.push(gene);
+        } else if (sameHeader && gene && !geneArray.includes(gene)) {
+            geneArray.push(gene);
+        } else if(sameHeader && gene && geneArray.includes(gene)){
+            const index = geneArray.indexOf(gene);
+            geneArray.splice(index, 1)
+        }
+
+        if(!sameHeader && !selectedGeneName.includes(gene)) {
+            selectedGeneName.splice(0, selectedGeneName.length);
+            selectedGeneName.push(gene);
+        } else if(sameHeader && !selectedGeneName.includes(gene)) {
+            selectedGeneName.push(gene);
+        } else {
+            const index = selectedGeneName.indexOf(gene);
+            selectedGeneName.splice(index, 1);
+        }
+        const filteredBarData = sameHeader ? barData.filter(d => geneArray.includes(d.geneName.split("*")[1])) : 
+            barData.filter(d => d.geneName.split("*")[1] === gene);
+
+        d3.select("#chart-container").selectAll("*").remove();
+
+        // Chart dimensions
+        const width = 400;
+        const height = 200;
+        const margin = { top: 20, right: 20, bottom: 300, left: 40 };
+        
+        // Create scales
+        const xScale = d3.scaleBand()
+            .domain(filteredBarData.map(d => d.value))
+            .range([0, width])
+            .padding(0.1);
+
+        const yScale = d3.scaleLinear()
+            .domain([0, d3.max(filteredBarData, d => d.upperRange)])
+            .nice()
+            .range([height, 0]);
+
+
+        // Select the container element
+        const svg = d3.select("#chart-container")
+            .append("svg")
+            .attr("id", `${outcomeName.replace(/\s+/g, '-')}-chart`)
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // Create bars
+        svg.selectAll(".bar")
+        .data(filteredBarData)
+        .enter().append("rect")
+        .attr("class", "bar")
+        .attr("x", d => xScale(d.value) + (xScale.bandwidth() - 20) / 2)
+        .attr("y", d => yScale(d.value))
+        .attr("width", 20)
+        .attr("height", d => height - yScale(d.value))
+        .attr("fill", "grey");
+
+        svg.selectAll(".x-axis .tick text").remove();
+
+        svg.selectAll(".tick-label")
+        .data(filteredBarData)
+        .enter().append("text")
+        .attr("class", "tick-label")
+        .attr("x", d => xScale(d.value) + xScale.bandwidth() / 2)
+        .attr("y", height + 5)
+        .attr("text-anchor", "end")
+        .style("font-size", "10px")
+        .attr("transform", function(d) {
+            const x = xScale(d.value) + xScale.bandwidth() / 2;
+            const y = height + 5;
+            return `rotate(-75, ${x}, ${y})`;
+        })
+        .text(d => d.geneName.split("*")[1]);
+
+
+        // Add outcomeName on top of each bar
+        svg.append("text")
+            .attr("class", "outcome-label")
+            .attr("x", 15)
+            .attr("y", -10)
+            .attr("text-anchor", "start")
+            .text(outcomeName);
+
+        svg.append("text")
+            .attr("text-anchor", "middle")
+            .attr("transform", "rotate(-90)")
+            .attr("y", -margin.left + 10)
+            .attr("x", -margin.top - height/2 + 20)
+            .style("font-size", "14px") 
+            .text(proption_name);
+
+
+        // Add lines extending from the top of the bars
+        svg.selectAll(".bar-line")
+            .data(filteredBarData)
+            .enter().append("line")
+            .attr("class", "bar-line")
+            .attr("x1", d => xScale(d.value) + xScale.bandwidth() / 2)
+            .attr("y1", d => yScale(d.upperRange))
+            .attr("x2", d => xScale(d.value) + xScale.bandwidth() / 2)
+            .attr("y2", d => yScale(d.lowerRange))
+            .attr("stroke", "black")
+            .attr("stroke-width", 1)
+
+        // // Add lines in the center of each bar
+        svg.selectAll(".line")
+            .data(filteredBarData)
+            .enter().append("line")
+            .attr("class", "line")
+            .attr("x1", d => xScale(d.value) + xScale.bandwidth() / 2)
+            .attr("x2", d => xScale(d.value) + xScale.bandwidth() / 2)
+            .attr("y1", d => yScale(d.upperRange))
+            .attr("y2", d => yScale(d.lowerRange))
+            .attr("stroke", "black")
+
+        // Add axes (optional)
+        const xAxis = d3.axisBottom(xScale);
+        const yAxis = d3.axisLeft(yScale);
+
+        svg.append("g")
+            .attr("class", "x-axis")
+            .attr("transform", `translate(0,${height})`)
+            .call(xAxis);
+
+        svg.append("g")
+            .attr("class", "y-axis")
+            .call(yAxis);
+
+        svg.select(".x-axis")
+        .selectAll(".tick line, .tick text")
+        .remove();
+    }                    
+
+</script>
+</body>
+</html>

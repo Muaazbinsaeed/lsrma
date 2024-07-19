@@ -1,0 +1,87 @@
+<div id="pan_ocpapers_working_paper_collector"
+    v-if="show_working_paper_collector" >
+    <div v-if="working_paper != null && working_oc != null" v-bind:class="{'disable_piecie':editable_flag}">
+        <div class="working_title"
+            v-bind:class="{'wpc-data-has-not-saved':!has_saved}">
+            {{ working_oc.meta.group }}<br>
+            {{ working_oc.meta.category }} | {{ working_oc.meta.full_name }}
+        </div>
+
+        <div class="mt-1 mb-1 d-flex flex-row">
+            <button class="btn btn-sm btn-default mr-1"
+                v-bind:disabled="is_saving"
+                v-on:click="save_working_paper_extraction">
+                <span v-if="is_saving"
+                    v-bind:class="{'wpc-data-has-not-saved':!has_saved}">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    Saving
+                </span>
+                <span v-else
+                    v-bind:class="{'wpc-data-has-not-saved':!has_saved}">
+                    <i class="fa fa-save"></i>
+                    Save
+                </span>
+            </button>
+
+            <button class="btn btn-sm btn-default mr-1"
+                v-if="working_oc.oc_type!='itable'"
+                v-on:click="fill_working_paper_attrs">
+                <i class="fa fa-edit"></i>
+                Fill
+            </button>
+
+            <select class="form-control form-control-sm"
+                style="width: 50px;"
+                v-on:change="set_n_arms"
+                v-model.number="working_piece.data.n_arms">
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+        </div>
+
+        <div class="mb-1 d-flex flex-row">
+            <button class="w-arm-tab btn btn-xs btn-primary"
+                id="working_paper_arm_tab_null"
+                v-on:click="switch_working_arm(null)">
+                Comp 1
+            </button>
+            <button class="ml-1 w-arm-tab btn btn-xs"
+                v-for="arm_seq in (working_piece.data.n_arms - 2)"
+                v-bind:id="'working_paper_arm_tab_' + (arm_seq-1)"
+                v-on:click="switch_working_arm(arm_seq-1)">
+                Comp {{ arm_seq + 1 }}
+            </button>
+        </div>
+
+        <div v-if="working_oc.meta.is_subg_analysis == 'yes'"
+            class="ml-1 d-flex">
+            <button v-for="g, g_idx in working_oc.meta.sub_groups"
+                v-bind:id="'working_paper_subg_tab_' + (g_idx)"
+                v-bind:class="{'btn-info': working_paper_subg == g_idx}"
+                v-on:click="switch_working_subg(g_idx)"
+                class="w-subg-tab btn btn-xs">
+                {{ g }}
+            </button>
+        </div>
+
+        <div id="pan_ocpapers_working_paper_collector_attr_list">
+            <div class="w-cate-item mb-1"
+                v-for="cate in working_oc.meta.cate_attrs">
+
+                <div v-if="cate.abbr=='COE_RCT_ROB'">
+                    {% include 'extractor/_working_paper_extractor_rob.html' %}
+                </div>
+
+                <div v-if="cate.abbr=='COE_RCT_IND'">
+                    {% include 'extractor/_working_paper_extractor_ind.html' %}
+                </div>
+
+                <div v-if="['COE_RCT_ROB', 'COE_RCT_IND'].indexOf(cate.abbr)<0">
+                    {% include 'extractor/_working_paper_extractor_cate.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

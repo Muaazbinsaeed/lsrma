@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
+<title>Evidence Map</title>
+<link rel="icon" href="/static/img/favicon.png" type="image/png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+{% include 'css/box.css' %}
+{% include 'css/start_screen.css' %}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+body {
+    font-size: 14px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+a {
+    color: #333333;
+    text-decoration: none;
+}
+#main-pane {
+    width: 100%;
+    height: 100%;
+    padding: 5px;
+    background-color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+}
+#main-pane .box {
+    margin: 0 5px 0 0;
+}
+.pane-row {
+    display: flex;
+    flex-direction: row;
+}
+</style>
+</head>
+<body>
+<div id="start-screen">
+    <h1>
+        <i class="fa fa-chart-bar"></i>
+        Evidence Map
+    </h1>
+    <div id="ss-msg">Initializing graphs ...</div>
+</div>
+
+<div class="flex-container" style="width:100%; height:100%;">
+
+<div id="app_evmap" 
+    class="container-fluid my-1">
+    <div class="row">
+        <div class="col-auto">
+            <label for="treatment" 
+                class="col-form-label fs-6 fw-bold">
+                Select treatment:
+            </label>
+          </div>
+        <div class="col-auto">
+            <select class="form-select form-select-sm" 
+                aria-label="Default select example"
+                id="treatment"
+                v-model="treatment"
+                v-on:change="on_change_treat">
+                <option v-for="t in treat_list"
+                    v-bind:value="t">
+                    {{ to_fullname(t) }}
+                </option>
+            </select>
+        </div>
+
+        <div class="col-auto">
+            <div style="text-align: center;">
+                {% include 'svg/EVMAP_LEG.svg' %}
+            </div>
+        </div>
+    </div>
+
+    <div id="main-pane">
+        <div class="pane-row">
+            <div class="box" style="width: 100%;">
+                <div class="box-body d-flex fx-col">
+                    
+                    <div id="fg_evmap" style="width: 100%;"></div>
+                    
+                </div>
+            </div>
+            <!-- .box -->
+    
+        </div>
+        <!-- .pane-row -->
+    
+    </div>
+    <!-- /#main-pane -->
+</div>
+
+
+</div><!-- .flex-container -->
+
+<!-- use third party libs -->
+<!-- jQuery -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<!-- Plotly -->
+<script src="https://cdn.plot.ly/plotly-2.6.3.js" charset="utf-8"></script>
+<!-- vue.js  -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"></script>
+
+<!-- for IE -->
+<script>
+var isIE = /*@cc_on!@*/false || !!document.documentMode;
+if (isIE) {
+    document.getElementById('ss-msg').innerHTML = 'The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.';
+}
+</script>
+
+<!-- My Scripts -->
+<script>
+
+var app_evmap = {
+    vpp: null,
+    vpp_id: '#app_evmap',
+    
+    init: function(data, treat) {
+        this.data = data;
+        
+        var treat_list = data.treat_list;
+        treat_list = jarvis.sort_by_list(
+            treat_list,
+            jarvis.treat_orders
+        );
+
+        this.vpp = new Vue({
+            el: this.vpp_id,
+
+            data: {
+                treatment: treat,
+                treat_list: treat_list
+            },
+
+            methods: {
+                on_change_treat: function() {
+                    fg_evmap.draw(this.treatment);
+                },
+
+                to_fullname: function(s) {
+                    if (jarvis.hasOwnProperty('to_fullname')) {
+                        return jarvis.to_fullname(s);
+                    } else {
+                        return s;
+                    }
+                }
+            }
+        });
+
+        // update the plotly
+        fg_evmap.init(
+            data,
+            treat
+        );
+    }
+};
+
+var fg_evmap = {
+    plot_id: 'fg_evmap',
+    cfg: {
+        height: 600,
+        margin_left: 20,
+        margin_right: 20,
+        margin_top: 10,
+        opacity: 1,
+        color: {
+            0: '',
+            1: 'red',
+            2: 'gold',
+            3: 'green'
+        },
+        cie2opacity: {
+            0: 0,
+            1: 0.25,
+            2: 0.50,
+            3: 0.75,
+            4: 1
+        },
+        cie2txt: {
+            0: 'NA',
+            1: 'Very Low',
+            2: 'Low',
+            3: 'Moderate',
+            4: 'High'
+        },
+        effect2txt: {
+            0: 'NA',
+            1: 'Significant Harm',
+            2: 'No Significant Effect',
+            3: 'Significant Benefit'
+        },
+        xaxis_title: 'Outcomes of Interest',
+        yaxis_title: 'Comparator'
+    },
+
+    init: function(data, treat) {
+        console.log(data);
+        this.data = data;
+
+        // treat could be null or undefined
+        if (typeof(treat) == 'undefined' ||
+            treat == null) {
+            treat = data.treat_list[0];
+        }
+        if (data.treat_list.indexOf(treat)<0) {
+            treat = data.treat_list[0];   
+        }
+        this.draw(treat);
+    },
+
+    draw: function(treat) {
+        this.treat = treat;
+        var treatment = treat;
+
+        // oc list for x axis
+        var oc_list = [];
+        for (const oc_abbr in this.data.oc_dict) {
+            if (Object.hasOwnProperty.call(this.data.oc_dict, oc_abbr)) {
+                const oc = this.data.oc_dict[oc_abbr];
+                oc_list.push(oc.extract.meta.full_name);
+            }
+        }
+
+        // 2022-05-13: sort the oc_list
+        oc_list.sort(jarvis.compare_oc_names);
+        console.log('* sorted oc_list', oc_list);
+
+        // treat list for y axis
+        var treat_list = [];
+        for (var i = 0; i < this.data.treat_list.length; i++) {
+            var t = this.data.treat_list[i];
+
+            if (t == treatment) {
+                // skip the current treatment
+                continue;
+            }
+            treat_list.push(t);
+        }
+        treat_list = jarvis.sort_by_list(
+            treat_list,
+            jarvis.treat_orders,
+            true
+        );
+        // then translate
+        for (let i = 0; i < treat_list.length; i++) {
+            treat_list[i] = jarvis.to_fullname(
+                treat_list[i]
+            );
+        }
+
+        // to hold all the traces of all combinations.
+        var trace_dict = {};
+
+        // check each record
+        for (let i = 0; i < this.data.treat_dict[treatment].rs.length; i++) {
+            const d = this.data.treat_dict[treatment].rs[i];
+
+            // no need to add empty record
+            // certainty == 0 and effect == 0?
+            if (d.cie == 0 && d.effect == 0) {
+                continue;
+            }
+            
+            // get the full name as x
+            var oc_full_name = this.data.oc_dict[d.oc_abbr].extract.meta.full_name;
+
+            // get others
+            var comparator = d.comparator;
+
+            // get the bubble size
+            var size = d.cie * 12;
+
+            // get the color
+            var color = this.cfg.color[d.effect];
+
+            // get the opacity
+            var opacity = this.cfg.cie2opacity[d.cie];
+
+            // get the cie text content
+            var cie_text = this.cfg.cie2txt[d.cie];
+
+            // get the effect text content
+            var effect_text = this.cfg.effect2txt[d.effect];
+
+            // get the detail
+            var text = 'Outcome: <b>' + oc_full_name + '</b><br>' +
+                'Comparator: <b>' + jarvis.to_fullname(comparator) + '</b><br>' + 
+                'Treatment: <b>' + jarvis.to_fullname(treatment) + '</b><br>' + 
+                'Certainty: <b>' + cie_text + '</b><br>' + 
+                'Effect: <b>' + effect_text  + '</b>';
+
+            // if has SM, show me details
+            if (this.data.oc_dict[d.oc_abbr].lgtable.hasOwnProperty(comparator)) {
+                if (this.data.oc_dict[d.oc_abbr].lgtable[comparator].hasOwnProperty(treatment)) {
+                    var sm_txt = this.data.oc_dict[d.oc_abbr].extract.meta.measure_of_effect;
+                    var sm_val = this.data.oc_dict[d.oc_abbr].lgtable[comparator][treatment].sm;
+                    var sm_low = this.data.oc_dict[d.oc_abbr].lgtable[comparator][treatment].lw;
+                    var sm_upp = this.data.oc_dict[d.oc_abbr].lgtable[comparator][treatment].up;
+
+                    text += "<br>" + sm_txt + ': <b>' + 
+                        sm_val.toFixed(2) + 
+                        ' (' + 
+                        sm_low.toFixed(2)+  
+                        ', ' + 
+                        sm_upp.toFixed(2) + 
+                        ') </b>';
+                }
+            }
+
+            // now, put the information into list
+            // put this bubble to a specified group
+            // first, whether this effect + certainty exists?
+            var trace_group_id = this._get_trace_group_id(d.effect, d.cie);
+
+            if (trace_dict.hasOwnProperty(trace_group_id)) {
+                // OK, the effect array exists
+                // nowthing to do here
+
+            } else {
+                trace_dict[trace_group_id] = {
+                    _trace_group_id: trace_group_id,
+                    name: this.cfg.effect2txt[d.effect] + ' (' + this.cfg.cie2txt[d.cie] + ')',
+                    x: [],
+                    y: [],
+                    mode: 'markers',
+                    text: [],
+                    hovertemplate: '%{text}',
+                    // legendgroup: this.cfg.effect2txt[d.e],
+                    marker: {
+                        size: [],
+                        color: [],
+                        opacity: []
+                    },
+                    hoverlabel: {
+                        font: {
+                            size: 13
+                        },
+                        align: 'left'
+                    }
+                }
+            }
+            // append to list
+            trace_dict[trace_group_id].x.push(oc_full_name);
+            trace_dict[trace_group_id].y.push(jarvis.to_fullname(comparator));
+            trace_dict[trace_group_id].text.push(text);
+            trace_dict[trace_group_id].marker.size.push(size);
+            trace_dict[trace_group_id].marker.color.push(color);
+            trace_dict[trace_group_id].marker.opacity.push(opacity);
+        }
+
+        // update the plot data.
+        // put all traces into plot data
+        this.plot_data = [];
+        for (var e = 3; e > 0; e--) {
+            for (var c = 4; c > 0; c--) {
+                var trace_group_id = this._get_trace_group_id(e, c);
+                if (trace_dict.hasOwnProperty(trace_group_id)) {
+                    this.plot_data.push(
+                        trace_dict[trace_group_id]
+                    );
+                }
+            }
+        }
+        
+        // a patch trace for fix the x axis
+        this.plot_data.push({
+            name: '',
+            x: oc_list,
+            y: [],
+            showlegend: false,
+            visible: true
+        });
+
+        // a patch trace for fix the y axis
+        this.plot_data.push({
+            name: '',
+            x: [],
+            y: treat_list,
+            showlegend: false,
+            visible: true
+        });
+        
+        // set the layout
+        this.plot_layout = {
+            title: '',
+            hovermode: 'closest',
+            showlegend: true,
+            margin: {
+                l: this.cfg.margin_left,
+                r: this.cfg.margin_right,
+                t: this.cfg.margin_top
+            },
+            xaxis: {
+                title: this.cfg.xaxis_title,
+                type: 'category',
+                autorange: true,
+                // 2021-04-05: fix the margin
+                // https://plotly.com/javascript/reference/layout/xaxis/
+                automargin: true,
+                tickvals: oc_list,
+                categoryarray: oc_list,
+                tickangle: -45
+            },
+            yaxis: {
+                // title: this.cfg.yaxis_title,
+                type: 'category',
+                automargin: true,
+                title: {
+                    text: this.cfg.yaxis_title,
+                    standoff: 10
+                },
+                autorange: true,
+                tickvals: treat_list,
+                // categoryorder: 'category ascending',
+                categoryarray: treat_list
+            },
+            legend: {
+                y: 1.0,
+                // "orientation": "h",
+                itemsizing: 'trace',
+                itemclick: 'toggleothers',
+                title: {
+                    text: 'Treatment Effects',
+                    font: {
+                        size: 16
+                    }
+                }
+            },
+            height: this.cfg.height
+        };
+
+        this.plot_config = {
+            responsive: true,
+            displayModeBar: false,
+            scrollZoom: false,
+        }
+
+        Plotly.newPlot(
+            this.plot_id, 
+            this.plot_data, 
+            this.plot_layout,
+            this.plot_config
+        );
+    },
+
+    _get_trace_group_id: function(e, c) {
+        var trace_group_id = 'E' + e + 'C' + c;
+        return trace_group_id;
+    }
+};
+
+
+var jarvis = {
+
+    get_url_paramter: function(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    },
+
+    ssmsg: function(msg) {
+        $('#ss-msg').html(msg);
+    },
+
+    ssclose: function() {
+        $('#start-screen').hide();
+    },
+    
+    init: function() {
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+
+        console.log('* User is using IE:', isIE);
+        if (isIE) {
+            jarvis.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
+            return;
+        }
+
+        // get filename
+        var prj = jarvis.get_url_paramter('prj');
+        if (prj == null || prj == '') {
+            jarvis.ssmsg('Project information error.')
+            return;
+        }
+
+        // get the default treatment
+        var tr = jarvis.get_url_paramter('tr');
+        if (tr == null || tr == '') {
+            tr = null;
+        }
+        this.default_treatment = tr;
+
+        // get the cq_abbr for this project
+        var cq = jarvis.get_url_paramter('cq');
+        if (cq == null || cq == '') {
+            cq = 'default';
+        }
+
+        // get the analysis group, by default just show the primary
+        var gp = jarvis.get_url_paramter('gp');
+        var version = jarvis.get_url_paramter('version');
+        if (gp == '') {
+            gp = 'primary';
+        }
+
+        // where to get the data
+        var src = jarvis.get_url_paramter('src');
+        if (src == '') {
+            src = 'cache';
+        }
+
+        // get the figure height
+        var fh = jarvis.get_url_paramter('fh');
+        if (fh == '') {
+            fh = '600';
+        }
+
+        // set the sorting
+        var od = jarvis.get_url_paramter('od');
+        if (od == '') {
+            jarvis.oc_orders = [];
+        } else {
+            od = od.toLocaleLowerCase();
+            jarvis.oc_orders = od.split(';');
+        }
+
+        // set the sorting for treat
+        var trod = jarvis.get_url_paramter('trod');
+        if (trod == '') {
+            jarvis.treat_orders = [];
+        } else {
+            od = od.toLocaleLowerCase();
+            jarvis.treat_orders = trod.split(';');
+        }
+
+        // set the height
+        $('#fg_evmap').css('height', fh+'px');
+        // set the plotly figure
+        fg_evmap.cfg.height = parseInt(fh);
+
+        jarvis.ssmsg('Loading data ...');
+        
+        // send request to get data for initializing app
+        var url = "[[ url_for('pub.graphdata', keystr='__KEYSTR__', fn='EVMAP.json') ]]";
+        // update with url with the project keystr
+        url = url.replace('__KEYSTR__', prj);
+
+        $.get(
+            url,
+            // "/pub/graphdata/" + prj + "/EVMAP.json",
+            {
+                src: src,
+                cq: cq,
+                gp: gp,
+                ver: Math.random(), 
+                version: version
+            },
+            function(data) {
+                // if (data.success) {
+                    app_evmap.init(
+                        data,
+                        jarvis.default_treatment
+                    );
+                    jarvis.ssmsg('Data loaded!');
+                    setTimeout('jarvis.ssclose();', 300);
+                // } else {
+                //     jarvis.ssmsg('Data file is not ready, try later.');
+                // }
+            }, 'json'
+        );
+    }
+};
+
+// include the jarvis extensions
+{% include 'js/jarvis_ext_compare_oc_names.js' %}
+
+// include the jarvis extension for full name
+{% include 'js/jarvis_ext_fullnames.js' %}
+
+$(document).ready(function() {
+    jarvis.init();
+});
+
+</script>
+</body>
+</html>

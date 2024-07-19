@@ -1,0 +1,156 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Study Importer
+{% endblock %}
+
+{% block style %}
+<style>
+.result-item {
+    padding: 1px 0;
+}
+</style>
+{% endblock %}
+
+{% block page_name %}
+<i class="nav-icon fas fa-file-upload"></i> 
+Study Importer by PMID
+{% endblock %}
+
+{% block active_nav_link %}importer-pmid{% endblock %}
+
+{% block content %}
+
+<div class="content">
+    <div class="container-fluid">
+
+        <div id="vw_uploader_userinput" class="row">
+            <div class="col-md-5">
+                <h5>Import Study</h5>
+                <p class="card-text">Input the main information manually.</p>
+
+                <form id="upload_userinput" method="post" enctype="multipart/form-data">
+                    
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="exampleFormControlInput1">PubMed ID</label>
+                            <input v-model="paper.pid" name="pid"
+                                class="form-control" id="exampleFormControlInput1" placeholder="PubMed ID">
+                            <small id="passwordHelpBlock1" class="form-text text-muted">
+                                Please provide a PMID.
+                            </small>
+                        </div>
+
+                        <div class="form-group col-md-6">
+                            <label for="exampleFormControlInpute">NCT Number</label>
+                            <input v-model="paper.nct" name="nct"
+                                class="form-control" id="exampleFormControlInpute" placeholder="NCT12345678">
+                            <small id="passwordHelpBlock2" class="form-text text-muted">
+                                If there is no clinical trial number yet, just leave empty.
+                            </small>
+                        </div>
+                        
+                    </div>
+
+                </form>
+                <div>                    
+                    <button class="btn btn-primary"
+                        v-bind:disabled="btn_import.disabled"
+                        v-on:click="import_study">
+                        <i class="fa fa-upload"></i>
+                        Import this study to the current project
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block script %}
+<script>
+
+{% include 'js/srv_importer.js' %}
+
+
+var vw_uploader_userinput = {
+    vpp: null,
+    vpp_id: '#vw_uploader_userinput',
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                result: null,
+                paper: {
+                    pid: '',
+                    nct: '',
+                },
+                btn_import: {
+                    disabled: false
+                }
+            },
+            methods: {
+                import_study: function() {
+                    vw_uploader_userinput.import_study();
+                }
+            }
+        });
+    },
+
+    import_study: function() {
+        var project_id = Cookies.get('project_id');
+        if (project_id == undefined) {
+            alert('Set working project first.');
+            return;
+        }
+        // update UI
+        this.vpp.btn_import.disabled = true;
+
+        // remove blanks
+        var pid = this.vpp.$data.paper.pid.trim();
+        var nct = this.vpp.$data.paper.nct.trim();
+
+        // create form for upload
+        srv_importer.import_one_pmid(
+            pid,
+            nct,
+            function(data) {
+                vw_uploader_userinput.show_result(data);
+            }
+        );
+    },
+
+    show_result: function(data) {
+        console.log(data);
+        this.vpp.result = data;
+
+        this.vpp.btn_import.disabled = false;
+
+        if (data.success) {
+            toast('Imported the study ['+data.paper.pid+'] successfully!');
+        } else {
+            if (data.is_existed) {
+                toast('The PMID ['+data.paper.pid+'] already exists!', 'error');
+            } else {
+                toast('System Error!')
+            }
+        }
+    }
+};
+
+var jarvis = {
+    init: function() {
+        vw_uploader_userinput.init();
+    }
+};
+
+$(document).ready(function() {
+    jarvis.init();
+})
+</script>
+{% endblock %}

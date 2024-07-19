@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+
+<title>PARP_mCRPC | Living Interactive Systematic Reviews</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
+<link rel="icon" href="/static/img/favicon.ico">
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+{% include 'pub/_shared/_pubstyle.html' %}
+</head>
+<body>
+<br id="sec-concept">
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark" style="height: 70px;">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <a class="navbar-brand" href="#">
+        <img src="/static/img/logo-lisr.png" alt="" width="180px">
+    </a>
+
+    <div class="navbar" style="padding:0;">
+        <ul class="navbar-nav">
+            <li class="nav-item" style="color: white;">
+                PARP_mCRPC <br> 
+                <i class="far fa-calendar-alt"></i> 
+                Update: 
+                <span id="latest_update_time">&nbsp;</span>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault" style="justify-content: flex-end;">
+        <ul class="navbar-nav">
+            <li class="nav-item active">
+                <a class="nav-link" href="./">HOME <span class="sr-only">(current)</span></a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="/pub/methods.html">METHODS</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#sec-intro">INTRODUCTION</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#sec-studysel">PRISMA</a>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="dropdown02" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">SUMMARY TABLES</a>
+                <div class="dropdown-menu" aria-labelledby="dropdown02">
+                    <a class="dropdown-item" href="#sec-intertable">
+                        Interactive Table
+                    </a>
+                    <!-- <a class="dropdown-item" href="#sec-spst">
+                        Summary by prognostic subgroups
+                    </a> -->
+                </div>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#sec-pwma-oucome"> MA</a>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="dropdown_pma" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">PAIRWISE MA</a>
+                <div class="dropdown-menu" aria-labelledby="dropdown_pma">
+                    <a class="dropdown-item" href="#sec-pwma-Prim">Primary Analysis</a>
+                    <a class="dropdown-item" href="#sec-pwma-Sens">Sensitivity Analysis</a>
+                    <a class="dropdown-item" href="#sec-pwma-Subg">Subgroup Analysis</a>
+                    <a class="dropdown-item" href="#sec-pwma-Incid">Incidence Analysis</a>
+                </div>
+            </li>
+
+            <!-- <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="dropdown_nma" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">NETWORK MA</a>
+                <div class="dropdown-menu" aria-labelledby="dropdown_nma">
+                    <a class="dropdown-item" href="#sec-nma-Prim">Primary Analysis</a>
+                    <a class="dropdown-item" href="#sec-nma-Seco">Secondary Analyses</a>
+                </div>
+            </li> -->
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="dropdown_sof" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">SOF TABLE</a>
+                <div class="dropdown-menu" aria-labelledby="dropdown_sof">
+                    <a class="dropdown-item" href="#sec-sof-pwma">Summary of Findings: Pairwise MA</a>
+                    
+                </div>
+            </li>
+
+           
+            <li class="nav-item">
+                <a class="nav-link" href="#sec-pubs">PUBLICATIONS</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+
+<div id="sec-intro" style="position: absolute; top: 0;"></div>
+<div class="container" style="margin-top: 1rem;">
+        <h3 style="margin-bottom: 2rem;font-size: 2rem;color: black;text-decoration: none;">
+            A Living Interactive Systematic Review and Meta-Analysis assessing Efficacy of PARP inhibitors in Metastatic Castration Resistant Prostate Cancer
+        </h3>
+
+        <div class="row">
+
+            <div class="col">
+                <img width="100%" src="[[ url_for('pub.graphdata', keystr=keystr, fn='Living_PARP_diagram.svg', cq=cq_abbr) ]]" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <p class="mt-3">
+                    The therapeutic landscape of metastatic castration resistant prostate cancer (mCRPC) is rapidly changing. DDR deficiencies can confer dependence on the DNA repair enzyme PARP, rendering tumors exquisitely sensitive to PARP inhibition in individuals with homologous recombination repair (HRR) deficiency. This biological rationale has already led to FDA approvals for the PARP inhibitors (PARPi) olaparib and rucaparib in molecularly defined mCRPC patient subsets. While olaparib gained broad approval encompassing BRCA1/2, ATM, and 12 other DDR genes, rucaparib’s indication remains restricted to BRCA1/2 mutant mCRPC.  Recently, three phase III clinical trials (PROpel, TALAPRO-2, MAGNITUDE have investigated PARPi and androgen pathway inhibitor (API) combinations for first line (treatment-naïve) mCRPC patients. Both PROpel and TALAPRO-2 demonstrated improved progression-free survival (PFS) in overall patient population with greater magnitude of benefit observed in HRR-deficient subgroup of patients. Conversely, the PFS benefit in the MAGNITUDE trial was only limited to HRR-positive (HRR-deficient) patients and was not observed in HRR-negative (HRR-proficient) population. This provides a compelling rationale to examine evidence in totality and conduct a comprehensive review of available data. We have initiated a living and interactive systematic review in this space to provide most contemporary evidence as soon as new information becomes available
+                </p>
+                </div>
+
+        </div>
+    </div>
+
+
+    <br id="sec-studysel">
+    <div class="contar" style="margin: auto; width: 1400px;">
+        <h3 style="margin-bottom: 2rem;">
+            INTERACTIVE, MODIFIED PRISMA
+        </h3>
+        <div class="row">
+            <div class="col">
+                <p>
+                    The search strategy has been developed in consultation with an information specialist. The strategy is used to generate “auto” searches every month (from Medline, Embase and Cochrane Central Register of Controlled Trials [CENTRAL]). The numbers in the flowsheet are dynamically updated as new studies are considered for inclusion. Users can click the colored boxes for additional details.
+                </p>
+    
+                <p>How to use this flowsheet? <a href="javascript:void(0);" data-toggle="modal" data-target="#exampleModalCenter">Video demonstration</a></p>
+            </div>
+        </div>
+        <div class="row">
+            <iframe id="ifm_prisma"
+                src="[[ url_for('pub.prisma_living', prj=keystr, cq=cq_abbr, src='cache', version=version) ]]" frameborder="0" 
+                style="width: 100%; min-height: 900px;">
+            </iframe>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 995px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">How to use this flowsheet?</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <iframe width="960" height="550" frameborder="0" allowtransparency="true" allowfullscreen="allowfullscreen" style="border: none;" src="https://share.getcloudapp.com/lluDolxp?embed=true"></iframe>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<div class="contai" style="margin-top: 3rem; margin-bottom: 0; width: 1650px; margin: auto;">
+
+    <h3 style="margin-bottom: 2rem;">
+        SUMMARY TABLES
+    </h4>
+
+    
+    <br id="sec-intertable">
+    <h4 style="margin-top: 3rem; margin-bottom: 2rem;">
+        INTERACTIVE TABLE
+    </h4>
+    <p>The interactive table summarizes study characteristics, population characteristics and results from the clinical trials included in this systematic review and meta-analysis. This table is dynamically updated as new studies are included in the living review. Users can select filter options to view only studies with certain characteristics or interactively construct the results table from the available menu.</p>
+
+    <p>How to use this table? <a href="javascript:void(0);" data-toggle="modal" data-target="#exampleModalCenter2">Video demonstration</a></p>
+
+</div>
+
+<div style="width: 1650px; margin: 0 auto; margin-bottom: 3rem;">
+    <div class="row">
+        <iframe id="ifm_itable" 
+            src="https://living-evidence.com/flowchart/?panel=itable&cq=parp_mcrpc" 
+            frameborder="0" 
+            style="width: 100%; min-height: 820px;">
+        </iframe>
+    </div>
+</div>
+
+<div class="modal fade" id="exampleModalCenter2" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 995px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">How to use this table?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                https://share.getcloudapp.com/p9u7Zmy7
+                <iframe width="960" height="550" frameborder="0" allowtransparency="true" allowfullscreen="allowfullscreen" style="border: none;" src="https://share.getcloudapp.com/p9u7Zmy7?embed=true"></iframe>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<br id="sec-intertable">
+
+
+<br id="sec-pwma-oucome">
+<!-- to reduce the spacing between this section and next, adding -3.5rem bottom -->
+<div class="container" style="margin-bottom: -3.5rem;">
+    <h3>
+        PAIRWISE META-ANALYSIS
+    </h3>
+    <p>
+        Results are summarized as forest plots for primary analysis, sensitivity analysis and subgroup pairwise meta-analysis. Users can choose to view results for their outcome of interest using the dropdown menu (“Select outcome”).  Pairwise analysis is limited to trials evaluating PARPi+API as compared to API alone. Primary analysis includes overall patient population
+    </p>
+    <p>
+        <iframe id="ifm_pwma_prim"
+                src="[[ url_for('pub.graph_pma', version=version,src='db', prj=keystr, cq=cq_abbr, group='primary', od=';'.join(sorted_texts['PWMA'][:3])) ]]"
+                frameborder="0"
+                style="width: 100%; min-height: 300px;">
+        </iframe>
+        
+    </p>
+
+
+
+    <br id="sec-pwma-Sens">
+    <h4 class="mb-2" style="margin-top: 3rem;">
+        Sensitivity Analysis
+    </h4>
+
+    <div class="row">
+        <div class="col">
+            <iframe id="ifm_pwma_sens"
+                src="[[ url_for('pub.graph_pma', version=version,src='cache', prj=keystr, cq=cq_abbr, gp='sensitivity', od=';'.join(sorted_texts['PWMA'])) ]]" 
+                frameborder="0" 
+                style="width: 100%; min-height: 420px;">
+            </iframe>
+        </div>
+    </div>
+
+    <br id="sec-pwma-Subg">
+    <h4 class="mb-2" style="margin-top: 3rem;">
+        Subgroup Analysis
+    </h4>
+
+    <div class="row">
+        <div class="col">
+            <iframe id="ifm_pwma_subg"
+                src="[[ url_for('pub.graph_pma', version=version, src='cache', prj=keystr, cq=cq_abbr, gp='subgroup') ]]" 
+                frameborder="0" 
+                style="width: 100%; min-height: 500px;">
+            </iframe>
+        </div>
+    </div>
+</div>
+
+<br id="sec-pwma-Incid">
+<div class="container" style="margin-bottom: -3.5rem;">
+    <h3>
+        INCIDENCE META-ANALYSIS
+    </h3>
+    <p>
+        Incidence based analysis was conducted using single arms of included trials assessing PARPi monotherapy. Users can choose to view results for their outcome of interest using the dropdown menu ("Select outcome").
+    </p>
+    <p>
+        <iframe id="ifm_pwma_prim"
+                src="[[ url_for('pub.graph_incidences', version=version,src='cache', prj=keystr, cq=cq_abbr, group='incidence',) ]]"
+                frameborder="0"
+                style="width: 100%; min-height: 800px;">
+        </iframe>
+        
+    </p>
+</div>
+
+
+<!-- <br id="sec-nma-oucome"> -->
+<!-- to reduce the spacing between this section and next, adding -3.5rem bottom -->
+<!-- <div class="container" style="margin-bottom: -3.5rem;">
+    <h3>
+        NETWORK META-ANALYSIS
+    </h3> -->
+    <!-- <p>
+        Results are summarized as forest plots for primary analysis and sensitivity network meta-analysis. Users can choose to view results for their outcome of interest using the dropdown menu ("Select outcome").
+    </p> -->
+    <!-- <p>
+        Working in progress
+    </p>
+</div> -->
+
+
+<!-- 
+<br id="sec-nma-Prim">
+<div class="container" style="margin-top: 3rem;">
+    <h4>
+        Primary Analysis
+    </h4>
+</div>
+
+<div class="container mt-2"
+    style="max-width: 1200px;">
+    <div class="row">
+    </div>
+</div>
+
+
+
+
+<br id="sec-nma-Seco">
+<div class="container" style="margin-top: 3rem;">
+    <h4>
+        Secondary Analyses
+    </h4>
+</div>
+
+<div class="container mt-2"
+    style="max-width: 1200px;">
+    <div class="row">
+
+    </div>
+</div> -->
+
+
+
+
+<br id="sec-sof-pwma">
+<div class="container">
+
+    <h3>
+        SUMMARY OF FINDINGS: PAIRWISE META-ANALYSIS
+    </h3>
+    <p>
+        The Summary of Findings (SoF) table is designed to summarize the key results of pairwise meta-analysis and to evaluate confidence in the estimates of effect. This table summarizes results for patient-important outcomes for all treatment options investigated in included trials as compared to control, in mCSPC. Users can select their outcome of interest from the left-hand panel by clicking on it and enter any baseline risk for that outcome, to visualize the absolute risk differences due to treatment.
+    </p>
+    <p>
+        <b>Choose measure of effect and denominator for absolute effect.</b>
+    </p>
+    <div class="row">
+        <div class="col" style="overflow: auto;">
+            <iframe id="ifm_sofpma" 
+            src="[[ url_for('pub.softable_pma', version=version,src='db', prj=keystr, cq=cq_abbr, msrs='OR,RR,HR', od=';'.join(sorted_texts['PWMA'])) ]]" 
+            frameborder="0" 
+            resize_by_content
+            style="width: 100%; min-height: 450px; height: 950px;">
+        </iframe>
+        </div>
+    </div>
+
+</div>
+<!-- /#sec-sof-pwma -->
+
+
+
+
+<!-- <div style="width: 1200px; margin: 0 auto;">
+    <div class="row">
+        <div class="col">
+
+        </div>
+    </div>
+</div> -->
+<!-- /#sec-sof-nma -->
+
+
+
+<!-- /#sec-evmap -->
+
+
+<br id="sec-pubs">
+<div class="container" style="margin-top: 3rem; margin-bottom:2rem;">
+    <h3 style="margin-bottom: 2rem;">
+        PUBLICATIONS
+    </h3>
+    <div class="row">
+        <div class="col">
+
+            <h4>Abstracts presentations</h4>
+
+            <p>
+                <b><i>First-line PARP inhibitors (PARPi) with androgen receptor pathway inhibitors (ARPi) in metastatic castration-resistant prostate cancer (mCRPC): A systematic review and meta-analysis</i></b> 
+                2024 ASCO Genitourinary Cancers Symposium | January 29, 2024 | 173-173<br>
+                Muhammad Ali Khan, Syed Arsalan Ahmed Naqvi, Manal Imran, Aneeta Channar, Akshat Saxena, Ammad Raina, Kaneez Zahra Rubab Khakwani, Zaryab Bin Riaz, Adam McLain Kase, Mitchell R. Humphreys, Cassandra N. Moore, Jacob Orme, Daniel S Childs, Parminder Singh, Alan Haruo Bryce, Jeanne M. Palmer, Irbaz Bin Riaz <br>
+                DOI: <a href="https://ascopubs.org/doi/10.1200/JCO.2024.42.4_suppl.173">110.1200/JCO.2024.42.4_suppl.173</a>
+            </p>
+
+            <p>
+                <b><i>Efficacy of first line (1L) poly ADP-ribose polymerase inhibitors (PARPi) in combination with androgen pathway inhibitors (API) by homologous recombination repair (HRR) genes in metastatic castration-resistant prostate cancer (mCRPC): A living meta-analysis</i></b> 
+                2024 ASCO Annual Meeting | May 29, 2024 | e17059-e17059<br>
+                Arifa Bibi, Syed Arsalan Ahmed Naqvi, Muhammad Ali Khan, Ammad Raina, Kaneez Zahra Rubab Khakwani, Jacob Orme, Daniel S Childs, Adam McLain Kase, Sylvan C. Baca, Oliver Sartor, Parminder Singh, Alan Haruo Bryce, Irbaz Bin Riaz <br>
+                DOI: <a href="https://ascopubs.org/doi/10.1200/JCO.2024.42.16_suppl.e17059">10.1200/JCO.2024.42.16_suppl.e17059</a>
+            </p>
+
+        </div>
+    </div>
+</div>
+
+
+</div>
+
+<hr class="featurette-divider">
+
+<!-- FOOTER -->
+<footer class="container">
+    <p class="float-right"><a href="#">Back to top</a></p>
+    <p>&copy; 2022 &middot; <a href="#">Terms</a></p>
+</footer>
+
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<!-- Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+
+<script>
+var prj = '[[ keystr ]]';
+var cq = '[[ cq_abbr ]]';
+
+
+{% include 'js/resize_frames.js' %}
+
+var jarvis = {
+    init: function() {
+
+        $.get(
+            "[[ url_for('pub.graphdata_latest_json', prj=keystr) ]]",
+            {},
+            function(data) {
+                console.log(data);
+                // update the time
+                $('#latest_update_time').html(data.last_created);
+            }, 'json'
+        );
+    }
+}
+
+$(document).ready(function() {
+    jarvis.init();
+});
+</script>
+</body>
+</html>

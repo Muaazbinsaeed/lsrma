@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+
+<title>Metastatic Renal Cell Cancer | Living Interactive Systematic Reviews</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
+<link rel="icon" href="/static/img/favicon.ico">
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
+
+{% include 'pub/_shared/_pubstyle.html' %}
+</head>
+<body>
+<br id="sec-concept">
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark" style="height: 70px;">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <a class="navbar-brand" href="#">
+        <img src="/static/img/logo-lisr.png" alt="" width="180px">
+    </a>
+
+    <div class="navbar" style="padding:0;">
+        <ul class="navbar-nav">
+            <li class="nav-item" style="color: white;">                
+                Metastatic Renal Cell Cancer<br>
+                <i class="far fa-calendar-alt"></i> 
+                Update: 
+                <span id="latest_update_time">&nbsp;</span>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault" style="justify-content: flex-end;">
+        <ul class="navbar-nav">
+            <li class="nav-item active">
+                <a class="nav-link" href="./">HOME <span class="sr-only">(current)</span></a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#sec-intro">INTRODUCTION</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#sec-studysel">PRISMA</a>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="dropdown02" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">TABLES</a>
+                <div class="dropdown-menu" aria-labelledby="dropdown02">
+                <a class="dropdown-item" href="#sec-intertable">INTERACTIVE TABLE</a>
+                </div>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#sec-pwma-oucome">PAIRWISE MA</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#sec-nma-oucome">NETWORK MA</a>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="dropdown02" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">SOF TABLE</a>
+                <div class="dropdown-menu" aria-labelledby="dropdown02">
+                    <a class="dropdown-item" href="#sec-sof-pma">Summary of Findings: Pairwise MA</a>
+                    <a class="dropdown-item" href="#sec-sof-nma">Summary of Findings: Network MA</a>
+                </div>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#sec-evmap">EVIDENCE MAP</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#sec-limitations">LIMITATIONS</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#sec-pubs">PUBLICATIONS</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+
+<div id="sec-intro" style="position: absolute; top: 0;"></div>
+<div class="container" style="margin-top: 1rem;">
+        <h3 style="margin-bottom: 2rem;font-size: 2rem;color: black;text-decoration: none;">
+            First-line Treatment of Metastatic Renal Cell Carcinoma: A Living, Interactive Systematic Review and Network Meta-Analysis
+        </h3>
+
+        <div class="row">
+
+            <div class="col">
+                <img width="100%" src="[[ url_for('pub.graphdata', keystr=keystr, cq=cq_abbr, fn='CONCEPT_IMAGE.svg') ]]" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <p class="mt-3">
+                    The landscape of first-line treatment options for metastatic renal cell cancer (mRCC) is rapidly changing. Recently, six large randomized controlled trials studying different combinations of immune checkpoint inhibitors (ICI) and anti-angiogenesis therapy have been reported and several others are under way. JAVELIN Renal 101 and IMmotion151 showed that avelumab plus axitinib and atezolizumab plus bevacizumab, respectively, improved progression-free survival (PFS), whereas Checkmate 214, KEYNOTE-426, CheckMate 9ER, and CLEAR showed that Ipilimumab plus nivolumab, pembrolizumab plus axitinib, nivolumab plus cabozantinib, and lenvatinib plus pembrolizumab, respectively improved both PFS and overall survival (OS) when compared to sunitinib. The long-term data from most of these trials is awaited and several ongoing trials such as COSMIC 313, and A031704 PDIGREE are well underway. Treatment options, estimates of benefits and harms, and certainty in evidence are therefore rapidly evolving. Confronted with this evidence, it is a challenging task to choose amongst several frontline options in patients with previously untreated mRCC, especially since direct comparisons between different combinations of ICI and anti-angiogenesis therapy have not been assessed in head-to-head trials. Therefore, we conducted a network meta-analysis (NMA), which allows for comparing all treatments with each other, even if randomized controlled trials are not available for some treatment comparisons and we keep it living and interactive to provide most contemporary evidence as soon as new information becomes available.
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+
+
+<br id="sec-studysel">
+<div class="container" style="margin-top: 3rem; margin-bottom:2rem;">
+    <h3 style="margin-bottom: 2rem;">
+        INTERACTIVE, MODIFIED PRISMA
+    </h3>
+    <div class="row">
+        <div class="col">
+            <p>
+                The search strategy has been developed in consultation with an information specialist. The strategy is used to generate “auto” searches every month (from Medline, Embase and Cochrane Central Register of Controlled Trials [CENTRAL]). The numbers in the flowsheet are dynamically updated as new studies are considered for inclusion. The red limb on the right-hand side of the flowsheet represents real-time living updates. Users can click the colored boxes for additional details.
+            </p>
+
+            <p>How to use this flowsheet? <a href="javascript:;" data-toggle="modal" data-target="#exampleModalCenter">Video demonstration</a></p>
+        </div>
+    </div>
+    <div class="row">
+        <iframe id="ifm_prisma"
+            src="[[ url_for('pub.prisma', prj=keystr, cq=cq_abbr) ]]" 
+            frameborder="0" 
+            style="width: 100%; min-height: 850px;">
+        </iframe>
+    </div>
+</div>
+
+
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 995px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">How to use this flowsheet?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <iframe width="960" height="550" frameborder="0" allowtransparency="true" allowfullscreen="allowfullscreen" style="border: none;" src="https://share.getcloudapp.com/lluDolxp?embed=true"></iframe>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<br id="sec-intertable rccccccc">
+<div class="contai" style="margin-top: 3rem; margin-bottom: 3rem;margin-left: 5rem;margin-right: 2rem;">
+
+    <h3 style="margin-bottom: 2rem;">
+        INTERACTIVE TABLE
+    </h3>
+    <p>
+        The interactive table summarizes study characteristics, population characteristics and results from the clinical trials included in this systematic review and meta-analysis. This table is dynamically updated as new studies are included in the living review. Users can select filter options to view only studies with certain characteristics or interactively construct the results table from the available menu.
+    </p>
+
+    <p>How to use this table? <a href="javascript:;" data-toggle="modal" data-target="#exampleModalCenter2">Video demonstration</a></p>
+
+    <div class="row">
+        <iframe id="ifm_itable"
+            src="[[ url_for('pub.itable', prj=keystr, cq=cq_abbr, src='db') ]]" 
+            frameborder="0" 
+            style="width: 100%; min-height: 880px;">
+        </iframe>
+    </div>
+</div>
+
+
+<div class="modal fade" id="exampleModalCenter2" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 995px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">How to use this table?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- https://share.getcloudapp.com/p9u7Zmy7 -->
+                <iframe width="960" height="550" frameborder="0" allowtransparency="true" allowfullscreen="allowfullscreen" style="border: none;" src="https://share.getcloudapp.com/p9u7Zmy7?embed=true"></iframe>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="exampleModalCenter3" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter3Title"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 995px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">How to use this figure?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <iframe width="960" height="550" frameborder="0" allowtransparency="true" allowfullscreen="allowfullscreen" style="border: none;" src="https://share.getcloudapp.com/KouqEo4G?embed=true"></iframe>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<br id="sec-pwma-oucome">
+<!-- to reduce the spacing between this section and next, adding -3.5rem bottom -->
+<div class="container">
+    <h3>
+        PAIRWISE META-ANALYSIS
+    </h3>
+    <p>
+        Results are summarized as forest plots for primary analysis, sensitivity analysis and subgroup pairwise meta-analysis. Users can choose to view results for their outcome of interest using the dropdown menu (“Select outcome”).
+    </p>
+
+    <br id="sec-pwma-Prim">
+    <h4 style="margin-bottom: 2rem;">Primary Analysis</h4>
+
+    <div class="row">
+        <div class="col">
+            <iframe id="ifm_pwma_prim"
+                src="[[ url_for('pub.graph_pma', prj=keystr, cq=cq_abbr, gp='primary', src='cache', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+                frameborder="0" 
+                style="width: 100%; min-height: 350px;">
+            </iframe>
+        </div>
+    </div>
+
+
+    <br id="sec-pwma-Sens">
+    <h4 style="margin-bottom: 0;">Sensitivity Analysis</h4>
+
+    <div class="row">
+        <div class="col">
+            <iframe id="ifm_pwma_sens"
+                src="[[ url_for('pub.graph_pma', prj=keystr, cq=cq_abbr, gp='sensitivity', src='cache', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+                frameborder="0" 
+                style="width: 100%; min-height: 450px;">
+            </iframe>
+        </div>
+    </div>
+
+
+    <br id="sec-pwma-Subg">
+    <h4 style="margin-bottom: 0;"
+         class="mt-4">
+        Subgroup Analysis
+    </h4>
+    <div class="row">
+        <div class="col">
+            <iframe id="ifm_pwma_subg"
+                src="[[ url_for('pub.graph_pma', prj=keystr, cq=cq_abbr, gp='subgroup', foc='Age', src='cache', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+                frameborder="0" 
+                style="width: 100%; min-height: 450px;">
+            </iframe>
+        </div>
+    </div>
+
+</div>
+
+
+
+<br id="sec-nma-oucome">
+<!-- to reduce the spacing between this section and next, adding -3.5rem bottom -->
+<div class="container mt-3">
+    <h3>
+        NETWORK META-ANALYSIS
+    </h3>
+    <p>
+        Results are summarized as forest plots for primary analysis and sensitivity network meta-analysis. Users can choose to view results for their outcome of interest using the dropdown menu (“Select outcome”).
+    </p>
+    <p>
+        How to use this figure? 
+        <a href="javascript:;" data-toggle="modal" data-target="#exampleModalCenter3">Video demonstration</a>
+    </p>
+</div>
+
+
+<br id="sec-nma-Prim">
+<div class="container mt-0">
+    <h4>
+        Primary Analysis
+    </h4>
+</div>
+
+<div class="container mt-2"
+    style="max-width: 1300px;">
+    <div class="row">
+        <iframe id="ifm_nma_prim"
+            src="[[ url_for('pub.graph_nma', prj=keystr, cq=cq_abbr, gp='primary', tr='Suni', oc=project.settings['public_website'][cq_abbr]['graph_nma']['default_oc_abbr'], od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+            frameborder="0" 
+            style="width: 100%; min-height: 800px;"
+            resize_by_content>
+        </iframe>
+    </div>
+</div>
+
+
+
+<br id="sec-nma-Sens">
+<div class="container mt-1">
+    <h4>
+        Sensitivity Analysis
+    </h4>
+</div>
+
+<div class="container mt-2"
+    style="max-width: 1300px;">
+    <div class="row">
+        <iframe id="ifm_nma_sens"
+            src="[[ url_for('pub.graph_nma', prj=keystr, cq=cq_abbr, gp='sensitivity', tr='Suni', oc=project.settings['public_website'][cq_abbr]['graph_nma']['default_oc_abbr_for_sensitivity'], od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+            frameborder="0" 
+            style="width: 100%; min-height: 800px;"
+            resize_by_content>
+        </iframe>
+    </div>
+</div>
+
+
+
+<br id="sec-sof-pma">
+<div class="container">
+
+    <h3>
+        SUMMARY OF FINDINGS: PAIRWISE META-ANALYSIS
+    </h3>
+    <p>
+        The Summary of Findings (SoF) table is designed to summarize the key results of pairwise meta-analysis and to evaluate confidence in the estimates of effect. This table summarizes results for patient-important outcomes for all treatment options investigated in included trials as compared to control, in untreated mRCC. Users can select their outcome of interest from the left-hand panel by clicking on it and enter any baseline risk for that outcome, to visualize the absolute risk differences due to treatment.
+    </p>
+    <p>
+        <b>Choose measure of effect and denominator for absolute effect.</b>
+    </p>
+    
+    <div class="row">
+        <div class="col">
+            <iframe id="ifm_sofpma" 
+                src="[[ url_for('pub.softable_pma', prj=keystr, cq=cq_abbr, msrs='OR,RR,HR', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+                frameborder="0" 
+                resize_by_content
+                style="width: 100%; min-height: 450px;">
+            </iframe>
+        </div>
+    </div>
+
+</div>
+
+
+
+<br id="sec-sof-nma">
+<div class="container">
+
+    <h3>
+        SUMMARY OF FINDINGS: NETWORK META-ANALYSIS
+    </h3>
+    <p>
+        The Summary of Findings (SoF) table is designed to display multiple comparisons in an interactive manner. All possible combinations in network meta-analysis can be compared using this framework. Users can interactively select or deselect SoF for a given clinical outcome by clicking the outcome of interest from the left-hand panel. Users can also enter any baseline risk for an outcome, to visualize the absolute risk differences due to treatment. Clicking on any of the colored boxes displays details of that effect estimate as well as its associated certainty of evidence assessment.
+    </p>
+    <p>
+        <b>Choose reference treatment, measure of effect, and denominator for absolute effect</b>
+    </p>
+    <div class="row">
+        <div class="col">
+            <iframe id="ifm_sofnma" 
+                src="[[ url_for('pub.softable_nma', prj=keystr, cq=cq_abbr, dc='Suni', cp='yes', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+                frameborder="0" 
+                resize_by_content
+                style="width: 100%; min-height: 450px;">
+            </iframe>
+        </div>
+    </div>
+</div>
+
+
+<br id="sec-evmap">
+<div class="container">
+    <h3>
+        EVIDENCE MAP
+    </h3>
+    <p>
+        The evidence map visually summarizes the evidence for available treatment comparisons and identifies evidence gaps that warrant future research.  User can select a treatment option of interest from the dropdown to visualize whether it is comparable, beneficial or harmful (color), certainty of evidence (size of the circle) as compared to other treatment options in the network. Empty slots (no circles) denote the complete lack of evidence (either direct or indirect). 
+    </p>
+
+    <div class="row">
+        <div class="col">
+            <iframe id="ifm_evmap" 
+                src="[[ url_for('pub.evmap', prj=keystr, cq=cq_abbr, tr='LenPem', fh='800') ]]" 
+                frameborder="0" 
+                style="width: 100%; min-height: 900px;">
+            </iframe>
+        </div>
+    </div>
+
+</div>
+<!-- /#sec-evmap -->
+
+
+
+<br id="sec-limitations">
+<div class="container" style="margin-top: 3rem; margin-bottom:2rem;">
+    <h3 style="margin-bottom: 2rem;">
+        LIMITATIONS &amp; CONSIDERATIONS
+    </h3>
+    <div class="row">
+        <div class="col">
+            <p>1. Included trials are limited to patients with clear cell histology and results are not applicable to non-clear cell histological subtypes.</p>
+            <p>2. Treatment rankings should be interpreted cautiously based on their congruence with pairwise (direct) estimates.</p>
+            <p>3. The small number of trials led to scarce direct evidence with sparse and open network that precludes the formal assessment of consistency and leads to imprecision.</p>
+            <p>4. There is lack of consistent reporting in trials for results by subgroups leading to decreased credibility of subgroup analyses.</p>
+            <p>5. There is lack of reporting in trials for immune related adverse events which may be different than treatment related adverse events, hence results about safety of ICI cannot be generalized and careful considerations must be taken before interpreting conclusions.</p>
+            <p>6. Certain patient important endpoints such as durability of response or durability of complete response can not be addressed yet due to different follow-up durations of the included trials.</p>
+        </div>
+    </div>
+</div>
+<!-- /#sec-limitations -->
+
+
+
+<br id="sec-pubs">
+<div class="container" style="margin-top: 3rem; margin-bottom:2rem;">
+    <h3 style="margin-bottom: 2rem;">
+        PUBLICATIONS
+    </h3>
+    <div class="row">
+        <div class="col">
+            <p>There are no associated publications with this living NMA at this point.</p>
+        </div>
+    </div>
+</div>
+<!-- /#sec-pubs -->
+
+
+</div>
+
+<hr class="featurette-divider">
+
+<!-- FOOTER -->
+<footer class="container">
+    <p class="float-right"><a href="#">Back to top</a></p>
+    <p>&copy; 2020 - 2022 &middot; <a href="#">Terms</a></p>
+</footer>
+
+<!-- Estimated HR(OR) reflect outcomes for treatment in columns compared to treatment in rows 
+The HR for 1,2 , The OR for the last one!
+-->
+
+
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<!-- Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+<script>
+var prj = "[[ keystr ]]";
+var default_treat = 'Suni';
+
+{% include 'js/resize_frames.js' %}
+
+var jarvis = {
+    init: function() {
+        $.get(
+            "[[ url_for('pub.graphdata_latest_json', prj=keystr) ]]",
+            {},
+            function(data) {
+                console.log(data);
+                // update the time
+                $('#latest_update_time').html(data.last_created);
+            }, 'json'
+        );
+    }
+}
+
+$(document).ready(function() {
+    jarvis.init();
+});
+</script>
+</body>
+</html>

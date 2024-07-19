@@ -1,0 +1,289 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Study Importer
+{% endblock %}
+
+{% block style %}
+<style>
+.result-item {
+    padding: 1px 0;
+    margin: 0 2px 2px 0;;
+    width: 100px;
+    border: 1px solid #999999;
+    font-size: 0.9em;
+}
+
+.paper-result-waiting {
+    background-color: rgb(197, 197, 176);
+}
+.paper-result-created {
+    background-color: rgb(12, 194, 6);
+}
+.paper-result-existed {
+    background-color: rgb(194, 150, 6);
+}
+.paper-result-notfound {
+    background-color: rgb(194, 6, 178);
+}
+</style>
+{% endblock %}
+
+{% block page_name %}
+<i class="nav-icon fas fa-file-upload"></i> 
+Study Importer
+{% endblock %}
+
+{% block active_nav_link %}importer-pmid-list{% endblock %}
+
+{% block content %}
+
+<div class="content">
+    <div class="container-fluid">
+
+        <div id="vw_uploader_pmidlist" class="row">
+            <div class="col-md-4">
+
+                <h5>Upload a XLS/CSV file</h5>
+                <p class="card-text">This file contains two columns: 'NCT' and 'PMID'</p>
+                <form id="upload_file" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <input type="file" class="form-control-file" name="input_file" id="input_file">
+                    </div>
+                </form>
+                <div>                    
+                    <button class="btn btn-primary"
+                        v-bind:disabled="btn_upload.disabled"
+                        v-on:click="upload_data_file">
+                        <i class="fa fa-upload"></i>
+                        Load this data file
+                    </button>
+                </div>
+                
+                <hr>
+
+                <!-- <h5>Or import by PMID list</h5>
+                <p class="card-text">Input the PMID in the following area, one PMID per line.</p>
+                <div>
+                    <div class="form-group">
+                        <textarea class="form-control" id="input_pmids" 
+                            name="pmids" rows="10"
+                            v-model="pmids"></textarea>
+                    </div>
+                    
+                </div> -->
+
+            </div>
+
+            <div class="col-md-8">
+
+                <div>
+
+                    <div class="form-inline">
+
+                        <button class="btn btn-primary"
+                            v-bind:disabled="btn_import.disabled"
+                            v-on:click="import_pmids">
+                            <i class="fa fa-upload"></i>
+                            Import the following studies as: 
+                        </button>
+
+                        <label for="default_stage">&nbsp;</label>
+                        <select class="form-control" id="default_stage" name="default_stage">
+                            <option value="[[ ss.SS_STAGE_UNSCREENED ]]">Unscreened</option>
+                            <option value="[[ ss.SS_STATE_PASSED_TITLE_NOT_FULLTEXT ]]">Full-text Review</option>
+                            <option value="[[ ss.SS_STAGE_INCLUDED_SR ]]">Included in SR</option>
+                            <option value="[[ ss.SS_STAGE_INCLUDED_SRMA ]]">Included in SR and MA</option>
+                            <option value="[[ ss.SS_STAGE_EXCLUDED_BY_TITLE ]]">Excluded by Title</option>
+                            <option value="[[ ss.SS_STAGE_EXCLUDED_BY_ABSTRACT ]]">Excluded by Abstract</option>
+                            <option value="[[ ss.SS_STAGE_EXCLUDED_BY_FULLTEXT ]]">Excluded by Full Text</option>
+                        </select>
+                    </div>
+                    
+                </div>
+
+                <div v-if="rs.length != 0">
+                    <h5>Results ({{ rs.length }} records)</h5>
+                    <div class="d-flex flex-row flex-wrap">
+                        <div class="result-item"
+                            v-for="r, i in rs"
+                            :class="'paper-result-' + r.result">
+                            <div style="text-align: center;">
+                                {{ r.pmid }} <br>
+                                <span v-if="r.hasOwnProperty('paper') && r.paper != null">
+                                    {{ r.paper.seq_num }}.{{ r.paper.ss_rs }} <br>
+                                    <span v-for="cq, cq_abbr in r.paper.ss_ex.ss_cq">
+                                        {{ cq_abbr }}: {{ cq.d }}
+                                    </span>
+                                </span>
+                                <span v-else>
+                                    &nbsp; <br>
+                                    &nbsp;
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block script %}
+<script src="/static/lib/jquery/jquery.ajaxQueue.min.js"></script>
+<script>
+
+
+var vw_uploader_pmidlist = {
+    vpp: null,
+    vpp_id: '#vw_uploader_pmidlist',
+    
+    url: {
+        import_pmids: "[[ url_for('importer.import_pmids') ]]",
+        upload_pmid_data_file: "[[ url_for('importer.upload_pmid_data_file') ]]"
+    },
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                pmids: '',
+                rs: [],
+                btn_import: {
+                    disabled: false
+                },
+                btn_upload: {
+                    disabled: false
+                }
+            },
+            methods: {
+                import_pmids: function() {
+                    vw_uploader_pmidlist.import_pmids(this.pmids);
+                },
+
+                upload_data_file: function() {
+                    vw_uploader_pmidlist.upload_data_file();
+                }
+            }
+        });
+    },
+
+    import_pmids: function(pmids) {
+        var project_id = Cookies.get('project_id');
+        if (project_id == undefined) {
+            alert('Set working project first.');
+            return;
+        }
+        // this.vpp.btn_import.disabled = true;
+
+        var stage = $('#default_stage').val();
+        var rs = this.vpp.$data.rs;
+
+        var batch_size = 10;
+
+        var _rs = [];
+        for (let i = 0; i < rs.length; i++) {
+            var r = rs[i];
+            _rs.push(r);
+            if (_rs.length == batch_size || i == rs.length - 1) {
+                // send the request!
+                $.ajaxQueue({
+                    type: 'POST',
+                    url: this.url.import_pmids,
+                    data: {
+                        project_id: project_id,
+                        stage: stage,
+                        rs: JSON.stringify(_rs)
+                    },
+                    // contentType: false,
+                    // cache: false,
+                    // processData: false,
+                    success: function(data) {
+                        console.log(data);
+                        
+                        for (let j = 0; j < data.rs.length; j++) {
+                            const _r = data.rs[j];
+                            var idx = _r.idx;
+                            vw_uploader_pmidlist.vpp.$data.rs[idx].result = _r.result;
+                            vw_uploader_pmidlist.vpp.$data.rs[idx].paper = _r.paper;
+                        }
+
+                        vw_uploader_pmidlist.vpp.$forceUpdate();
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.error(textStatus, errorThrown);
+                    }
+
+                });
+                
+                // clear the _rs for next round
+                _rs = [];
+                // for test
+                // break;
+            }
+
+        }
+        // $.post(
+        //     this.url,
+        //     {project_id:project_id, rs:JSON.stringify(rs), stage:stage},
+        //     function(data) {
+        //         console.log(data);
+        //         vw_uploader_pmidlist.vpp.btn_import.disabled = false;
+        //         vw_uploader_pmidlist.vpp.results = data.rs;
+        //     }, 'json'
+        // )
+    },
+
+    upload_data_file: function() {
+        var project_id = Cookies.get('project_id');
+        if (project_id == undefined) {
+            alert('Set working project first.');
+            return;
+        }
+        // update UI
+        this.vpp.btn_upload.disabled = true;
+
+        // create form for upload
+        if ($('#input_csvfile').val() == '') {
+            return;
+        }
+        var form_data = new FormData($('#upload_file')[0]);
+        form_data.append('project_id', project_id);
+
+        // send request
+        $.ajax({
+            type: 'POST',
+            url: this.url.upload_pmid_data_file,
+            data: form_data,
+            contentType: false,
+            cache: false,
+            processData: false,
+            success: function(data) {
+                console.log(data);
+                vw_uploader_pmidlist.vpp.btn_upload.disabled = false;
+                vw_uploader_pmidlist.vpp.rs = data.rs;
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error(textStatus, errorThrown);
+            }
+        });
+    }
+}
+
+var jarvis = {
+    init: function() {
+        vw_uploader_pmidlist.init();
+    }
+};
+$(document).ready(function() {
+    jarvis.init();
+})
+</script>
+{% endblock %}

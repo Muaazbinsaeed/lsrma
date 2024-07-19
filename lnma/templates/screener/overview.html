@@ -1,0 +1,4045 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Screener Overview
+{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css">
+
+<style>
+#ui_category_stat {
+    width: 240px;
+}
+#loading_stage_box {
+    position: absolute;
+    left: 330px;
+    top: 0;
+    width: calc(100% - 340px);
+    height: 100%;
+    background-color: white;
+    z-index: 99;
+    padding: 1em 0 0 1em;
+}
+#tbjs_paperlist {
+    width: 100%;
+}
+#pan_iecriteria {
+    width: calc(80% - 300px);
+    height: 240px;
+    position: fixed;
+    top: 5px;
+    left: 400px;
+    right: 0;
+    border: 1px solid #999999;
+    background-color: white;
+    z-index: 9990;
+}
+iframe {
+    height: 100%;
+}
+.criteria-box {
+    padding: 10px;
+    height: 210px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin: 0;
+}
+#pan_pdfviewer {
+    position: fixed;
+    top: 10px;
+    min-width: 1000px;
+    min-height: 400px;
+    padding: 42px 5px 5px 5px;
+    background-color: rgba(249, 249, 250, 1);;
+    z-index: 9999;
+    border: 3px solid #efefef;
+}
+#pan_prisma {
+    position: fixed;
+    top: 10px;
+    left: 100px;
+    width: 1100px;
+    min-height: 450px;
+    padding: 42px 5px 5px 5px;
+    background-color: rgba(249, 249, 250, 1);;
+    z-index: 9999;
+    border: 3px solid #efefef;
+}
+#pan_datasync {
+    position: fixed;
+    top: 10px;
+    min-width: 1000px;
+    min-height: 400px;
+    padding: 42px 5px 5px 5px;
+    background-color: rgba(249, 249, 250, 1);;
+    z-index: 9999;
+    border: 3px solid #efefef;
+}
+.datasync-textarea {
+    width: 100%;
+}
+#pan_pdfviewer_btns {
+    width: 100%;
+}
+#ifr_pdfviewer {
+    width: 100%;
+    height: 400px;
+    min-height: 400px;
+}
+#export_dialog {
+    /* width: 500px; */
+}
+td.details-control {
+    cursor: pointer;
+}
+tr.shown td.details-control {
+    cursor: pointer;
+}
+.col-first {
+    font-size: .9em;
+}
+.first-col-text {
+    display: inline-block;
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.col-title {
+    cursor: pointer;
+}
+.col-seq {
+    text-indent: 0em;
+}
+.col-actions {
+    line-height: 1em;
+}
+.cq-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* for highlight */
+.keyword-exclusion {
+    color: rgb(250, 89, 89);
+    background: rgb(255, 205, 205);
+    /* padding: 2px 3px; */
+    /* border-radius: 3px; */
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+}
+.keyword-inclusion {
+    color: rgb(1, 56, 1);
+    background: rgb(223, 245, 223);
+    /* padding: 2px 3px; */
+    /* border-radius: 3px; */
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+}
+.keyword-rct-id {
+    color: #925f01;
+    background-color: bisque;
+    font-size: .95em;
+}
+.search-highlight {
+    text-decoration: underline;
+    background-color: rgb(230, 195, 132);
+}
+/* badge */
+.tag-filter-item {
+    background: #e0dfdf;
+    padding-left: 3px;
+    padding-right: 3px;
+    border-radius: 3px;
+    padding-top: 1px;
+    padding-bottom: 5px;
+}
+.tr-tags .badge-tag {
+    padding: 9px 7px;
+    font-size: .8em;
+}
+.badge-tag {
+    cursor: pointer;
+    color: #333333;
+    background-color: #dfdfd5;
+    font-weight: bold;
+}
+.badge-tag:hover {
+    color: black;
+    background-color: rgb(212, 211, 211);
+}
+.badge-tag-not-used {
+    cursor: pointer;
+    color: #999999;
+    background-color: #dddddd;
+    border: 1px dotted #cccccc;
+    font-weight: normal;
+}
+.badge-btn {
+    color: #adadad;
+    background-color: #f1f1f1;
+    cursor: pointer;
+}
+.badge-btn:hover {
+    color:rgb(250, 89, 89);
+    background-color: #fefefe;
+}
+.badge-ckl {
+    color: #fff;
+    background-color: #b88d17;
+}
+.badge-rct {
+    color: #fff;
+    background-color: #17a2b8;
+}
+.badge-rfc {
+    color: #fff;
+    background-color: #019927;
+}
+.badge-dis {
+    color: #fff;
+    background-color: #8f3333;
+}
+.badge-unscreened {
+    color: #fff;
+    background-color: #696b00;
+}
+.row th {
+    border-top: 1px solid #111111;
+    border-right: 1px solid #111111;
+}
+.exclusion-reason {
+    width: 150px;
+}
+.hide {
+    display: none;
+}
+.offscreen {
+    left: -8888px !important;
+}
+.text-rct-yes {
+    color: #17a2b8;
+}
+.text-rct-no {
+    color: #ff0000;
+}
+.fs-s, .text-sm {
+    font-size: 10px;
+}
+.fs-m, .text-nm {
+    font-size: 12px;
+}
+.fs-l, .text-lg {
+    font-size: 14px;
+}
+.study-type-original {
+    
+}
+.study-type-followup {
+
+}
+.btn-ve {
+    border-top: 1px solid #f1f1f1;
+    border-left: 1px solid #f1f1f1;
+    border-right: 1px solid #999999;
+    border-bottom: 1px solid #999999;
+}
+.btn-ve:active {
+    border-top: 1px solid #999999;
+    border-left: 1px solid #999999;
+    border-right: 1px solid #f1f1f1;
+    border-bottom: 1px solid #f1f1f1;
+}
+.list-group-item:active {
+    font-weight: bold;
+    background-color: #83e3ff;
+   
+}
+.list-group-item-sub {
+    padding: 0.2rem 0.5rem !important;
+}
+.list-group-item-selected {
+    font-weight: bold;
+    background-color: #83e3ff !important;
+}
+.list-cq-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 120px;
+}
+.list-group-item-button {
+    padding-top: 8px; 
+    padding-bottom: 8px; 
+    border: 0;
+    border-bottom: 1px solid #dfdfdf;
+    background-color: white;
+}
+.list-group-item-cq-count {
+    width: 60px;
+    text-align: center;
+}
+.list-group-item-cq-count:hover {
+    background-color: #83e3ff;
+}
+.cursor-pointer {
+    cursor: pointer;
+}
+.hoverable:hover {
+    background-color: #79e9fa;
+}
+.form-radio-inline {
+    display: inline-block;
+}
+.main-decision {
+    border: 1px solid transparent;
+    cursor: pointer;
+    margin: 1px;
+    display: inline-block;
+}
+.main-decision:hover {
+    border-bottom: 1px solid #999999;
+}
+.main-decision:active {
+    border-bottom: 1px solid #333333;
+}
+#pan_prisma_box {
+    width: 100%;
+    height: 400px;
+}
+
+.paging_listbox {
+    padding-right: 2em;
+    font-size: 1.2em;
+}
+.paginate_select {
+    padding: 0 1em;
+}
+.ds-id-span {
+    padding: 0 1em; 
+}
+</style>
+{% endblock %}
+
+{% block page_name %}
+<i class="fas fa-map-signs"></i>
+Screener Overview
+{% endblock %}
+
+{% block content %}
+
+<div id="pan_pdfviewer" class="shadow-sm" :class="{offscreen:is_hide}">
+    <div style="position: absolute; left: 5px; top: 5px;" class="d-flex flex-row">
+        <div class="mt-1 mr-5 ml-1">
+            <a href="javascript:void(0);"
+                v-on:click="toggle();">
+                <i class="fa fa-close"></i>
+            </a>
+        </div>
+
+        <div id="pan_pdfviewer_btns" class="d-flex flex-row">
+            
+        </div>
+    </div>
+
+    <iframe id="ifr_pdfviewer" src="/pdfworker/view_pdf" 
+        width="100%" scrolling="yes"
+        frameborder="0"></iframe>
+</div>
+
+
+<div id="pan_prisma" class="shadow-sm" :class="{offscreen:is_hide}">
+    <div style="position: absolute; left: 5px; top: 5px;" class="d-flex flex-row">
+        <div class="mt-1 mr-5 ml-1">
+            <a href="javascript:void(0);"
+                v-on:click="toggle();">
+                <i class="fa fa-close"></i>
+            </a>
+        </div>
+
+        <div id="pan_prisma_btns" class="d-flex flex-row">
+            PRISMA Plot
+        </div>
+    </div>
+    <div class="d-flex flex-row" style="padding-left: 5px;">
+        <div class="d-flex flex-column border-right mr-1 pr-3">
+            <div v-for="cq in project.settings.clinical_questions"
+                v-bind:class="{'list-group-item-selected': cq_abbr == cq.abbr}"
+                v-on:click="change_cq(cq.abbr)"
+                style="width: 200px"
+                class="list-cq-name cursor-pointer hoverable mb-1">
+                {{ cq.name }}
+            </div>
+        </div>
+
+        <div class="w-100">
+            <div id="pan_prisma_box">
+                <div id="pan_prisma_box_chart" class="w-100 h-100">
+                
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="pan_datasync" class="shadow-sm" :class="{offscreen:is_hide}">
+    <div style="position: absolute; left: 5px; top: 5px;" class="d-flex flex-row">
+        <div class="mt-1 mr-5 ml-1">
+            <a href="javascript:void(0);"
+                v-on:click="toggle();">
+                <i class="fa fa-close"></i>
+            </a>
+        </div>
+
+        <div id="pan_datasync_btns" class="d-flex flex-row"
+            v-if="new_data != null">
+            {{ new_data.pmid }}
+        </div>
+    </div>
+
+    <div v-if="new_data != null"
+        style="padding: 5px 10px;">
+        <div class="form-group row">
+            <label for="ds_title" class="col-sm-2 col-form-label">Title</label>
+            <div class="col-sm-10">
+                <textarea name="ds_title" id="ds_title" rows="2"
+                    class="datasync-textarea"
+                    v-model="new_data.title"></textarea>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label for="ds_authors" class="col-sm-2 col-form-label">Authors</label>
+            <div class="col-sm-10">
+                <textarea name="ds_authors" id="ds_authors" rows="2"
+                    class="datasync-textarea"
+                    v-model="new_data.authors"></textarea>
+            </div>
+        </div>
+
+        <div class="form-group row">
+
+            <label for="ds_journal" class="col-sm-2 col-form-label">Journal</label>
+            <div class="col-sm-4">
+                <textarea name="ds_journal" id="ds_journal" rows="1"
+                    class="datasync-textarea"
+                    v-model="new_data.journal"></textarea>
+            </div>
+
+            <label for="ds_pub_date" class="col-sm-2 col-form-label">Publication Date</label>
+            <div class="col-sm-4">
+                <textarea name="ds_pub_date" id="ds_pub_date" rows="1"
+                    class="datasync-textarea"
+                    v-model="new_data.pub_date"></textarea>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label for="ds_pub_date" class="col-sm-2 col-form-label">Abstract</label>
+            <div class="col-sm-10">
+                <textarea name="ds_pub_date" id="ds_pub_date" rows="10"
+                    class="datasync-textarea"
+                    v-model="new_data.abstract"></textarea>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12 text-right">
+                <button class="btn btn-primary"
+                    v-bind:disabled="is_btn_disabled"
+                    v-on:click="update_paper_detail">
+                    <i class="fa fa-save"></i>
+                    <span v-if="!is_btn_disabled">
+                        Update the information for paper [ {{ new_data.pmid }} ]
+                    </span>
+                    <span v-else>
+                        Updating paper [ {{ new_data.pmid }} ] <i class="fas fa-spinner fa-spin"></i>
+                    </span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<div id="export_dialog" class="modal" tabindex="-1" role="dialog">
+<div class="modal-dialog" role="document">
+    <div class="modal-content">
+    <div class="modal-header">
+    <h5 class="modal-title">Export Table</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    </div>
+    <div class="modal-body">
+        <p>There are <b id="export_dialog_total_number">&nbsp;</b> records in the current table, export them as the following foramt:</p>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="export_format" id="export_format_1" value="endnote_xml" checked>
+            <label class="form-check-label" for="export_format_1">
+            EndNote XML 
+            </label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="export_format" id="export_format_3" value="ovid_xml" checked>
+            <label class="form-check-label" for="export_format_3">
+            OVID XML 
+            </label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="export_format" id="export_format_2" value="ct01_csv">
+            <label class="form-check-label" for="export_format_2">
+            Excel XLS (NCT, PMID, Journal, Year, Number of Authors, Authors)
+            </label>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary"
+            onclick="tbjs_paperlist.export_current_table();">
+            <i class="fa fa-file-export"></i>
+            Export
+        </button>
+
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+    </div>
+    </div>
+</div>
+</div>
+
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+
+            <div id="ui_category_stat">
+                <div v-if="flag_is_loading_stage"
+                    id="loading_stage_box">
+                    <p style="font-size: 1.2em;">
+                        Loading papers ... <i class="fas fa-spinner fa-spin"></i>
+                    </p>
+                    <p>
+                        The loading may take a little while, please wait. <br>
+                        If it takes too long (more than 1 min) or show any error message, please try later or contact system administrator.
+                    </p>
+
+                </div>
+
+
+                <h5>
+                    <i class="far fa-file-alt"></i>
+                    Summary 
+                </h5>
+                <div class="list-group" style="margin-bottom: 15px;">
+                   
+                    <button class="list-group-item-button d-flex justify-content-between align-items-center" 
+                        
+                      >
+                        Total References 
+                        <span>
+                            <span class="badge badge-unscreened badge-pill">0</span>
+                           
+                        </span>
+                    </button>
+                    <button class="list-group-item-button d-flex justify-content-between align-items-center" 
+                      >
+                        Duplicates
+                        <span>
+                          
+                            <span class="badge badge-rfc">0</span>
+                        </span>
+                        
+                    </button>
+
+                    <button class="list-group-item-button d-flex justify-content-between align-items-center" 
+                    >
+                    Unique Studies
+                    <span>
+                       
+                        <span class="badge badge-rfc">0</span>
+                    </span>
+                    
+                </button>
+
+                <button class="list-group-item-button d-flex justify-content-between align-items-center" 
+               >
+                Screened Studies
+                <span>
+                    
+                    <span class="badge badge-rfc">0</span>
+                </span>
+                
+            </button>
+
+            <button class="list-group-item-button d-flex justify-content-between align-items-center" 
+           >
+            Unscreened Studies
+            <span>
+                
+                <span class="badge badge-rfc">0</span>
+            </span>
+            
+        </button>
+
+               
+                </div>
+
+                <h5>
+                    <i class="far fa-file-alt"></i>
+                    All References
+                </h5>
+                <div class="list-group">
+                    <!-- <button class="list-group-item-button d-flex justify-content-between align-items-center" v-on:click="load_by_stage('all_of_them')">
+                        All
+                        <span class="badge badge-secondary badge-pill">{{ stat.all_of_them }}</span>
+                    </button> -->
+                    <button class="list-group-item-button d-flex justify-content-between align-items-center" 
+                        v-bind:class="{'list-group-item-selected': active_stage == 'unscreened'}"
+                        v-on:click="load_by_stage('unscreened')">
+                        Unscreened
+                        <span>
+                            <span class="badge badge-unscreened badge-pill">{{ stat.unscreened }}</span>
+                            <span class="badge badge-secondary badge-ckl">{{ stat.unscreened_ckl }}</span>
+                        </span>
+                    </button>
+                    <button class="list-group-item-button d-flex justify-content-between align-items-center" 
+                        v-bind:class="{'list-group-item-selected': active_stage == 'decided'}"
+                        v-on:click="load_by_stage('decided')">
+                        Decided
+                        <span>
+                            <span class="badge badge-secondary badge-pill">{{ stat.decided }}</span>
+                            <span class="badge badge-rfc">{{ stat.decided_rfc }}</span>
+                        </span>
+                        
+                    </button>
+                </div>
+
+                <h5 class="mt-3">
+                    <i class="far fa-file-alt"></i>
+                    Further Check
+                </h5>
+                <div class="list-group">
+                    <button class="list-group-item-button d-flex justify-content-between align-items-center" 
+                        v-bind:class="{'list-group-item-selected': active_stage == 'passed_title_not_fulltext'}"
+                        v-on:click="load_by_stage('passed_title_not_fulltext')">
+                        Full Text Review
+                        <span>
+                            <span class="badge badge-secondary badge-pill">{{ stat.passed_title_not_fulltext }}</span>
+                            <span class="badge badge-primary badge-ckl">{{ stat.passed_title_not_fulltext_ckl }}</span>
+                        </span>
+                    </button>
+                </div>
+
+                <h5 class="mt-3">
+                    <i class="far fa-file-alt"></i>
+                    Included References
+                </h5>
+                <div class="list-group">
+                    <button class="list-group-item-button d-flex justify-content-between align-items-center" 
+                        v-bind:class="{'list-group-item-selected': active_stage == 'included_sr'}"
+                        v-on:click="load_by_stage('included_sr')">
+                        Included
+                        <span>
+                            <span class="badge badge-primary badge-pill">{{ stat.included_sr }}</span>
+                            <span class="badge badge-rfc">{{ stat.included_sr_rfc }}</span>
+                            <span class="badge badge-secondary badge-ckl">{{ stat.included_sr_ckl }}</span>
+                        </span>
+                    </button>
+
+                    <div v-if="project.settings.clinical_questions.length > 1">
+
+                        <div v-for="cq in project.settings.clinical_questions"
+                            class="list-group-item-button list-group-item-sub d-flex justify-content-between align-items-center"
+                            v-bind:title="cq['name']"
+                            style="opacity: 0.9;"
+                            >
+                            <div class="list-cq-name" style="width: 120px;">
+                                - {{ cq.name }}
+                            </div>
+
+                            <div class="list-group-item-cq-count cursor-pointer"
+                                v-bind:class="{'list-group-item-selected': active_stage == 'included_sr' && active_cq_abbr == cq.abbr && active_cq_dval == 'yes'}"
+                                v-on:click="load_by_stage('included_sr', cq.abbr, 'yes');"
+                                style="width: 60px; ">
+                                <span class="badge badge-primary badge-pill">
+                                    {{ stat.cq['cnt_included_in_cq_' + cq.abbr] }}
+                                </span>
+                            </div>
+
+                            <div class="list-group-item-cq-count cursor-pointer"
+                                v-bind:class="{'list-group-item-selected': active_stage == 'included_sr' && active_cq_abbr == cq.abbr && active_cq_dval == 'no'}"
+                                v-on:click="load_by_stage('included_sr', cq.abbr, 'no');"
+                                style="width: 60px">
+                                <span class="badge badge-default">
+                                    {{ stat.included_sr - stat.cq['cnt_included_in_cq_' + cq.abbr] }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <h5 class="mt-3">
+                    <i class="far fa-file-alt"></i>
+                    Excluded References
+                </h5>
+                <div class="list-group">
+                    <!-- <button class="list-group-item-button d-flex justify-content-between align-items-center" v-on:click="load_by_stage('excluded_by_rct_classifier')">
+                        By RCT Classifier
+                        <span class="badge badge-secondary badge-pill">{{ stat.excluded_by_rct_classifier }}</span>
+                    </button> -->
+                    <button class="list-group-item-button d-flex justify-content-between align-items-center" 
+                        v-bind:class="{'list-group-item-selected': active_stage == 'excluded_by_title'}"
+                        v-on:click="load_by_stage('excluded_by_title')">
+                        By Title
+                        <span>
+                            <span class="badge badge-secondary badge-pill">{{ stat.excluded_by_title }}</span>
+                            <span class="badge badge-secondary badge-rfc">{{ stat.excluded_by_title_rfc }}</span>
+                            <span class="badge badge-secondary badge-ckl">{{ stat.excluded_by_title_ckl }}</span>
+                        </span>
+                    </button>
+
+                    <button class="list-group-item-button d-flex justify-content-between align-items-center" 
+                        v-bind:class="{'list-group-item-selected': active_stage == 'excluded_by_abstract'}"
+                        v-on:click="load_by_stage('excluded_by_abstract')">
+                        By Abstract
+                        <span>
+                            <span class="badge badge-secondary badge-pill">{{ stat.excluded_by_abstract }}</span>
+                            <span class="badge badge-secondary badge-rfc">{{ stat.excluded_by_abstract_rfc }}</span>
+                            <span class="badge badge-secondary badge-ckl">{{ stat.excluded_by_abstract_ckl }}</span>
+                        </span>
+                    </button>
+
+                    <button class="list-group-item-button d-flex justify-content-between align-items-center" 
+                        v-bind:class="{'list-group-item-selected': active_stage == 'excluded_by_fulltext'}"
+                        v-on:click="load_by_stage('excluded_by_fulltext')">
+                        By Full Text
+                        <span>
+                            <span class="badge badge-secondary badge-pill">{{ stat.excluded_by_fulltext }}</span>
+                            <span class="badge badge-secondary badge-rfc">{{ stat.excluded_by_fulltext_rfc }}</span>
+                            <span class="badge badge-secondary badge-ckl">{{ stat.excluded_by_fulltext_ckl }}</span>
+                        </span>
+                    </button>
+                </div>
+
+                <hr>
+
+                <h5 class="mt-3">
+                    <i class="fa fa-cog"></i>
+                    Screener Tools
+                </h5>
+                <div class="btn-group mb-1" role="group" >
+                    <button id="btn_update_original_followup" class="btn btn-default"
+                        onclick="jarvis.sort_rct_seq();">
+                        <i class="fa fa-folder"></i>
+                        Update Original/Followup
+                    </button>
+                </div>
+
+                <div class="btn-group mb-1" role="group" >
+                    <button class="btn btn-default"
+                        onclick="tbjs_paperlist.show_export_panel();">
+                        <i class="fa fa-file-export"></i>
+                        Export Reference List
+                    </button>
+                </div>
+
+                <div class="btn-group" role="group" >
+                    <button class="btn btn-default"
+                        onclick="pan_prisma.vpp.toggle();">
+                        <i class="fa fa-project-diagram"></i>
+                        Show PRISMA
+                    </button>
+                </div>
+            </div>
+            <!-- / left pane -->
+
+
+
+            <div style="width: calc(100% - 250px); margin-left: 10px;">
+                
+                <div id="tbjs_paperlist_topbar">
+
+                    <div id="pan_iecriteria" 
+                        class="shadow-sm" 
+                        :class="{hide:is_pan_iecriteria_hide}">
+                        <div style="position: absolute; left: 5px; top: 0px;">
+                            <a href="javascript:void(0);"
+                                v-on:click="toggle_pan_iecriteria">
+                                <i class="fa fa-close"></i>
+                            </a>
+                        </div>
+                        <div class="d-flex flex-row">
+                            <div class="d-flex flex-column w-50 border-right">
+                                <div class="text-center fw-bolder border-bottom .bg-success">INCLUSION</div>
+                                <pre class="criteria-box fs-m" v-if="criterias != null">{{ criterias.inclusion }}</pre>
+                            </div>
+                            <div class="d-flex flex-column w-50 ml-1">
+                                <div class="text-center fw-bolder border-bottom">EXCLUSION</div>
+                                <pre class="criteria-box fs-m" v-if="criterias != null">{{ criterias.exclusion }}</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5>
+                        <i class="far fa-file-alt"></i>
+                        Reference List | 
+                        <span id="tbjs_paperlist_title"
+                            v-html="topbar_title">
+                        </span>
+    
+                        <a style="font-size: .8em;" 
+                            class="mr-2" 
+                            href="javascript:void(0);" v-on:click="toggle_pan_iecriteria">
+                            <i class="far fa-clipboard"></i>
+                            Inclusion / Exclusion Criteria
+                        </a>
+                    </h5>
+
+                    <div class="form-row">
+                        
+                        <div class="form-group col-8 mb-0">
+                            <label class="mr-2">
+                                <i class="fa fa-filter"></i>
+                                Filters: 
+                            </label>
+
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" 
+                                    type="checkbox" 
+                                    name="checkbox_lbl_unkrct" 
+                                    id="checkbox_lbl_unkrct"
+                                    v-model="show_unkrct_label"
+                                    v-on:change="on_change_unkrct_label">
+                                <label class="form-check-label"
+                                    for="checkbox_lbl_unkrct">
+                                        RCT UNKNOWN
+                                </label>
+                            </div>
+
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" 
+                                    type="checkbox" 
+                                    name="checkbox_lbl_rct" 
+                                    id="checkbox_lbl_rct"
+                                    v-model="show_rct_label"
+                                    v-on:change="on_change_rct_label">
+                                <label class="form-check-label"
+                                    for="checkbox_lbl_rct">
+                                    <span class="badge badge-pill badge-info">
+                                        <i class="fa fa-robot"></i> RCT
+                                    </span>
+                                </label>
+                            </div>
+    
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" 
+                                    type="checkbox" 
+                                    name="checkbox_lbl_ckl" 
+                                    id="checkbox_lbl_ckl"
+                                    v-model="show_ckl_label"
+                                    v-on:change="on_change_ckl_label">
+                                <label class="form-check-label"
+                                    for="checkbox_lbl_ckl">
+                                    <span class="badge badge-pill badge-ckl">
+                                        <i class="far fa-clock"></i> Check Later
+                                    </span> 
+                                </label>
+                            </div>
+
+                            <div class="border-left pl-1 ml-2" 
+                                style="display: inline-block;"
+                                v-show="stage != 'unscreened' && stage != 'passed_title_not_fulltext'">
+
+                                <div class="form-radio-inline mr-2">
+                                    <label for="">
+                                        Agreement: 
+                                    </label>
+                                </div>
+
+                                <div class="form-radio-inline mr-2">
+                                    <input type="radio" 
+                                        id="radio_rfc_all"
+                                        value="all" 
+                                        v-model="show_rfc_label"
+                                        v-on:change="on_change_rfc_filter"
+                                        name="radio_rfc" >
+                                    <label class="form-check-label"     
+                                        for="radio_rfc_all">
+                                        ALL
+                                    </label>
+                                </div>
+
+                                <div class="form-radio-inline mr-1">
+                                    <input type="radio" 
+                                        id="radio_rfc_agree" 
+                                        value="agree" 
+                                        v-model="show_rfc_label"
+                                        v-on:change="on_change_rfc_filter"
+                                        name="radio_rfc" >
+                                    <label class="form-check-label"     
+                                        for="radio_rfc_agree">
+                                        <i class="fa fa-check"></i>
+                                        Agreed
+                                    </label>
+                                </div>
+                                <div class="form-radio-inline mr-1">
+                                    <input type="radio" 
+                                        id="radio_rfc_disagree" 
+                                        value="disagree" 
+                                        v-on:change="on_change_rfc_filter"
+                                        v-model="show_rfc_label"
+                                        name="radio_rfc">
+                                    <label class="form-check-label" 
+                                        for="radio_rfc_disagree">
+                                        <i class="fa fa-times"></i>
+                                        Disagreed
+                                    </label>
+                                </div>
+                                <div class="form-radio-inline">
+                                    <input type="radio" 
+                                        id="radio_rfc_unconfirmed" 
+                                        value="unconfirmed" 
+                                        v-on:change="on_change_rfc_filter"
+                                        v-model="show_rfc_label"
+                                        name="radio_rfc">
+                                    <label class="form-check-label" 
+                                        for="radio_rfc_unconfirmed">
+                                        <i class="far fa-question-circle"></i>
+                                        Unconfirmed
+                                    </label>
+                                </div>
+                            </div>
+    
+                        </div>
+
+                        <div class="form-group col-4 form-inline mb-0">
+                            <label class="mr-2">
+                                <i class="fa fa-sort-amount-down"></i>
+                                Sort by: 
+                            </label>
+
+                            <button class="btn btn-default btn-sm"
+                                onclick="tbjs_paperlist.sort_by_decision_reason();">
+                                Decision Reason
+                            </button>
+                            &nbsp;
+                            <button class="btn btn-default btn-sm"
+                                onclick="tbjs_paperlist.sort_by_decision_date();">
+                                <!-- <i class="fa fa-sort-alpha-down"></i> -->
+                                Decision Date
+                            </button>
+                            
+                        </div>
+
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label for="" class="mr-2">
+                                <i class="fa fa-tags"></i>
+                                Tag Filters:
+                            </label>
+
+                            <button class="btn btn-default btn-sm"
+                                onclick="tbjs_paperlist.reset_tag_filter();">
+                                <i class="fa fa-undo"></i>
+                                Reset
+                            </button>
+
+                            {% for i, tag in enumerate(project['settings']['tags']) %}
+                            <div class="form-check form-check-inline mr-2 tag-filter-item">
+                                <input class="form-check-input tag-filter" 
+                                    type="checkbox" 
+                                    name="checkbox_tag_[[i]]" 
+                                    id="checkbox_tag_[[i]]" 
+                                    value="[[ tag ]]"
+                                    onchange="tbjs_paperlist_topbar.vpp.on_change_tag_filter()">
+                                <label class="form-check-label"
+                                    for="checkbox_tag_[[i]]">
+                                [[ tag ]]
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                </div>
+                <!-- /div#tbjs_paperlist_topbar -->
+
+
+                <table id="tbjs_paperlist" class="display compact hover" style="width: 100%;">
+
+                </table>
+            </div>
+            <!-- / right pane -->
+        </div>
+    </div>
+</div>
+<!-- /.timeline -->
+
+</div>
+</div>
+</div>
+
+
+{% endblock %}
+
+{% block active_nav_link %}screener-overview{% endblock %}
+
+{% block script %}
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.1/d3.min.js"></script> -->
+<script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js"></script>
+
+<!-- datatable.js and extensions -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap4.min.css">
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/plug-ins/1.10.13/features/mark.js/datatables.mark.js"></script>
+<!-- <script src="https://cdn.datatables.net/searchpanes/1.2.0/js/dataTables.searchPanes.min.js"></script>
+<script src="https://cdn.datatables.net/select/1.3.1/js/dataTables.select.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/searchpanes/1.2.0/css/searchPanes.dataTables.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.3.1/css/select.dataTables.min.css"> -->
+<script src="https://cdn.datatables.net/plug-ins/1.13.1/pagination/input.js"></script>
+<script src="https://cdn.datatables.net/plug-ins/1.13.1/pagination/select.js"></script>
+
+<!-- clipboard.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.4.0/clipboard.min.js"></script>
+
+<!-- echarts for the prisma -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.2.0/echarts.min.js"></script>
+
+<!-- my scripts -->
+<script>
+
+{% include 'js/srv_pubmed.js' %}
+
+{% include 'js/fgmk_prisma_sankey.js' %}
+
+{% include 'js/srv_shared.js' %}
+
+{% include 'js/srv_screener.js' %}
+srv_screener.project = [[ project_json_str|safe ]];
+
+{% include 'js/srv_extractor.js' %}
+srv_extractor.project = [[ project_json_str|safe ]];
+
+// update the project information
+srv_screener.project = [[ project_json_str|safe ]];
+
+// the UI for category stat
+var ui_category_stat = {
+    vpp_id: '#ui_category_stat',
+    vpp: null,
+
+    load: function() {
+        // load data from backend by srv_screener
+        srv_screener.get_stat(function(data){
+            ui_category_stat.init(data.stat);
+        });
+    },
+
+    init: function(data) {
+        this.data = data;
+        console.log('* initing ui_category_stat', data);
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                stat: data,
+                project: [[ project_json_str |safe ]],
+
+                active_stage: 'unscreened',
+                active_cq_abbr: null,
+                active_cq_type: null,
+
+                flag_is_loading_stage: false,
+
+                stages: [
+                    'unscreened',
+                    'decided',
+
+                    'passed_title_not_fulltext',
+
+                    'included_sr',
+
+                    'excluded_by_title',
+                    'excluded_by_abstract',
+                    'excluded_by_fulltext'
+                ]
+            },
+            methods: {
+                load_by_stage: function(stage, cq_abbr, cq_dval) {
+                    if (typeof(cq_abbr) == 'undefined') {
+                        cq_abbr = null;
+                    }
+                    if (typeof(cq_dval) == 'undefined') {
+                        cq_dval = null;
+                    }
+                    
+                    console.log('* show ' + stage + ', ' + cq_abbr);
+
+                    this.active_stage = stage;
+                    this.active_cq_abbr = cq_abbr;
+                    this.active_cq_dval = cq_dval;
+
+                    this.flag_is_loading_stage = true;
+
+                    // update paper list
+                    tbjs_paperlist.load_by_stage(
+                        stage,
+                        cq_abbr,
+                        cq_dval
+                    );
+                }
+            }
+        });        
+    },
+
+    update: function() {
+        srv_screener.get_stat(function(data){
+
+            ui_category_stat.vpp.stat = data.stat;
+        });
+    }
+};
+
+
+var tbjs_paperlist_topbar = {
+    vpp_id: '#tbjs_paperlist_topbar',
+    vpp: null,
+
+    vpp_data: {
+        criterias: srv_screener.project.settings.criterias,
+        is_pan_iecriteria_hide: true,
+        topbar_title: null,
+
+        stage: null,
+
+        // for show RCT
+        show_rct_label: '',
+
+        // for showing the unknown (to be decided)
+        show_unkrct_label: false,
+
+        // show check later
+        show_ckl_label: '',
+
+        show_rfc_label: 'all',
+    },
+
+    vpp_methods: {
+        toggle_pan_iecriteria: function() {
+            this.is_pan_iecriteria_hide = !this.is_pan_iecriteria_hide;
+        },
+
+        set_title: function(title, cq_name, cq_type) {
+            this.topbar_title = title;
+        },
+
+        on_change_unkrct_label: function(event) {
+            console.log('* unkrct label:', event.target.checked);
+            tbjs_paperlist.toggle_label_rct();
+        },
+
+        on_change_rct_label: function(event) {
+            console.log('* rct label:', event.target.checked);
+            tbjs_paperlist.toggle_label_rct();
+        },
+
+        on_change_ckl_label: function(event) {
+            console.log('* ckl label:', event.target.checked);
+            tbjs_paperlist.toggle_label_ckl();
+        },
+
+        on_change_tag_filter: function(event) {
+            // console.log('* tag filters:', event.target.checked);
+            tbjs_paperlist.toggle_tag_filter();
+        },
+
+        on_change_rfc_filter: function(event) {
+            console.log('* change rfc filter:', event.target.value);
+            tbjs_paperlist.toggle_label_rfc();
+        }
+    },
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: this.vpp_data,
+            methods: this.vpp_methods
+        });
+    }
+};
+
+var tbjs_paperlist = {
+    table_id: '#tbjs_paperlist',
+    table: null,
+
+    // the list of all papers
+    data: null,
+
+    // for the full content of a paper
+    // key is the pid
+    papers: {},
+
+    cfg: {
+        number_of_rows: 10,
+
+        sort_by_idx: 0,
+
+        sort_by_order: 'desc'
+    },
+
+    // by default, show unscreened stage
+    stage: srv_screener.STAGE_UNSCREENED,
+
+    // by default, show null
+    cq_abbr: null,
+
+    // by default, show dval null
+    cq_dval: null,
+
+    // for highlight NCT number
+    regex_RCT_ID: /NCT\d{8}/gmi,
+
+    columns: [
+        // column 0
+        {
+            title: '#',
+            className: 'col-seq',
+            orderable: true,
+            data: 'seq_num_confirmed'
+        },
+
+        // column 1
+        {
+            title: '',
+            width: 70,
+            className: 'col-first',
+            orderable: false,
+            data: 'first_column'
+        },
+
+        // column 2
+        { 
+            title: 'Date', 
+            className: 'col-date',
+            width: 80,
+            data: 'date_created_norm' 
+        },
+
+        // column 3
+        { 
+            title: 'Labels', 
+            className: 'col-labels',
+            width: 50,
+            data: 'labels' 
+        },
+
+        // column 4
+        { 
+            title: 'Title', 
+            data: 'title_with_tags',
+            className: 'col-title',
+        },
+
+        // column 5
+        {
+            title: '',
+            className: 'col-actions',
+            width: 140,
+            orderable: false,
+            data: 'basic_actions'
+        },
+        
+        // hidden columns for sorting
+        // hidden column 6
+        {
+            title: '',
+            data: 'decision_reason',
+            visible: false,
+            searchable: false
+        },
+
+        // hidden columns for filtering
+        // hidden column 7
+        {
+            title: '',
+            data: 'tags',
+            visible: false,
+            searchable: true
+        },
+
+        // hidden columns for searching
+        // hidden column 8
+        {
+            title: '',
+            data: 'pid',
+            visible: false,
+            searchable: true
+        },
+
+        // hidden columns for searching
+        // hidden column 9
+        {
+            title: '',
+            data: 'paper_rct_id',
+            visible: false,
+            searchable: true
+        },
+
+        // hidden columns for searching
+        // hidden column 10
+        {
+            title: '',
+            data: 'rfc_agreement',
+            visible: false,
+            searchable: true
+        },
+
+        // hidden columns for sorting
+        // hidden column 11
+        {
+            title: '',
+            data: 'decision_date',
+            visible: false,
+            searchable: false
+        },
+
+    ],
+
+    sample: [
+        { pid: '123456', authors: 'B, X, C and E', date: '2020-10-01', title: 'A title here', journal: 'JAMA', abstract: 'This is the abstract content' },
+        { pid: '123457', authors: 'A, B, U and E', date: '2020-10-01', title: 'A title here', journal: 'NEJM', abstract: 'This is the abstract content' },
+        { pid: '123458', authors: 'D, B, N and E', date: '2020-10-01', title: 'A title here', journal: 'Lancet', abstract: 'This is the abstract content' }
+    ],
+
+    init: function() {
+        // the search filter for RCT
+        $.fn.dataTable.ext.search.push(
+            function( settings, data, dataIndex ) {
+                // var chk = $('input#checkbox_lbl_unkrct').prop('checked');
+                var chk = tbjs_paperlist_topbar.vpp.$data.show_unkrct_label;
+
+                if (chk) {
+                    if (data[3].indexOf('NOT RCT')>=0) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        );
+
+        // the search filter for RCT
+        $.fn.dataTable.ext.search.push(
+            function( settings, data, dataIndex ) {
+                var chk = $('input#checkbox_lbl_rct').prop('checked');
+
+                if (chk) {
+                    if (data[3].indexOf('RCT')>=0 && data[3].indexOf('NOT')==-1) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        );
+
+        // the search filter for Check later
+        $.fn.dataTable.ext.search.push(
+            function( settings, data, dataIndex ) {
+                var chk = $('input#checkbox_lbl_ckl').prop('checked');
+
+                if (chk) {
+                    if (data[3].indexOf('Check')>=0) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        );
+
+        // the search filter for agreement
+        $.fn.dataTable.ext.search.push(
+            function( settings, data, dataIndex ) {
+                // var chk = $('input#checkbox_lbl_rfc').prop('checked');
+                var stage = tbjs_paperlist_topbar.vpp.$data.stage;
+                if (stage == 'unscreened' ||
+                    stage == 'passed_title_not_fulltext') {
+                    // for these two stages, just show the record
+                    return true;
+                }
+
+                var chk = tbjs_paperlist_topbar.vpp.$data.show_rfc_label;
+
+                if (chk == 'all') {
+                    return true;
+                } else {
+                    if (data[10] == chk) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        );
+
+        // the search filter for tags
+        $.fn.dataTable.ext.search.push(
+            function( settings, data, dataIndex ) {
+                var chk_tags = [];
+                $('.tag-filter').each(function(){ 
+                    var chk = $(this).prop('checked');
+                    if (chk) {
+                        chk_tags.push($(this).val())
+                    }
+                });
+                if (chk_tags.length == 0) {
+                    // no tag is checked, ok
+                    return true;
+                } else {
+                    // at least one tag is checked
+                    for (var i = 0; i < chk_tags.length; i++) {
+                        var chk_tag = chk_tags[i];
+                        if (data[7].indexOf(chk_tag)>=0) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            }
+        );
+
+        // init the datatable obj
+        this.table = $(this.table_id).DataTable({
+            responsive: true,
+            autoWidth: false,
+            pageLength: this.cfg.number_of_rows,
+            data: [],
+            columns: this.columns,
+            order: [
+                [0, 'desc']
+            ],
+
+            pagingType: "input",
+            // "sPaginationType": "listbox",
+
+            // bind the row attributes
+            createdRow: function(row, data, dataIndex) {
+                $(row).attr('id', 'tb-row-' + data.paper_id);
+            },
+
+            // show the color for highlight
+            mark: {
+                element: 'span',
+                className: 'search-highlight'
+            }
+            
+        });
+
+        // update the open/close details event
+        // $(this.table_id + ' tbody').on('click', 'td.details-control', function() {
+        //     var tr = $(this).closest('tr');
+        //     var row = tbjs_paperlist.table.row( tr );
+    
+        //     if ( row.child.isShown() ) {
+        //         // This row is already open - close it
+        //         row.child.hide();
+        //         tr.removeClass('shown');
+        //         $(this).html('<i class="fa fa-plus"></i>')
+        //     }
+        //     else {
+        //         // Open this row
+        //         var row_html = tbjs_paperlist._get_expand_html_by_stage(row.data());
+        //         row.child(row_html).show();
+        //         tbjs_paperlist.update_paper_detail(row.data());
+        //         tr.addClass('shown');
+        //         $(this).html('<i class="fa fa-minus"></i>')
+
+        //         // trigger the highlight
+        //         tbjs_paperlist._mark_element('#tb-rowext-abstract-' + row.data().paper_id);
+        //     }
+        // });
+
+        // update the click title event
+        $(this.table_id + ' tbody').on('click', 'td.col-title', function() {
+            var tr = $(this).closest('tr');
+            var row = tbjs_paperlist.table.row( tr );
+    
+            if ( row.child.isShown() ) {
+                // This row is already open - close it
+                row.child.hide();
+                tr.removeClass('shown');
+                // tr.find('td.details-control').html('<i class="fa fa-plus"></i>');
+            }
+            else {
+                // Open this row
+                var row_html = tbjs_paperlist._get_expand_html_by_stage(row.data());
+                row.child(row_html).show();
+                tbjs_paperlist.update_paper_detail(row.data());
+                tr.addClass('shown');
+                // tr.find('td.details-control').html('<i class="fa fa-minus"></i>')
+
+                // trigger the highlight
+                tbjs_paperlist._mark_element('#tb-rowext-abstract-' + row.data().paper_id);
+
+                // bind the copy function
+                var clip = new Clipboard('#btn_copy_title_'+row.data().paper_id);
+                clip.on("success", function(e){
+                    jarvis.toast('Copied the title [' + e.text + ']!');
+                });
+            }
+        });
+
+        // for debug
+        if (jarvis.debug) {
+            $(this.table_id + ' tbody').on('click', 'td.col-date', function() {
+                var tr = $(this).closest('tr');
+                var row = tbjs_paperlist.table.row( tr );
+                console.log(row.data());
+            });
+        }
+
+        // add highlight event to the title
+        this.table.on('draw', function () {
+            // console.log( 'Redraw occurred at: '+new Date().getTime() );
+
+            // in the title column
+            // mark the inclusion keywords
+            $(".col-title").mark(
+                srv_screener.project.settings.highlight_keywords.inclusion,
+                {
+                    className: 'keyword-inclusion',
+                    separateWordSearch: false
+                }
+            );
+
+            // mark the exclusion keywords
+            $(".col-title").mark(
+                srv_screener.project.settings.highlight_keywords.exclusion,
+                {
+                    className: 'keyword-exclusion',
+                    separateWordSearch: false
+                }
+            );
+        });
+    },
+
+    _mark_element: function(elem) {
+        // mark the inclusion keywords
+        $(elem).mark(
+            srv_screener.project.settings.highlight_keywords.inclusion,
+            {
+                className: 'keyword-inclusion',
+                separateWordSearch: false
+            }
+        );
+
+        // mark the exclusion keywords
+        $(elem).mark(
+            srv_screener.project.settings.highlight_keywords.exclusion,
+            {
+                className: 'keyword-exclusion',
+                separateWordSearch: false
+            }
+        );
+
+        // mark the NCT keywords
+        $(elem).markRegExp(
+            this.regex_RCT_ID, 
+            {
+                className: 'badge badge-pill keyword-rct-id',
+                separateWordSearch: false
+            }
+        );
+    },
+
+    update_paper_detail: function(d) {
+        // send a request to get more information
+        srv_screener.get_paper_by_id(d.paper_id, function(data) {
+            // update the local database
+            tbjs_paperlist.papers[data.paper.pid] = data.paper;
+
+            // update the authors
+            $('#tb-rowext-authors-' + data.paper.paper_id).html(data.paper.authors);
+
+            // update the abstract
+            $('#tb-rowext-abstract-' + data.paper.paper_id).html(data.paper.abstract);
+
+            // trigger the highlight
+            tbjs_paperlist._mark_element('#tb-rowext-abstract-' + data.paper.paper_id);
+        });
+    },
+
+    load: function() {
+        srv_screener.get_papers(
+            srv_screener.stage.STAGE_UNSCREENED,
+            function(data) {
+                tbjs_paperlist.update(data.papers);
+            }
+        );
+    },
+
+    load_by_stage: function(stage, cq_abbr, cq_dval) {
+        // set stage
+        this.stage = stage;
+        // set cq_abbr
+        this.cq_abbr = cq_abbr;
+        // set stage
+        this.cq_dval = cq_dval;
+
+        // update toolbar tbjs_paperlist_topbar
+        tbjs_paperlist_topbar.vpp.$data.stage = stage;
+
+        // update header title
+        tbjs_paperlist_topbar.vpp.set_title(
+            srv_screener.stage[stage].title
+        );
+
+        // empty the search filter input box
+        $(this.table_id + '_filter input').val('');
+
+        // reset the search filter
+        this.table.search('');
+
+        // get data
+        srv_screener.get_papers_by_stage(
+            stage,
+            cq_abbr, 
+            cq_dval,
+            function(data) {
+                // first update data
+                tbjs_paperlist.update(data.papers);
+
+                // then update the flag
+                ui_category_stat.vpp.$data.flag_is_loading_stage = false;
+
+                // second, update stat
+                ui_category_stat.update();
+            }
+        );
+    },
+
+    update: function(data) {
+        // add more columns to data and bind to local
+        this.update_data_attrs(data);
+        
+        // remove the old data
+        this.table.clear();
+
+        // put new data
+        this.table.rows.add(data);
+
+        // render
+        this.table.draw();
+    },
+
+    update_data_attrs: function(data) {
+        for (var i = 0; i < data.length; i++) {
+            var d = data[i];
+
+            // update the attrs of d
+            d = this.update_datum_attrs(d);
+        }
+
+        this.data = data;
+    },
+
+    update_datum_attrs: function(d) {
+        // add the confirmed 
+        d['seq_num_confirmed'] = this._update_attr_seq_num_confirmed(d);
+
+        // add the pred_is_rct column
+        d['first_column'] = this._update_attr_first_column(d);
+
+        // add the pred_is_rct column
+        d['labels'] = this._update_attr_labels(d);
+
+        // add the title_with_tags column
+        d['title_with_tags'] = this._update_attr_title_with_tags(d);
+
+        // add the date_created_norm column
+        d['date_created_norm'] = this._update_attr_date_created_norm(d);
+
+        // add the date_published_norm column
+        d['date_published_norm'] = this._update_attr_date_published_norm(d);
+
+        // add the basic buttons column
+        d['basic_actions'] = this._get_basic_actions_by_stage(d);
+
+        // 6. add the decision reason column for sort
+        d['decision_reason'] = this._update_attr_decision_reason(d);
+
+        // 7. add the tags column for filter
+        d['tags'] = this._update_attr_tags(d);
+
+        // 8. pid column is already there, no need to add
+
+        // 9. add the rct_id column for search
+        d['paper_rct_id'] = this._update_attr_paper_rct_id(d);
+
+        // 10. add the rfc column for search
+        d['rfc_agreement'] = this._update_attr_rfc_agreement(d);
+
+        // 11. add the rfc column for search
+        d['decision_date'] = this._update_attr_decision_date(d);
+
+        return d;
+    },
+
+    update_data_by_paper: function(paper) {
+        // find the paper in the data
+        // 2022-12-07: get the length of this list in advance
+        // to avoid redandant calculation 
+        var len = this.table.data().length;
+
+        // find this paper and update
+        for (var i = 0; i < len; i++) {
+            if (this.table.row(i).data().paper_id == paper.paper_id) {
+                this.table.row(i).data(
+                    this.update_datum_attrs(paper)
+                ).draw(false);
+                break;
+            }
+        }
+    },
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Update the data attributes
+    ///////////////////////////////////////////////////////////////////////////
+
+    // 2021-08-17: change the seq num style
+    _update_attr_seq_num_confirmed: function(d) {
+        var ret = d.seq_num;
+
+        if (this.stage == 'unscreened') {
+
+        } else if (this.stage == 'passed_title_not_fulltext') {
+
+        } else {
+            if (d.ss_ex.hasOwnProperty('label')) {
+                if (d.ss_ex.label.hasOwnProperty('RFC')) {
+                    ret += '<br><span class="badge badge-rfc" title="'+d.ss_ex.label.RFC.user.abbr+' Agreed decision. Click to withdraw agreement" onclick="tbjs_paperlist.set_label_rfc(\''+d.paper_id+'\', \'no\', \'\')"><i class="fa fa-check"></i></span>';
+                } else if (d.ss_ex.label.hasOwnProperty('DIS')) {
+                    ret += '<br><span class="badge badge-dis" title="'+d.ss_ex.label.DIS.user.abbr+' Disagreed decision. Click to withdraw disagreement" onclick="tbjs_paperlist.set_label_dis(\''+d.paper_id+'\', \'no\', \'\')"><i class="fa fa-times"></i></span>';
+                } else {
+                    ret += '<br><span class="badge cursor-pointer" title="Click to agree this decision" onclick="tbjs_paperlist.set_label_rfc(\''+d.paper_id+'\', \'yes\', \'\')"><i class="far fa-question-circle"></i></span>';
+                }
+            } else {
+                ret += '<br><span class="badge cursor-pointer" title="Click to agree this decision" onclick="tbjs_paperlist.set_label_rfc(\''+d.paper_id+'\', \'yes\', \'\')"><i class="far fa-question-circle"></i></span>';
+            }
+        }
+
+        // var ret = '';
+        // if (d.ss_ex.hasOwnProperty('label')) {
+        //     if (d.ss_ex.label.hasOwnProperty('RFC')) {
+        //         ret = '<br><span class="badge badge-rfc">'+d.seq_num+'</span>';
+        //     } else {
+        //         ret = '<br><span class="badge">'+d.seq_num+'</span>';
+        //     }
+        // }
+
+        return ret
+    },
+
+    // 2021-05-23: change this column to pid
+    _update_attr_first_column: function(d) {
+        // return '<i class="fa fa-plus"></i>';
+        var ret = '<div class="first-col-text">';
+
+        // first, add the rct_id
+        if (d.meta.hasOwnProperty('rct_id')) {
+            ret += jarvis.get_link_nct(d.meta.rct_id) + '<br>';
+        }
+
+        // second, add the pmid
+        // 2023-01-16: for de-duplication, try to show PMID as possible
+        if (d.is_pmid) {
+            // if the pid is pmid, just show it
+            ret += 'PMID: ' + jarvis.get_link_pmid(d.pid);
+
+        } else {
+            if (d.meta.hasOwnProperty('ds_id')) {
+                // wow, that's great, it has the ds_id!
+                if (d.meta.ds_id.hasOwnProperty('pmid')) {
+                    // ok, this record has pmid!
+                    ret += 'PMID: ' + jarvis.get_link_pmid(d.meta.ds_id.pmid);
+
+                } else if (d.meta.ds_id.hasOwnProperty('doi')) {
+                    // DOI also works
+                    ret += 'N/DOI: ' + jarvis.get_link_doi(d.meta.ds_id.doi);
+
+                } else {
+                    // ok just show pid
+                    ret += d.pid;
+                }
+
+            } else {
+                // ok, no ds_id, then just try to show what we have
+                // by pid_type
+                if (d.pid_type == 'MD5') {
+                    if (d.meta.hasOwnProperty('doi') && d.meta.doi != '') {
+                        ret += 'N/DOI: ' + jarvis.get_link_doi(d.meta.doi);
+                    } else {
+                        ret += 'NO ID';
+                        
+                    }
+                } else {
+                    ret += d.pid;
+                }
+            }
+            
+        } 
+        ret += "</div>"
+
+        return ret;
+    },
+
+    _update_attr_labels: function(d) {
+        var label_rct = '<span class="badge badge-pill badge-info"><i class="fa fa-robot"></i> RCT</span>';
+
+        var label_ckl = '<span class="badge badge-pill badge-ckl"><i class="far fa-clock"></i> Check Later</span>';
+
+        var btn_not_rct = '<span class="badge badge-pill badge-btn" title="Click to indicate this study is not a RCT" onclick="tbjs_paperlist.set_rct_feedback(\''+d.paper_id+'\', 0)">NOT RCT</span>';
+
+        // create the return string
+        var ret = '';
+        
+        // the predicted RCT label
+        if (d.meta.hasOwnProperty('pred')) {
+            // if is RCT
+            if (d.meta.pred[0].is_rct) {
+                ret += label_rct;
+            }
+        }
+
+        // the Check later label
+        if (srv_screener.has_label_ckl(d)) {
+            ret += label_ckl;
+        }
+
+        // the human input RCT result
+        if (d.meta.pred[0].hasOwnProperty(srv_screener.ATTR_PRED_RCT_USR_FB)) {
+            if (d.meta.pred[0][srv_screener.ATTR_PRED_RCT_USR_FB] == '') {
+                ret += btn_not_rct;
+
+            } else {
+                var usr_fb = srv_screener.RCT_USER_FEEDBACK[d.meta.pred[0][srv_screener.ATTR_PRED_RCT_USR_FB]];
+
+                ret += '<span class="badge badge-pill badge-light">'+ usr_fb + '</span>';
+            }
+        }
+
+        return ret;
+    },
+
+    _update_attr_title_with_tags: function(d) {
+        var ret = '';
+        var tags = [];
+        if (d.meta.hasOwnProperty('tags')) {
+            for (var i = 0; i < d.meta.tags.length; i++) {
+                var tag = d.meta.tags[i];
+
+                // create a tag badge
+                var tag_badge = '<span class="badge badge-tag mr-1">' +
+                    // '<i class="fa fa-tag"></i> ' + 
+                    tag +
+                    '</span>';
+
+                tags.push(tag_badge);
+            }
+        }
+        // combine the tags
+        tags = tags.join('');
+
+        // combine the tags and title
+        if (tags == '') {
+            // if no tags, just leave title
+            ret = d.title;
+        } else {
+            // if has tags, put tags as one line
+            ret = tags + '<br>' + d.title;
+        }
+        return ret;
+    },
+
+    _update_attr_date_created_norm: function(d) {
+        var ret = '';
+        ret = dayjs(d.date_created).format('YYYY-MM-DD');
+        
+        // if (jarvis.debug) {
+        //     ret = '<a href="javascript:void(0);" onclick="">'+ret+'</a>';
+        // }
+        return ret;
+    },
+
+    _update_attr_date_published_norm: function(d) {
+        var ret = d.pub_date;
+        try {
+            ret = dayjs(d.pub_date).format('YYYY-MM-DD');
+        } catch {
+            ret = ' - ';
+        }
+
+        return ret;
+    },
+
+    _update_attr_decision_reason: function(d) {
+        var ret = '';
+        if (d.ss_ex.hasOwnProperty('reason')) {
+            ret = d.ss_ex.reason;
+        }
+        return ret;
+    },
+
+    _update_attr_decision_date: function(d) {
+        var ret = '';
+        if (d.ss_ex.hasOwnProperty('date_decided')) {
+            ret = d.ss_ex.date_decided;
+            // dayjs(d.pub_date).format('YYYY-MM-DD');
+        }
+        return ret;
+    },
+
+    _update_attr_tags: function(d) {
+        var ret = [];
+
+        // the tags 
+        if (d.meta.hasOwnProperty('tags')) {
+            for (var i = 0; i < d.meta.tags.length; i++) {
+                var tag = d.meta.tags[i];
+                ret.push(tag);
+            }
+        }
+
+        // combine the tags by | sym
+        return ret.join('|');
+    },
+
+    _update_attr_paper_rct_id: function(d) {
+        var ret = '';
+        if (d.meta.hasOwnProperty('rct_id')) {
+            ret = d.meta.rct_id;
+        }
+        return ret;
+    },
+
+    _update_attr_rfc_agreement: function(d) {
+        var ret = '';
+
+        if (d.ss_ex.hasOwnProperty('label')) {
+            if (d.ss_ex.label.hasOwnProperty('RFC')) {
+                ret = 'agree';
+
+            } else if (d.ss_ex.label.hasOwnProperty('DIS')) {
+                ret = 'disagree';
+
+            } else {
+                ret = 'unconfirmed';
+            }
+        } else {
+            ret = 'unconfirmed';
+        }
+
+        return ret;
+    },
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Get the basic actions column
+    ///////////////////////////////////////////////////////////////////////////
+
+    _get_basic_actions_by_stage: function(d) {
+        var stage = this.stage;
+        var func_name = '_get_basic_actions_by_stage_' + stage;
+        var html = this[func_name](d);
+        return html;
+    },
+
+    _get_basic_actions_by_stage_all_of_them: function(d) {
+        var html = '';
+        return html;
+    },
+
+    _get_basic_actions_by_stage_unscreened: function(d) {
+        var html = '';
+        html = '<button class="btn btn-danger btn-sm" title="Exclude this study by title" onclick="tbjs_paperlist.exclude_by_tt(\''+d.paper_id+'\')">Exclude By Title</button>';
+
+        return html;
+    },
+    
+    _get_basic_actions_by_stage_passed_title_not_fulltext: function(d) {
+        var html = '';
+        return html;
+    },
+
+    _get_basic_actions_by_stage_included_sr: function(d) {
+        return this._get_basic_actions_by_stage_decided(d);
+    },
+
+    _get_basic_actions_by_stage_included_srma: function(d) {
+        return this._get_basic_actions_by_stage_decided(d);
+    },
+
+    _get_basic_actions_by_stage_excluded_by_title: function(d) {
+        return this._get_basic_actions_by_stage_decided(d);
+    },
+
+    _get_basic_actions_by_stage_excluded_by_abstract: function(d) {
+        return this._get_basic_actions_by_stage_decided(d);
+    },
+
+    _get_basic_actions_by_stage_excluded_by_fulltext: function(d) {
+        return this._get_basic_actions_by_stage_decided(d);
+    },
+
+    _get_basic_actions_by_stage_decided: function(d) {
+        var html = '';
+
+        // the decision date
+        html +=  '<small>' + d.ss_ex.date_decided + '</small><br>';
+
+        // the main decision
+        var span_title = '';
+        var span_onclick = '';
+        var span_suffix = '';
+        if (d.ss_ex.hasOwnProperty('label')) {
+            if (d.ss_ex.label.hasOwnProperty('RFC')) {
+                span_title = 'Agreed decision. Click to withdraw agreement';
+                span_onclick = 'tbjs_paperlist.set_label_rfc(\''+d.paper_id+'\', \'no\', \'\')';
+                span_suffix = '<i class="fa fa-check"></i>';
+
+            } else if (d.ss_ex.label.hasOwnProperty('DIS')) {
+                span_title = 'Disagreed decision. Click to withdraw disagreement';
+                span_onclick = 'tbjs_paperlist.set_label_rfc(\''+d.paper_id+'\', \'no\', \'\')';
+                span_suffix = '<i class="fa fa-times"></i>';
+
+            } else {
+                span_title = 'Click to agree this decision';
+                span_onclick = 'tbjs_paperlist.set_label_rfc(\''+d.paper_id+'\', \'yes\', \'\')';
+                span_suffix = '<i class="far fa-question-circle"></i>';
+
+            }
+        } else {
+            span_title = 'Click to agree this decision';
+            span_onclick = 'tbjs_paperlist.set_label_rfc(\''+d.paper_id+'\', \'yes\', \'\')';
+            span_suffix = '<i class="far fa-question-circle"></i>';
+
+        }
+        html += '<span class="main-decision" style="color: ' + srv_screener.ss.rs[d.ss_rs].color + ';" title="'+span_title+'" onclick="'+span_onclick+'">' + srv_screener.ss.rs[d.ss_rs].name + ' ' + span_suffix +  '</span>';
+
+        // the reason
+        if (d.ss_ex.reason != '') {
+            html += '<br>' + d.ss_ex.reason;
+        }
+
+        return html;
+    },
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Get the expand HTML content
+    ///////////////////////////////////////////////////////////////////////////
+
+    _get_expand_html_by_stage: function(d) {
+        var stage = this.stage;
+        var func_name = '_get_expand_html_by_stage_' + stage;
+        // the html is always a table
+        // content of this table is decided by the stage
+        // and for each stage, the main differences are the buttons
+        debugger;
+        var html = '<table id="tb-rowext-'+d.paper_id+'" style="width:100%;" cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
+            this[func_name](d) +
+        '</table>'
+        return html;
+    },
+
+    __get_tr_actions_by_stage: function(d) {
+        var stage = this.stage;
+        var func_name = '__get_tr_actions_by_stage_' + stage;
+        return this[func_name](d);
+    },
+
+    _get_expand_html_by_stage_all_of_them: function(d) {
+        var html = 
+            this.__get_tr_title(d) + 
+            this.__get_tr_info(d) + 
+            this.__get_tr_authors(d) +
+            this.__get_tr_abstract(d);
+        return html;
+    },
+    
+    _get_expand_html_by_stage_unscreened: function(d) {
+        var html = 
+            this.__get_tr_actions_by_stage_unscreened(d) +
+            this.__get_tr_tags(d) +
+            this.__get_tr_title(d) + 
+            this.__get_tr_info(d) + 
+            this.__get_tr_authors(d) +
+            this.__get_tr_abstract(d);
+
+        return html;
+    },
+
+    __get_tr_actions_by_stage_unscreened: function(d) {
+        var _html_btn_ckl = this.__get_btn_check_later(d);
+        var html = '<tr id="tb-tr-actions-'+d.paper_id+'">'+
+            '<td>Actions:</td>'+
+            '<td>'+
+            '<button class="btn btn-secondary btn-sm" onclick="tbjs_paperlist.set_needchkft(\''+d.paper_id+'\')">Proceed to Full-Text Review</button> '+
+            '<button class="btn btn-primary btn-sm" onclick="tbjs_paperlist.include_in_sr(\''+d.paper_id+'\', \'Through Abstract\')">Include in Project</button> '+
+            
+            '<button class="btn btn-danger btn-sm" onclick="tbjs_paperlist.exclude_by_ab(\''+d.paper_id+'\')">Exclude by Abstract</button> '+
+            ' | ' +
+            _html_btn_ckl +
+            ' | ' +
+            this.__get_div_rct_yes_no(d) + 
+            '</td>'+
+        '</tr>';
+        return html
+    },
+    
+    _get_expand_html_by_stage_passed_title_not_fulltext: function(d) {
+        var html = [
+            this.__get_tr_actions_by_stage_passed_title_not_fulltext(d),
+            this.__get_tr_tags(d),
+            this.__get_tr_pdfs(d),
+            this.__get_tr_title(d),
+            this.__get_tr_info(d),
+            this.__get_tr_authors(d),
+            this.__get_tr_abstract(d)
+        ].join('');
+        return html;
+    },
+
+    __get_tr_actions_by_stage_passed_title_not_fulltext: function(d) {
+        var html = ['<tr id="tb-tr-actions-'+d.paper_id+'">',
+            '<td>Actions:</td>',
+            '<td class="d-flex flex-row flex-wrap">',
+            '<div>',
+                '<button class="btn btn-primary btn-sm" onclick="tbjs_paperlist.include_in_sr(\''+d.paper_id+'\', \'Through Full Text Review\')">Include in Project</button>',
+            '</div>',
+
+            '<div class="ml-2">',
+                this.__get_select_fulltext_exclusion_reasons(d),
+                '<button class="btn btn-danger btn-sm" type="button" onclick="tbjs_paperlist.exclude_by_ft(\''+d.paper_id+'\')">',
+                    'Exclude by Full-Text Review',
+                '</button>',
+            '</div>',
+
+            '<div class="ml-2">',
+                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button>',
+            '</div>',
+
+            '<div class="ml-2">',
+                this.__get_btn_check_later(d),
+            '</div>',
+
+            '<div class="ml-2">',
+                '<span class="mr-2">|</span>',
+                this.__get_div_rct_yes_no(d),
+            '</div>',
+
+            '</td>',
+        '</tr>'];
+        return html.join('');
+    },
+
+    _get_expand_html_by_stage_included_sr: function(d) {
+
+        var html = 
+            this.__get_tr_actions_by_stage_included_sr(d)+
+            this.__get_tr_cqs(d) +
+            this.__get_tr_tags(d) +
+            this.__get_tr_pdfs(d) +
+            this.__get_tr_title(d) + 
+            this.__get_tr_info(d) + 
+            this.__get_tr_authors(d) +
+            this.__get_tr_abstract(d);
+
+        return html;
+    },
+
+    __get_tr_actions_by_stage_included_sr: function(d) {
+        var html = [
+        '<tr id="tb-tr-actions-'+d.paper_id+'">',
+            '<td>Actions:</td>',
+            '<td>',
+        ];
+            // '<button class="btn btn-primary btn-sm" onclick="tbjs_paperlist.include_in_srma(\''+d.paper_id+'\')">Include in MA</button> '+
+
+        if (tbjs_paperlist.cq_abbr == null) {
+            // only show the buttons when not in cq level
+            html = html.concat([
+                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_needchkft(\''+d.paper_id+'\')">Send Back to Full-Text Review</button> ',
+                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button> ',
+                ' | ' ,
+            ]);
+        }
+            
+        html = html.concat([
+            this.__get_btn_check_later(d) ,
+            ' | ' ,
+            this.__get_div_rct_yes_no(d) ,
+            ' | ' ,
+            this.__get_div_rfc_yes_no(d) ,
+            '</td>',
+        '</tr>'
+        ]);
+        return html.join('');
+    },
+
+    _get_expand_html_by_stage_included_srma: function(d) {
+        var html = 
+            this.__get_tr_actions_by_stage_included_srma(d)+
+            this.__get_tr_tags(d) +
+            this.__get_tr_pdfs(d) +
+            this.__get_tr_title(d) + 
+            this.__get_tr_info(d) + 
+            this.__get_tr_authors(d) +
+            this.__get_tr_abstract(d);
+
+        return html;
+    },
+    
+    __get_tr_actions_by_stage_included_srma: function(d) {
+        var _html_btn_ckl = this.__get_btn_check_later(d);
+        var html = 
+            '<tr id="tb-tr-actions-'+d.paper_id+'">'+
+                '<td>Actions:</td>'+
+                '<td>'+
+                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.include_in_sr(\''+d.paper_id+'\', \'Back from MA\')">Send Back to SR</button> '+
+                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_needchkft(\''+d.paper_id+'\')">Send Back to Full-Text Review</button> '+
+                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button> '+
+                ' | ' +
+                _html_btn_ckl + 
+                ' | ' +
+                this.__get_div_rct_yes_no(d) + 
+                ' | ' +
+                this.__get_div_rfc_yes_no(d) +
+                '</td>'+
+            '</tr>';
+        return html;
+    },
+
+    _get_expand_html_by_stage_excluded_by_title: function(d) {
+        var html = this.__get_tr_actions_by_stage_excluded_by_title(d) +
+            this.__get_tr_tags(d) +
+            this.__get_tr_title(d) + 
+            this.__get_tr_info(d) + 
+            this.__get_tr_authors(d) +
+            this.__get_tr_abstract(d);
+        return html;
+    },
+
+    __get_tr_actions_by_stage_excluded_by_title: function(d) {
+        var _html_btn_ckl = this.__get_btn_check_later(d);
+
+        var html = 
+            '<tr id="tb-tr-actions-'+d.paper_id+'">'+
+                '<td>Actions:</td>'+
+                '<td>'+
+                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button> '+
+                ' | ' +
+                _html_btn_ckl + 
+                ' | ' +
+                this.__get_div_rct_yes_no(d) + 
+                ' | ' +
+                this.__get_div_rfc_yes_no(d) +
+                '</td>'+
+            '</tr>';
+        return html;
+    },
+
+    _get_expand_html_by_stage_excluded_by_abstract: function(d) {
+        var html = this.__get_tr_actions_by_stage_excluded_by_abstract(d) +
+            this.__get_tr_tags(d) +
+            this.__get_tr_title(d) + 
+            this.__get_tr_info(d) + 
+            this.__get_tr_authors(d) +
+            this.__get_tr_abstract(d);
+
+        return html;
+    },
+
+    __get_tr_actions_by_stage_excluded_by_abstract: function(d) {
+        var _html_btn_ckl = this.__get_btn_check_later(d);
+
+        var html = 
+            '<tr id="tb-tr-actions-'+d.paper_id+'">'+
+                '<td>Actions:</td>'+
+                '<td>'+
+                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button> '+
+                ' | ' +
+                _html_btn_ckl + 
+                ' | ' +
+                this.__get_div_rct_yes_no(d) + 
+                ' | ' +
+                this.__get_div_rfc_yes_no(d) +
+                '</td>'+
+            '</tr>';
+
+        return html;
+    },
+
+    _get_expand_html_by_stage_excluded_by_fulltext: function(d) {
+        var html = this.__get_tr_actions_by_stage_excluded_by_fulltext(d) +
+            this.__get_tr_tags(d) +
+            this.__get_tr_title(d) + 
+            this.__get_tr_info(d) + 
+            this.__get_tr_authors(d) +
+            this.__get_tr_abstract(d);
+
+        return html;
+    },
+
+    __get_tr_actions_by_stage_excluded_by_fulltext: function(d) {
+        var _html_btn_ckl = this.__get_btn_check_later(d);
+
+        var html = 
+            '<tr id="tb-tr-actions-'+d.paper_id+'">'+
+                '<td>Actions:</td>'+
+                '<td>'+
+                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_needchkft(\''+d.paper_id+'\')">Send Back to Full-Text Review</button> '+
+                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button> '+
+                ' | ' +
+                _html_btn_ckl + 
+                ' | ' +
+                this.__get_div_rct_yes_no(d) + 
+                ' | ' +
+                this.__get_div_rfc_yes_no(d) +
+                '</td>'+
+            '</tr>';
+        return html;
+    },
+
+    _get_expand_html_by_stage_decided: function(d) {
+        var html = this.__get_tr_actions_by_stage_decided(d) +
+            this.__get_tr_tags(d) +
+            this.__get_tr_title(d) + 
+            this.__get_tr_info(d) + 
+            this.__get_tr_authors(d) +
+            this.__get_tr_abstract(d);
+
+        return html;
+    },
+
+    __get_tr_actions_by_stage_decided: function(d) {
+        var html = 
+            '<tr id="tb-tr-actions-'+d.paper_id+'">'+
+                '<td>Actions:</td>'+
+                '<td>'+
+                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button> '+
+                ' | ' +
+                this.__get_div_rct_yes_no(d) + 
+                ' | ' +
+                this.__get_div_rfc_yes_no(d) +
+                '</td>'+
+            '</tr>';
+        return html;
+    },
+
+    ///////////////////////////////////////////////////////////////////////////
+    // HTML fragment makers
+    ///////////////////////////////////////////////////////////////////////////
+
+
+    /* this is just for the toolbar */
+    _get_pdfview_toolbar: function(d) {
+        var html = [];
+
+        if (tbjs_paperlist.stage == srv_screener.STAGE_FULLTEXT_REVIEW) {
+            // for 
+            html = [
+                '<div>',
+                    '<button class="btn btn-primary btn-sm" onclick="tbjs_paperlist.include_in_sr(\''+d.paper_id+'\', \'Through Full Text Review\'); pan_pdfviewer.hide();">Include in Project</button>',
+                '</div>',
+
+                '<div class="ml-2">',
+                    this.__get_select_fulltext_exclusion_reasons(d),
+                    '<button class="btn btn-danger btn-sm" type="button" onclick="tbjs_paperlist.exclude_by_ft(\''+d.paper_id+'\'); pan_pdfviewer.hide();">',
+                        'Exclude by Full-Text Review',
+                    '</button>',
+                '</div>',
+
+                '<div class="ml-2">',
+                    '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\'); pan_pdfviewer.hide();">Send Back to Unscreened</button>',
+                '</div>',
+            ].join('');
+            
+        } else if (tbjs_paperlist.stage == srv_screener.STAGE_INCLUDED_SR) {
+            html = [
+                '<div class="ml-2">',
+                    '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_needchkft(\''+d.paper_id+'\'); pan_pdfviewer.hide();">Send Back to Full-Text Review</button>',
+                '</div>',
+            ].join('');
+        }
+        
+
+        return html;
+    },
+
+    __get_select_fulltext_exclusion_reasons: function(d, default_value, cq_abbr, onchange) {
+        if (typeof(default_value) == 'undefined') {
+            default_value = '';
+        }
+        if (typeof(cq) == 'undefined') {
+            cq = '';
+        }
+        if (typeof(onchange) == 'undefined') {
+            onchange = '';
+        }
+        var reasons = [];
+        for (let i = 0; i < srv_screener.project.settings.exclusion_reasons.length; i++) {
+            const er = srv_screener.project.settings.exclusion_reasons[i];
+            let opt_r = '';
+            if (default_value == '') {
+                opt_r = '<option value="'+er+'">'+er+'</option>';
+            } else {
+                if (default_value == er) {
+                    opt_r = '<option value="'+er+'" selected>'+er+'</option>';
+                } else {
+                    opt_r = '<option value="'+er+'">'+er+'</option>';
+                }
+            }
+            reasons.push(opt_r);
+        }
+        reasons = reasons.join('\n');
+        var html = [
+            '<select class="custom-select exclusion-reason custom-select-sm mr-2" id="tb-row-exclude-reason-'+d.paper_id+'" cq="'+cq_abbr+'" onchange="'+onchange+'">',
+                reasons,
+            '</select>'
+        ].join('');
+        return html;
+    },
+
+    /**
+     * Deprecated
+     */
+    // __get_select_fulltext_exclusion_reasons_v1: function(d) {
+    //     var reasons = [];
+    //     for (let i = 0; i < srv_screener.project.settings.exclusion_reasons.length; i++) {
+    //         const er = srv_screener.project.settings.exclusion_reasons[i];
+    //         let opt_r = '<option value="'+er+'">'+er+'</option>';
+    //         reasons.push(opt_r);
+    //     }
+    //     reasons = reasons.join('\n');
+    //     var html = [
+    //         '<div class="ml-2">',
+    //         '<select class="custom-select exclusion-reason custom-select-sm mr-2" id="tb-row-exclude-reason-'+d.paper_id+'">',
+    //             reasons,
+    //         '</select>',
+            
+    //         '<button class="btn btn-danger btn-sm" type="button" onclick="tbjs_paperlist.exclude_by_ft(\''+d.paper_id+'\')">',
+    //             'Exclude by Full-Text Review',
+    //         '</button>',
+
+    //         '</div>'
+    //     ].join('');
+    //     return html;
+    // },
+
+    /**
+     * Deprecated
+     */
+    // __get_select_fulltext_exclusion_reasons_v1: function(d) {
+    //     var html = [
+    //         '<div class="dropdown">',
+    //         '<button class="btn btn-danger dropdown-toggle btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">',
+    //             'Exclude by Full-Text Review',
+    //         '</button>',
+    //         '<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">',
+    //             '<a class="dropdown-item" href="javascript:void(0);" onclick="tbjs_paperlist.exclude_by_ft(\''+d.paper_id+'\', \'Conference Abstracts\')">Conference Abstracts</a>',
+    //             '<a class="dropdown-item" href="javascript:void(0);" onclick="tbjs_paperlist.exclude_by_ft(\''+d.paper_id+'\', \'Editorials, Commentaries, Case Reports\')">Editorials, Commentaries, Case Reports</a>',
+    //             '<a class="dropdown-item" href="javascript:void(0);" onclick="tbjs_paperlist.exclude_by_ft(\''+d.paper_id+'\', \'Non-Randomized Studies\')">Non-Randomized Studies</a>',
+    //             '<a class="dropdown-item" href="javascript:void(0);" onclick="tbjs_paperlist.exclude_by_ft(\''+d.paper_id+'\', \'Cohort Studies\')">Cohort Studies</a>',
+    //             '<a class="dropdown-item" href="javascript:void(0);" onclick="tbjs_paperlist.exclude_by_ft(\''+d.paper_id+'\', \'Narrative Reviews\')">Narrative Reviews</a>',
+    //             '<a class="dropdown-item" href="javascript:void(0);" onclick="tbjs_paperlist.exclude_by_ft(\''+d.paper_id+'\', \'Systematic Reviews and Meta-Analyses\')">Systematic Reviews and Meta-Analyses</a>',
+    //             '<a class="dropdown-item" href="javascript:void(0);" onclick="tbjs_paperlist.exclude_by_ft(\''+d.paper_id+'\', \'Subgroup Analysis/Exploratory Analysis/Sub-Study\')">Subgroup Analysis/Exploratory Analysis/Sub-Study</a>',
+    //             '<a class="dropdown-item" href="javascript:void(0);" onclick="tbjs_paperlist.exclude_by_ft(\''+d.paper_id+'\', \'ICI in the control arm\')">ICI in the control arm</a>',
+ 
+    //             '<div class="dropdown-divider"></div>',
+    //             '<a class="dropdown-item" href="javascript:void();">Add a new reason</a>',
+    //         '</div>',
+    //         '</div>',
+    //     ].join('');
+    //     return html;
+    // },
+
+    __get_btn_check_later: function(d) {
+        var html = '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.set_label_check_later(\''+d.paper_id+'\')"><i class="far fa-clock"></i> Check Later</button>';
+
+        if (srv_screener.has_label_ckl(d)) {
+            html = '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.unset_label_check_later(\''+d.paper_id+'\')"><i class="far fa-clock"></i> Has Checked</button>';
+        }
+
+        return html;
+    },
+
+    __get_div_rct_yes_no: function(d) {
+        var usr_fb = '';
+        if (d.meta.pred[0].hasOwnProperty(srv_screener.ATTR_PRED_RCT_USR_FB)) {
+            usr_fb = srv_screener.RCT_USER_FEEDBACK[d.meta.pred[0][srv_screener.ATTR_PRED_RCT_USR_FB]];
+        }
+        var html = [
+            '<label class="mr-2">This study is <span id="tb-row-rct-feedback-'+d.paper_id+'">'+usr_fb+'</span></label>', 
+            '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.set_rct_feedback(\''+d.paper_id+'\', 1)">It\'s a <span class="text-rct-yes">RCT</span></button> ',
+            '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.set_rct_feedback(\''+d.paper_id+'\', 0)">It\'s <span class="text-rct-no">NOT</span> RCT</button> ',
+            '&nbsp;&nbsp;<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.set_rct_feedback(\''+d.paper_id+'\', -1)">RESET</button>',
+        ].join('');
+
+        return html;
+    },
+
+    __get_div_rfc_yes_no: function(d, cq_abbr) {
+        if (typeof(cq_abbr)=='undefined') {
+            cq_abbr = '';
+        }
+        var html = []
+        
+        if (d.ss_ex.hasOwnProperty('label')) {
+            if (d.ss_ex.label.hasOwnProperty('RFC')) {
+                // alredy have!
+                html = [
+                    '<button class="ml-2 btn btn-sm btn-default" onclick="tbjs_paperlist.set_label_rfc(\''+d.paper_id+'\', \'no\', \''+cq_abbr+'\')">',
+                        '<i class="fa fa-times"></i> ',
+                        'Withdraw Agreement',
+                    '</button>'
+                ];
+            } else if (d.ss_ex.label.hasOwnProperty('DIS')) {
+                // alredy have!
+                html = [
+                    '<button class="ml-2 btn btn-sm btn-default" onclick="tbjs_paperlist.set_label_dis(\''+d.paper_id+'\', \'no\', \''+cq_abbr+'\')">',
+                        '<i class="fa fa-times"></i> ',
+                        'Withdraw Disagreement',
+                    '</button>'
+                ];
+            } else {
+                // no RFC yet
+                html = [
+                    '<button class="ml-2 btn btn-sm btn-default" onclick="tbjs_paperlist.set_label_rfc(\''+d.paper_id+'\', \'yes\', \''+cq_abbr+'\')">',
+                        '<i class="fa fa-check"></i> ',
+                        'Agree',
+                    '</button>',
+
+                    '<button class="ml-2 btn btn-sm btn-default" onclick="tbjs_paperlist.set_label_dis(\''+d.paper_id+'\', \'yes\', \''+cq_abbr+'\')">',
+                        '<i class="fa fa-times"></i> ',
+                        'Disagree',
+                    '</button>'
+                ];
+            }
+        } else {
+            // no rfc yet
+            html = [
+                '<button class="ml-2 btn btn-sm btn-default" onclick="tbjs_paperlist.set_label_rfc(\''+d.paper_id+'\', \'yes\', \''+cq_abbr+'\')">',
+                    '<i class="fa fa-check"></i> ',
+                    'Agree',
+                '</button>',
+                
+                '<button class="ml-2 btn btn-sm btn-default" onclick="tbjs_paperlist.set_label_dis(\''+d.paper_id+'\', \'yes\', \''+cq_abbr+'\')">',
+                    '<i class="fa fa-times"></i> ',
+                    'Disagree',
+                '</button>'
+            ];
+        }
+        
+
+        return html.join('');
+    },
+
+    __get_span_rct_id: function(d) {
+        var html = [];
+        if (d.meta.rct_id == '') {
+            html = [
+                '<a href="javascript:void(0);" onclick="tbjs_paperlist.set_rct_id(\''+d.paper_id+'\', \'\')" title="Click to update the NCT number for this study">Add NCT Number</a>'
+            ].join('');
+        } else {
+            html = [
+                '<a target="_blank" href="https://clinicaltrials.gov/ct2/show/'+d.meta.rct_id+'" title="Check this clinical trial">'+d.meta.rct_id+'</a> ',
+                '<a href="javascript:void(0);" onclick="tbjs_paperlist.set_rct_id(\''+d.paper_id+'\', \''+d.meta.rct_id+'\')" title="Click to update the NCT number for this study">',
+                    '<i class="fa fa-edit"></i>',
+                '</a>'
+            ].join('');
+        }
+
+        return html;
+    },
+
+    __get_span_pmid: function(d) {
+        var html_study_type = '';
+        if (d.meta.rct_id == '') {
+
+        } else {
+            if (d.meta.hasOwnProperty('study_type') && d.meta.study_type != null) {
+                // this means this paper has been sorted
+                if (d.meta.rct_seq == 0) {
+                    html_study_type = '<span class="ml-1 mr-1 study-type-'+
+                        d.meta.study_type+'"> '+
+                        '(<span class="badge badge-pill badge-info">'+d.meta.study_type.toUpperCase()+'</span>)'+
+                        '</span>';
+
+                } else {
+                    html_study_type = '<span class="ml-1 mr-1 study-type-'+
+                        d.meta.study_type+'"> '+
+                        '(<span class="badge badge-pill badge-success">'+d.meta.study_type.toUpperCase()+' - '+d.meta.rct_seq+'</span>)'+
+                        '</span>';
+                }
+            }
+        }
+
+        // build html
+        var html = [html_study_type];
+        
+        // now build the id
+        // if (d.is_pmid) {
+        //     // the simplest case, just the pmid
+        //     html.push(
+        //         'PMID: ' + jarvis.get_link_pmid(d.pid)
+        //     );
+        // } else {
+        //     if (d.meta.hasOwnProperty('ds_id')) {
+        //         // wow, that's great, it has the ds_id!
+        //         if (d.meta.ds_id.hasOwnProperty('pmid')) {
+        //             // ok, this record has pmid!
+        //             html.push(
+        //                 'PMID: ' + jarvis.get_link_pmid(d.meta.ds_id.pmid)
+        //             );
+
+        //         } else {
+        //             // just show others
+        //             for (const ds_name in d.meta.ds_id) {
+        //                 html.push(
+        //                     ds_name.toLocaleUpperCase() + 
+        //                     ': ' + 
+        //                     d.meta.ds_id[ds_name] + 
+        //                     ' | '
+        //                 );
+        //             }
+        //         } 
+
+        //     } else {
+        //         if (d.pid_type == 'MD5') {
+        //             if (d.meta.hasOwnProperty('doi') && d.meta.doi != '') {
+        //                 html.push(
+        //                     'N/DOI' + ': ' + 
+        //                     jarvis.get_link_doi(d.meta.doi)
+        //                 );
+        //             } else {
+        //                 html.push(
+        //                     'NOID'
+        //                 );
+        //             }
+        //         } else {
+        //             html.push(
+        //                 d.pid_type + ': ' + d.pid
+        //             );
+        //         }
+        //     }
+            
+        // }
+
+        if (d.meta.hasOwnProperty('ds_id')) {
+            for (const ds_type in d.meta.ds_id) {
+                const ds_id = d.meta.ds_id[ds_type];
+                if (ds_type == 'pmid') {
+                    html.push(
+                        '<span class="ds-id-span">PMID: ' + 
+                        jarvis.get_link_pmid(ds_id) + '</span>'
+                    );
+                } else if (ds_type == 'doi') {
+                    html.push(
+                        '<span class="ds-id-span">DOI: ' + 
+                        jarvis.get_link_doi(ds_id) + '</span>'
+                    );
+                } else {
+                    html.push(
+                        '<span class="ds-id-span">' +
+                        ds_type + ': ' + ds_id + 
+                        '</span>'
+                    );
+                }
+            }
+        } else {
+            // ??? what? usually won't happen
+            var ds = srv_shared.get_paper_pmid_if_exists(d);
+            html.push(
+                ds.type + ': ' + ds.id
+            );
+        }
+
+        // push the edit at last
+        html.push(
+            ' <a href="javascript:void(0);" class="ml-2" onclick="tbjs_paperlist.set_pmid(\''+d.paper_id+'\', \''+d.pid+'\')" title="Click to update the ID for this study">' +
+                '<i class="fa fa-edit"></i>' +
+            '</a>'
+        );
+
+        html = html.join('');
+        
+        return html;
+    },
+
+    __get_tr_pdfs: function(d) {
+        return '<tr>' +
+            '<td>Files: </td>' +
+            '<td id="tb-rowext-pdfs-'+d.paper_id+'" class="d-flex flex-row">' +
+                '<form id="tb-rowext-pdfs-form-'+d.paper_id+'" method="post" enctype="multipart/form-data">' +
+                '<div class="mr-2">' + 
+                    '<input type="hidden" name="paper_id" value="'+d.paper_id+'">' + 
+                    '<input type="file" name="files[]" multiple accept=".pdf" class="" id="tb-row-upload-'+d.paper_id+'">' +
+                    // '<label class="custom-file-label" for="tb-row-upload-'+d.paper_id+'">Choose file</label>' +
+                '</div>' +
+                '</form>' +
+                '<button id="btn_upload_'+d.paper_id+'" class="btn btn-sm btn-primary mr-2" onclick="srv_pdfworker.update_pdfs(\''+d.paper_id+'\');">Upload</button>' + 
+                
+                '<div id="tb-rowext-pdfs-list-'+d.paper_id+'">' +
+                this.__get_div_pdfs(d) +
+                '</div>'
+
+            '</td>' +
+        '</tr>';
+    },
+
+    __get_tr_authors: function(d) {
+        return '<tr>'+
+            '<td>Authors:</td>'+
+            '<td id="tb-rowext-authors-'+d.paper_id+'"> <i class="fas fa-spinner fa-spin"></i> Loading from server ... </td>'+
+        '</tr>';
+    },
+
+    __get_tr_title: function(d) {
+        return '<tr>' + 
+            '<td>Title: </td>' +
+            '<td><a title="Copy the title" id="btn_copy_title_'+d.paper_id+'" class="btn btn-xs btn-ve" data-clipboard-text="'+d.title+'"><i class="far fa-copy"></i></a> ' + d.title + '</td>' +
+        '</tr>';
+    },
+
+    __get_tr_info: function(d) {
+        return '<tr>'+
+            '<td>Information:</td>'+
+            '<td id="tb-rowext-info-'+d.paper_id+'">' +
+                this.__get_line_info(d) + 
+            '</td>'+
+        '</tr>';
+    },
+
+    __get_tr_abstract: function(d) {
+        return '<tr>'+
+            '<td>Abstract:</td>'+
+            '<td id="tb-rowext-abstract-'+d.paper_id+'" class="pb-4"> <i class="fas fa-spinner fa-spin"></i> Loading from server ... </td>'+
+        '</tr>';
+    },
+
+    __get_tr_tags: function(d) {
+        return '<tr>'+
+            '<td>Tags:</td>'+
+            '<td class="d-flex flex-row">' + 
+                // this.__get_dropdown_tags(d) + 
+                '<div id="tb-rowext-tags-'+d.paper_id+'" class="tr-tags">' +
+                    this.__get_line_tags(d) + 
+                '</div>' +
+            '</td>' + 
+        '</tr>';
+        // return '';
+    },
+
+    __get_tr_cqs: function(d) {
+        if (srv_screener.project.settings.clinical_questions.length == 1) {
+            // for those only has one cq, no need to change this 
+            return '';
+        }
+
+        console.log(d);
+        var html = [
+            '<tr id="tb-tr-cqs-'+d.paper_id+'">',
+            '<td>C.Questions:</td>',
+            '<td class="d-flex flex-row flex-wrap">',
+        ];
+
+        for (let i = 0; i < srv_screener.project.settings.clinical_questions.length; i++) {
+            const cq = srv_screener.project.settings.clinical_questions[i];
+            // If it has not clinical question we can add it 
+            if(!(d.ss_ex.ss_cq.hasOwnProperty(cq.abbr))){
+                d.ss_ex.ss_cq[cq.abbr] = {
+                    "c": "no",
+                    "d": "no",
+                    "r": ""
+                }
+            }
+
+            if (d.ss_ex.ss_cq[cq.abbr].d == 'yes') {
+                // this paper is selected for this cq
+                html.push(
+                    '<div class="col-md-2 cq-name">',
+                        
+                        '<input type="checkbox" class="mr-1" id="chk_p_'+d.paper_id+'_cq_'+i+'" checked onchange="tbjs_paperlist.set_ss_cq(\''+d.paper_id+'\', \''+cq.abbr+'\', event)">',
+                        '<span title="'+cq.name+'" for="chk_p_'+d.paper_id+'_cq_'+i+'">',
+                            cq.name,
+                        '</span>',
+                    '</div>'
+                );
+
+            } else {
+                // this paper is NOT selected for this cq
+                var onchange = 'tbjs_paperlist.set_ss_cq_exclude_reason(\''+d.paper_id+'\', \''+cq.abbr+'\', event)';
+                html.push(
+                    '<div class="col-md-2 cq-name">',
+                        '<input type="checkbox" class="mr-1" id="chk_p_'+d.paper_id+'_cq_'+i+'" onchange="tbjs_paperlist.set_ss_cq(\''+d.paper_id+'\', \''+cq.abbr+'\', event)">',
+                        '<span title="'+cq.name+'" for="chk_p_'+d.paper_id+'_cq_'+i+'">',
+                            cq.name,
+                        '</span>',
+                        '<br>',
+                        this.__get_select_fulltext_exclusion_reasons(d, d.ss_ex.ss_cq[cq.abbr].r, cq.abbr, onchange),
+                    '</div>'
+                );
+            }
+        }
+        html.push('</td></tr>');
+
+        return html.join('');
+    },
+
+    /**
+     * Generate info line content for the information
+     */
+    __get_line_info: function(d) {
+        return this.__get_span_rct_id(d) + ' | ' +
+            this.__get_span_pmid(d) + ' | ' +
+            '<span>' + d.journal + '</span> | ' + 
+            this.__get_span_pub_date(d) + ' | ' +
+            this.__get_span_sync(d);
+    },
+
+    /**
+     * Generate span for the pub_date
+     */
+    __get_span_pub_date: function(d) {
+        var html = '';
+        if (d.pub_date == '') {
+            html = [
+                '<a href="javascript:void(0);" onclick="tbjs_paperlist.set_pub_date(\''+d.paper_id+'\', \'\')" title="Click to set the publication date">Add Publication Date</a>'
+            ].join('');
+        } else {
+            html = [
+                '' + d.pub_date + ' ',
+                '<a href="javascript:void(0);" onclick="tbjs_paperlist.set_pub_date(\''+d.paper_id+'\', \''+d.pub_date+'\')" title="Click to update the publication date for this study">',
+                    '<i class="fa fa-edit"></i>',
+                '</a>'
+            ].join('');
+        }
+
+        return html;
+    },
+
+    __get_span_sync: function(d) {
+        if (d.is_pmid) {
+            return '<a href="javascript:void(0);" class="text-sm" onclick="tbjs_paperlist.sync_data_from_pubmed(\''+d.paper_id+'\', \''+d.pid+'\')"><i class="fa fa-sync"></i> Sync</a>';
+
+        } else {
+            return '';
+        }
+    },
+
+    /**
+     * Generate the div of pdfs
+     */
+    __get_div_pdfs: function(d) {
+        var html_tags = [];
+
+        if (!d.meta.hasOwnProperty('pdfs')) {
+            html_tags = html_tags.join('');
+            return html_tags;
+        }
+
+        // add the pdfs
+        for (let i = 0; i < d.meta.pdfs.length; i++) {
+            const pdf_meta = d.meta.pdfs[i];
+            html_tags.push(
+                '<div class="btn-group mr-2">' +
+                '    <button type="button" class="btn btn-sm btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
+                '        <i class="far fa-file-pdf"></i> ' + pdf_meta.display_name +
+                '    </button>' +
+                '    <div class="dropdown-menu dropdown-menu-right">' +
+                '        <a class="dropdown-item" href="javascript:void(0);" onclick="srv_pdfworker.view_pdf(\''+d.paper_id+'\', \''+pdf_meta.file_id+'\', \''+pdf_meta.folder+'\')"><i class="far fa-envelope-open"></i> View this PDF</a>' +
+                '        <a class="dropdown-item" href="javascript:void(0);" onclick="srv_pdfworker.download_pdf(\''+d.paper_id+'\', \''+pdf_meta.file_id+'\', \''+pdf_meta.folder+'\', \'File-'+i+'.pdf\')"><i class="fa fa-download"></i> Download this PDF</a>' +
+                '        <div class="dropdown-divider"></div>' +
+                '        <a class="dropdown-item" href="javascript:void(0);" onclick="srv_pdfworker.remove_pdf(\''+d.paper_id+'\', \''+pdf_meta.file_id+'\', \''+pdf_meta.folder+'\')"><i class="far fa-trash-alt"></i> Delete this file</a>' +
+                '    </div>' +
+                '</div>'
+            );
+        }
+        html_tags = html_tags.join('');
+        return html_tags;
+    },
+
+    /**
+     * Generate tags for in-title display
+     */
+    __get_div_tags: function(d) {
+        var html_tags = [ '<div>' ];
+        if (d.meta.hasOwnProperty('tags')) {
+            for (var i = 0; i < d.meta.tags.length; i++) {
+                var tag = d.meta.tags[i];
+                html_tags.push(
+                    '<span class="badge badge-tag ml-2">'+
+                        '<i class="fa fa-tag"></i> ' + 
+                        tag +
+                    '</span>'
+                    // '<div class="alert alert-secondary">'+tag+'</div>'
+                )
+            }
+        }
+        // the close of the spans
+        html_tags.push('</div>');
+
+        // convert to string
+        html_tags = html_tags.join('');
+    
+        return html_tags;
+    },
+
+    /**
+     * Generate a line of tags for user to label the study
+     */
+    __get_line_tags: function(d) {
+        // for the tag names 
+        var tag_names = [];
+        // for indicating whether the tag is used for this study
+        var tag_useds = [];
+
+        // first, put the tags of this project in the list
+        for (var i = 0; i < srv_screener.project.settings.tags.length; i++) {
+            var tag = srv_screener.project.settings.tags[i];
+            tag_names.push(tag);
+            tag_useds.push(0);
+        }
+
+        // second, check the tags of this study
+        if (d.meta.hasOwnProperty('tags')) {
+            for (var i = 0; i < d.meta.tags.length; i++) {
+                var used_tag = d.meta.tags[i];
+                // check if this tag exists in the tag_names
+                var idx = tag_names.indexOf(used_tag);
+
+                if (idx < 0) {
+                    // which means it is a new tag
+                    tag_names.push(used_tag);
+                    tag_useds.push(1);
+                } else {
+                    // which means it is a existing tag
+                    tag_names[idx] = used_tag;
+                    tag_useds[idx] = 1;
+                }
+            }
+        }
+
+        // third, generate the line of tags according to the analysis result
+        var html_tags = ['<div>'];
+        for (var i = 0; i < tag_names.length; i++) {
+            var tag_name = tag_names[i];
+            var tag_used = tag_useds[i];
+
+            var class_tag = 'badge-tag-not-used';
+            if (tag_used == 0) {
+                // which means not used
+            } else {
+                // which means this tag is used for this study
+                class_tag = 'badge-tag';
+            }
+            html_tags.push(
+                '<span class="badge '+class_tag+' ml-2" onclick="tbjs_paperlist.toggle_tag(\''+d.paper_id+'\', \'' + tag_name + '\')">'+
+                    '<i class="fa fa-tag"></i> ' + 
+                    tag_name +
+                '</span>'
+            );
+        }
+        html_tags.push('</div>');
+
+        // convert to string
+        html_tags = html_tags.join('');
+
+        return html_tags;
+    },
+
+    __get_dropdown_tags: function(d) {
+        var html_options_tags = '';
+
+        // create a option list of tags
+        for (var i = 0; i < srv_screener.project.settings.tags.length; i++) {
+            var tag = srv_screener.project.settings.tags[i];
+            html_options_tags += '<a class="dropdown-item" href="javascript:void(0);" onclick="tbjs_paperlist.add_tag(\''+d.paper_id+'\', \'' + tag + '\')">' + tag + '</a>'
+        }
+
+        var html = [
+            '<div class="dropdown">',
+            '<button class="btn btn-default dropdown-toggle btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">',
+                'Add Tag',
+            '</button>',
+            '<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">',
+                html_options_tags,
+                // '<div class="dropdown-divider"></div>',
+                // '<a class="dropdown-item" href="javascript:void();">Add a new tag</a>',
+            '</div>',
+            '</div>',
+        ].join('');
+
+        return html;
+    },
+
+    ///////////////////////////////////////////////////////////////////////////
+    // the functions related to pdf
+    ///////////////////////////////////////////////////////////////////////////
+
+    
+
+    ///////////////////////////////////////////////////////////////////////////
+    // the functions related to screening
+    ///////////////////////////////////////////////////////////////////////////
+
+    add_tag: function(paper_id, tag) {
+        srv_screener.add_tag(paper_id, tag, function(data) {
+            var paper = data.paper;
+            // update the tag list UI
+            $('#tb-rowext-tags-' + paper.paper_id).html(
+                tbjs_paperlist.__get_div_tags(paper)
+            );
+
+            // update the tb data list
+            tbjs_paperlist.update_data_by_paper(paper);
+        });
+    },
+
+    toggle_tag: function(paper_id, tag) {
+        srv_screener.toggle_tag(paper_id, tag, function(data) {
+            var paper = data.paper;
+            // update the tag line UI
+            $('#tb-rowext-tags-' + paper.paper_id).html(
+                tbjs_paperlist.__get_line_tags(paper)
+            );
+
+            // update the tb data list
+            tbjs_paperlist.update_data_by_paper(paper);
+        });
+    },
+    
+    remove_paper_from_tbjs: function(paper_id) {
+        this.table.row($('#tb-row-' + paper_id))
+            .remove()
+            .draw(false);
+    },
+
+    exclude_by_tt: function(paper_id) {
+        // exclude from server
+        srv_screener.exclude_by_tt(paper_id, function() {
+            // update the count number
+            ui_category_stat.update();
+        });
+
+        // remove from the list
+        this.remove_paper_from_tbjs(paper_id);
+    },
+
+    exclude_by_ab: function(paper_id) {
+        // exclude from server
+        srv_screener.exclude_by_ab(paper_id, function() {
+            // update the count number
+            ui_category_stat.update();
+        });
+
+        // remove from the list
+        this.remove_paper_from_tbjs(paper_id);
+    },
+
+    exclude_by_ft: function(paper_id, reason) {
+        if (typeof(reason) == 'undefined') {
+            reason = $('#tb-row-exclude-reason-' + paper_id).val();
+        }
+        // exclude from server
+        srv_screener.exclude_by_ft(paper_id, reason, function() {
+            // update the count number
+            ui_category_stat.update();
+        });
+
+        // remove from the list
+        this.remove_paper_from_tbjs(paper_id);
+    },
+
+    include_in_sr: function(paper_id, reason) {
+        // mark include in server
+        srv_screener.include_in_sr(paper_id, reason, function() {
+            // update the count number
+            ui_category_stat.update();
+        });
+
+        // remove from the list
+        this.remove_paper_from_tbjs(paper_id);
+    },
+
+    include_in_srma: function(paper_id) {
+        // mark include in server
+        srv_screener.include_in_srma(paper_id, function() {
+            // update the count number
+            ui_category_stat.update();
+        });
+
+        // remove from the list
+        this.remove_paper_from_tbjs(paper_id);
+    },
+
+    set_pub_date: function(paper_id, rct_id) {
+        var txt = jarvis.prompt(
+            'Please input the NCT number (e.g., 2021-03-01)', 
+            rct_id
+        );
+
+        if (txt == null) {
+            return;
+        }
+        txt = txt.trim();
+
+        if (txt == '') {
+            return;
+        }
+
+        srv_screener.set_pub_date(paper_id, txt, function(data) {
+            // console.log('* set RCT_ID!', data);
+            toast("Updated publication date [" + data.paper.pub_date + '] for ' + data.paper.seq_num);
+            var paper = data.paper;
+
+            // update the UI, well, just update the whole line of info
+            $('#tb-rowext-info-' + paper.paper_id).html(
+                tbjs_paperlist.__get_line_info(paper)
+            );
+
+            // update the tb data list
+            tbjs_paperlist.update_data_by_paper(data.paper);
+        });
+    },
+
+    set_rct_id: function(paper_id, rct_id) {
+        var txt = jarvis.prompt('Please input the NCT number (e.g., NCT12345678)', rct_id);
+
+        if (txt == null) {
+            return;
+        }
+        txt = txt.trim();
+
+        if (txt == '') {
+            return;
+        }
+
+        srv_screener.set_rct_id(paper_id, txt, function(data) {
+            // console.log('* set RCT_ID!', data);
+            toast("Updated NCT Number [" + data.paper.meta.rct_id + '] for ' + data.paper.seq_num);
+            var paper = data.paper;
+
+            // update the UI, well, just update the whole line of info
+            $('#tb-rowext-info-' + paper.paper_id).html(
+                tbjs_paperlist.__get_line_info(paper)
+            );
+
+            // update the tb data list
+            tbjs_paperlist.update_data_by_paper(data.paper);
+        });
+    },
+
+    set_pmid: function(paper_id, pmid) {
+        var txt = jarvis.prompt('Please input the new PubMed ID (e.g., 12345678) or other ID.', pmid);
+
+        if (txt == null) {
+            return;
+        }
+        txt = txt.trim();
+
+        if (txt == '') {
+            return;
+        }
+
+        if (txt.indexOf(',')>=0) {
+            // ok, this is for setting other id
+            var ps = txt.split(',');
+            var ds_name = ps[0];
+            var ds_id = ps[1];
+
+            // send req
+            srv_screener.set_meta_ds_id(paper_id, ds_name, ds_id, function(data) {
+                // console.log('* set RCT_ID!', data);
+                toast("Updated DS ID "+ds_name+" for paper [" + data.paper.pid + '] for ' + data.paper.seq_num);
+                var paper = data.paper;
+
+                // update the UI, well, just update the whole line of info
+                $('#tb-rowext-info-' + paper.paper_id).html(
+                    tbjs_paperlist.__get_line_info(paper)
+                );
+
+                // update the tb data list
+                tbjs_paperlist.update_data_by_paper(data.paper);
+            });
+
+        } else {
+            // 2023-06-03: use set_pid instead
+            srv_screener.set_pid(paper_id, txt, function(data) {
+
+                if (data.success) {
+                    // console.log('* set RCT_ID!', data);
+                    toast("Updated PID [" + data.paper.meta.ds_id.pmid + '] for ' + data.paper.seq_num);
+                    var paper = data.paper;
+
+                    // update the UI, well, just update the whole line of info
+                    $('#tb-rowext-info-' + paper.paper_id).html(
+                        tbjs_paperlist.__get_line_info(paper)
+                    );
+
+                    // update the tb data list
+                    tbjs_paperlist.update_data_by_paper(data.paper);
+
+                } else {
+                    // toast("Existed PMID [" + data.paper.pid + '] for another paper with sequence number [' + data.paper.seq_num + ']', 'error');
+                    toast(data.msg, 'warning');
+                }
+            });
+        }
+    },
+
+    set_rfc: function(paper_id, rfc, cq_abbr) {
+        srv_screener.set_label_rfc(
+            paper_id, rfc, cq_abbr, function(data) {
+                var paper = data.paper;
+                
+                if (data.success) {
+                    // update the tag list UI
+                    $('#tb-tr-cqs-' + paper.paper_id).replaceWith(
+                        tbjs_paperlist.__get_tr_cqs(paper)
+                    );
+
+                    // update the tb data list
+                    tbjs_paperlist.update_data_by_paper(paper);
+
+                    // show this good news!
+                    jarvis.toast('Updated the question selection for paper ' + paper.seq_num + ' | ' + paper.short_name);
+                } else {
+                    jarvis.toast('Failed when setting clinical question for this study, try again later or contact administrator', 'warning');
+                }
+            }
+        );
+    },
+
+    set_ss_cq: function(paper_id, cq_abbr, event) {
+        var ss_cq = event.target.checked? 'yes':'no';
+        // mark include in server
+        srv_screener.set_ss_cq(paper_id, cq_abbr, ss_cq, function(data) {
+            var paper = data.paper;
+            ui_category_stat.update();
+
+            if (data.success) {
+                // update the tag list UI
+                $('#tb-tr-cqs-' + paper.paper_id).replaceWith(
+                    tbjs_paperlist.__get_tr_cqs(paper)
+                );
+
+                // update the tb data list
+                tbjs_paperlist.update_data_by_paper(paper);
+
+                // show this good news!
+                jarvis.toast('Updated the question selection for paper ' + paper.seq_num + ' | ' + paper.short_name);
+            } else {
+                jarvis.toast('Failed when setting clinical question for this study, try again later or contact administrator', 'warning');
+            }
+        });
+    },
+
+    set_ss_cq_exclude_reason: function(paper_id, cq_abbr, event) {
+        // return;
+        // console.log(event);
+        var reason = event.target.value;
+
+        srv_screener.set_ss_cq_exclude_reason(
+            paper_id, cq_abbr, 'no', reason,
+            function(data) {
+                var paper = data.paper;
+
+                if (data.success) {
+                    // update the tag list UI
+                    $('#tb-tr-cqs-' + paper.paper_id).replaceWith(
+                        tbjs_paperlist.__get_tr_cqs(paper)
+                    );
+
+                    // update the tb data list
+                    tbjs_paperlist.update_data_by_paper(paper);
+
+                    // show this good news!
+                    jarvis.toast('Updated the exclusion reason for paper ' + paper.seq_num + ' | ' + paper.short_name);
+                } else {
+                    jarvis.toast('Failed when setting exclusion reason for this study, try again later or contact administrator', 'warning');
+                }
+            }
+        );
+    },
+    
+    set_unscreened: function(paper_id) {
+        // mark include in server
+        srv_screener.set_unscreened(paper_id, function() {
+            // update the count number
+            ui_category_stat.update();
+        });
+
+        // remove from the list
+        this.remove_paper_from_tbjs(paper_id);
+    },
+    
+    set_needchkft: function(paper_id) {
+        // mark include in server
+        srv_screener.set_needchkft(paper_id, function() {
+            // update the count number
+            ui_category_stat.update();
+        });
+
+        // remove from the list
+        this.remove_paper_from_tbjs(paper_id);
+    },
+
+    set_label_rfc: function(paper_id, rfc, cq_abbr) {
+        // mark include in server
+        srv_screener.set_label_rfc(paper_id, rfc, cq_abbr, function(data) {
+            var paper = data.paper;
+            if (data.success) {
+                // update the tb data list
+                tbjs_paperlist.update_data_by_paper(paper);
+
+                // update the action tr
+                $('#tb-tr-actions-' + paper.paper_id).replaceWith(
+                    tbjs_paperlist.__get_tr_actions_by_stage(paper)
+                );
+
+                // update the count number
+                ui_category_stat.update();
+
+                // show this good news!
+                jarvis.toast('Updated the agreement for paper ' + paper.seq_num + ' | ' + paper.short_name);
+            } else {
+                jarvis.toast('Failed when setting agreement for this study, try again later or contact administrator', 'warning');
+            }
+        });
+    },
+
+    set_label_dis: function(paper_id, dis, cq_abbr) {
+        // mark include in server
+        srv_screener.set_label_dis(paper_id, dis, cq_abbr, function(data) {
+            var paper = data.paper;
+            if (data.success) {
+                // update the tb data list
+                tbjs_paperlist.update_data_by_paper(paper);
+
+                // update the action tr
+                $('#tb-tr-actions-' + paper.paper_id).replaceWith(
+                    tbjs_paperlist.__get_tr_actions_by_stage(paper)
+                );
+
+                // update the count number
+                ui_category_stat.update();
+
+                // show this good news!
+                jarvis.toast('Updated the agreement for paper ' + paper.seq_num + ' | ' + paper.short_name);
+            } else {
+                jarvis.toast('Failed when setting agreement for this study, try again later or contact administrator', 'warning');
+            }
+        });
+    },
+
+    set_label_check_later: function(paper_id) {
+        // mark include in server
+        srv_screener.set_label_check_later(paper_id, function(data) {
+            if (data.success) {
+                // update the count number
+                ui_category_stat.update();
+
+                // update the list
+                var papers = data.papers;
+
+                for (let i = 0; i < papers.length; i++) {
+                    const paper = papers[i];
+                    
+                    // update the tag list UI
+                    $('#tb-tr-actions-' + paper.paper_id).replaceWith(
+                        tbjs_paperlist.__get_tr_actions_by_stage(paper)
+                        );
+                        
+                    // update the tb data list
+                    tbjs_paperlist.update_data_by_paper(paper);
+                    
+                    // show this good news!
+                    jarvis.toast('Set paper check later. ' + paper.seq_num + ' | ' + paper.short_name);
+                }
+            } else {
+                jarvis.toast('Failed when setting clinical question for this study, try again later or contact administrator', 'warning');
+            }
+
+        });
+
+        // remove from the list
+        // this.remove_paper_from_tbjs(paper_id);
+    },
+
+    unset_label_check_later: function(paper_id) {
+        // mark include in server
+        // srv_screener.unset_label_check_later(paper_id, function(data) {
+        //     // update the count number
+        //     ui_category_stat.update();
+        // });
+        // mark un ckl in server
+        srv_screener.unset_label_check_later(paper_id, function(data) {
+            if (data.success) {
+                // update the count number
+                ui_category_stat.update();
+
+                // update the list
+                var papers = data.papers;
+
+                for (let i = 0; i < papers.length; i++) {
+                    const paper = papers[i];
+                    
+                    // update the tag list UI
+                    $('#tb-tr-actions-' + paper.paper_id).replaceWith(
+                        tbjs_paperlist.__get_tr_actions_by_stage(paper)
+                        );
+                        
+                    // update the tb data list
+                    tbjs_paperlist.update_data_by_paper(paper);
+                    
+                    // show this good news!
+                    jarvis.toast('Removed paper check later. ' + paper.seq_num + ' | ' + paper.short_name);
+                }
+            } else {
+                jarvis.toast('Failed when setting clinical question for this study, try again later or contact administrator', 'warning');
+            }
+
+        });
+
+        // remove from the list
+        // this.remove_paper_from_tbjs(paper_id);
+    },
+
+    toggle_label_rct: function() {
+        this.table.draw();
+    },
+
+    toggle_label_ckl: function() {
+        this.table.draw();
+    },
+
+    toggle_label_rfc: function() {
+        this.table.draw();
+    },
+
+    toggle_tag_filter: function() {
+        this.table.draw();
+    },
+
+    reset_tag_filter: function() {
+        $('.tag-filter').prop('checked', '');
+        this.toggle_tag_filter();
+    },
+
+    set_rct_feedback: function(paper_id, feedback) {
+        srv_screener.set_rct_feedback([paper_id], feedback, function(data) {
+            // update the UI
+            for (var i = 0; i < data.papers.length; i++) {
+                // get the value
+                var d = data.papers[i];
+                var usr_fb_val = d.meta.pred[0][srv_screener.ATTR_PRED_RCT_USR_FB];
+                var usr_fb = srv_screener.RCT_USER_FEEDBACK[usr_fb_val];
+
+                // show notification
+                jarvis.toast('Updated RCT feedback on [' + d.title + '] to [' + usr_fb_val + ':' + usr_fb + ']');
+
+                // update the tb data list first to redraw the icon column
+                tbjs_paperlist.update_data_by_paper(d);
+
+                // update the UI if using expand mode
+                $('#tb-row-rct-feedback-' + d.paper_id).html(usr_fb);
+            }
+        });
+    },
+
+    sort_by: function(col_idx, order) {
+        this.cfg.sort_by_idx = col_idx;
+        this.cfg.sort_by_order = order;
+
+        this.table.order([col_idx, order]).draw()
+    },
+
+    sort_by_decision_reason: function() {
+        if (this.cfg.sort_by_order == 'asc') {
+            this.cfg.sort_by_order = 'desc';
+        } else {
+            this.cfg.sort_by_order = 'asc';
+        }
+        this.sort_by(6, this.cfg.sort_by_order);
+    },
+
+    sort_by_decision_date: function() {
+        if (this.cfg.sort_by_order == 'asc') {
+            this.cfg.sort_by_order = 'desc';
+        } else {
+            this.cfg.sort_by_order = 'asc';
+        }
+        this.sort_by(11, this.cfg.sort_by_order);
+    },
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Export
+    ///////////////////////////////////////////////////////////////////////////
+    show_export_panel: function() {
+        // update the number
+        var n_total = this.table.rows({search:'applied'}).data().length;
+        $('#export_dialog_total_number').html(n_total);
+
+        $( "#export_dialog" ).modal({
+            width: 500
+        });
+    },
+
+    export_current_table: function() {
+        // show the panel first
+        var n_total = this.table.rows({search:'applied'}).data().length;
+
+        // collect the seq numbers
+        var seq_nums = [];
+        var data = this.table.rows({search:'applied'}).data();
+        for (let i = 0; i < data.length; i++) {
+            const d = data[i];
+            seq_nums.push(d.seq_num);
+        }
+
+        // send the request to get 
+        var project_id = Cookies.get('project_id');
+        var format = $('input[name=export_format]:checked').val();
+
+        // build a form
+        srv_collector.export(project_id, format, seq_nums);
+    },
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Get data from PubMed
+    ///////////////////////////////////////////////////////////////////////////
+    sync_data_from_pubmed: function(paper_id, pmid) {
+        toast('Getting data from PubMed to update this study ['+pmid+'] information ...');
+
+        // show the data for this study
+        pan_datasync.set_current_paper(
+            tbjs_paperlist.papers[pmid]
+        );
+
+        // get the details from pubmed
+        srv_pubmed.efetch([pmid], function(data) {
+            srv_pubmed.ret = data;
+            console.log('* efetch return', data);
+
+            // convert the data to a paper object
+            var paper_dict = srv_pubmed.parse_efetch_data(data);
+            console.log('* paper_dict', paper_dict);
+            if (Object.keys(paper_dict).length == 0) {
+                toast('Not found in PubMed', 'warning');
+                return;
+            }
+
+            // show the panel
+            pan_datasync.show();
+
+            srv_pubmed.paper_dict = paper_dict;
+
+            // get the only one paper in the dictionary
+            var pmid = Object.keys(paper_dict)[0];
+            var pubmed_paper = paper_dict[pmid];
+
+            // set the data
+            pan_datasync.set_pubmed_paper(
+                pubmed_paper
+            );
+
+            toast('Parsed the data from PubMed successfully!');
+        });
+    }
+};
+
+
+var pan_iecriteria = {
+    vpp_id: '#pan_iecriteria',
+    vpp: null,
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                criterias: srv_screener.project.settings.criterias,
+                is_hide: true
+            },
+            methods: {
+                toggle: function() {
+                    pan_iecriteria.toggle();
+                }
+            }
+        });
+    },
+
+    toggle: function() {
+        this.vpp.$data.is_hide = !this.vpp.$data.is_hide;
+    }
+};
+
+
+var pan_prisma = {
+    vpp_id: '#pan_prisma',
+    vpp: null,
+    fig: null,
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                is_hide: true,
+                project: srv_screener.project,
+                cq_abbr: null,
+                prisma: null
+            },
+            methods: {
+                toggle: function() {
+                    this.is_hide = !this.is_hide;
+                },
+
+                change_cq: function(cq_abbr) {
+                    this.cq_abbr = cq_abbr;
+
+                    // send request to get the data
+                    srv_screener.get_prisma_by_cq_abbr(
+                        cq_abbr,
+                        function(data) {
+                            console.log("* got prisma data", data);
+                            pan_prisma.vpp.$data.prisma = data.prisma;
+
+                            // update the figure
+                            if (pan_prisma.fig != null) {
+                                pan_prisma.fig.chart.clear();
+                                pan_prisma.fig = null;
+                            }
+                            // $('#pan_prisma_box_chart').html('');
+
+                            pan_prisma.fig = fgmk_prisma_sankey.make_fig(
+                                'pan_prisma_box',
+                                data.prisma
+                            );
+                        }
+                    );
+                }
+            },
+            mounted: function() {
+
+            }
+        });
+    }
+}
+
+
+var pan_pdfviewer = {
+    vpp_id: '#pan_pdfviewer',
+    vpp: null,
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                is_hide: true
+            },
+            methods: {
+                toggle: function() {
+                    pan_pdfviewer.toggle();
+                }
+            }
+        });
+    },
+
+    toggle: function() {
+        this.vpp.$data.is_hide = !this.vpp.$data.is_hide;
+    },
+
+    hide: function() {
+        this.vpp.$data.is_hide = true;
+    },
+
+    show: function() {
+        this.vpp.$data.is_hide = false;
+
+        // resize
+        var w = $('#tbjs_paperlist_tools').width();
+        var h = $(window).height() - 25;
+
+        $(this.vpp_id).css('width', w + 'px');
+        $(this.vpp_id).css('height', h + 'px');
+
+        // relocate
+        $(this.vpp_id).css('left', '330px');
+
+        // resize the iframe
+        $('#ifr_pdfviewer').height(h - 52);
+    },
+
+    update_toolbar: function(paper_id) {
+        $('#pan_pdfviewer_btns').html(
+            tbjs_paperlist._get_pdfview_toolbar({paper_id:paper_id})
+        );
+    },
+
+    load_pdf: function(folder, file_id) {
+        var pdf_url = "/pdfworker/pdf/" + folder + "/" + file_id + '.pdf';
+        document.getElementById("ifr_pdfviewer").contentWindow.PDFViewerApplication.open(pdf_url);
+    }
+};
+
+
+var pan_datasync = {
+    vpp_id: '#pan_datasync',
+    vpp: null,
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                is_hide: true,
+                is_btn_disabled: false,
+                current_paper: null,
+                pubmed_paper: null,
+                new_data: null
+            },
+            methods: {
+                toggle: function() {
+                    pan_datasync.toggle();
+                },
+
+                update_paper_detail: function() {
+                    // first, disable button
+                    this.is_btn_disabled = true;
+                }
+            }
+        });
+    },
+
+    set_current_paper: function(paper) {
+        this.vpp.current_paper = paper;
+    },
+
+    set_pubmed_paper: function(paper) {
+        this.vpp.pubmed_paper = paper;
+        
+        // update content
+        this.vpp.new_data = paper 
+        this.vpp.new_data.authors =  paper.authors.join('; ');
+    },
+
+    toggle: function() {
+        this.vpp.$data.is_hide = !this.vpp.$data.is_hide;
+    },
+
+    hide: function() {
+        this.vpp.$data.is_hide = true;
+    },
+
+    show: function() {
+        this.vpp.$data.is_hide = false;
+        this.vpp.$data.is_btn_disabled = false;
+
+        // resize
+        this.resize();
+
+        // relocate
+        $(this.vpp_id).css('left', '330px');
+    },
+
+    resize: function() {
+        // resize
+        var w = $('#tbjs_paperlist_tools').width();
+        var h = $(window).height() - 25;
+        h = 620;
+
+        $(this.vpp_id).css('width', w);
+        $(this.vpp_id).css('height', h);
+    }
+};
+
+
+var srv_pdfworker = {
+    api_url: {
+        upload_pdfs: '[[ url_for("pdfworker.upload_pdfs") ]]',
+        remove_pdf: '[[ url_for("pdfworker.remove_pdf") ]]',
+    },
+    ///////////////////////////////////////////////////////////////////////////
+    // the functions related to pdf
+    ///////////////////////////////////////////////////////////////////////////
+
+    update_pdfs: function(paper_id) {
+        // check the form files
+        var n_files = $('#tb-row-upload-' + paper_id).prop('files').length;
+
+        if (n_files < 1) {
+            return;
+        }
+
+        // get the pdf form data
+        var form_data = new FormData(
+            $('#tb-rowext-pdfs-form-' + paper_id)[0]
+        );
+
+        // disable the upload button and add animation
+        $('#btn_upload_' + paper_id)
+            .prop('disabled', true)
+            .html('Uploading <i class="fas fa-spinner fa-spin"></i> <span id="pdf_upload_progress"> - </span>');
+
+        // send the update
+        $.ajax({
+            type: 'POST',
+            url: srv_pdfworker.api_url.upload_pdfs,
+            data: form_data,
+            contentType: false,
+            cache: false,
+            processData: false,
+
+            // 2021-05-23: add a callback for the uploading animation
+            xhr: function() {
+                var xhr = new window.XMLHttpRequest();
+
+                xhr.upload.addEventListener("progress", function(evt) {
+                    if (evt.lengthComputable) {
+                        var percentComplete = evt.loaded / evt.total;
+                        percentComplete = parseInt(percentComplete * 100);
+                        // console.log(percentComplete);
+
+                        // show a percentage
+                        $('#pdf_upload_progress').html(
+                            percentComplete + '%'
+                        );
+
+                        if (percentComplete === 100) {
+
+                        }
+
+                    }
+                }, false);
+
+                return xhr;
+            },
+
+            success: function(data) {
+                console.log(data);
+
+                var paper = data.paper;
+
+                // update hte pdf list UI
+                $('#tb-rowext-pdfs-list-' + paper.paper_id).html(
+                    tbjs_paperlist.__get_div_pdfs(paper)
+                );
+
+                // update the button
+                $('#btn_upload_' + paper.paper_id)
+                    .prop('disabled', false)
+                    .html('Upload');
+
+                // update the tb data list
+                tbjs_paperlist.update_data_by_paper(paper);
+            },
+        });
+    },
+
+    view_pdf: function(paper_id, file_id, folder) {
+        // update the toolbar
+        pan_pdfviewer.update_toolbar(paper_id);
+
+        // show the PDF panel
+        pan_pdfviewer.show();
+
+        // load the PDF
+        pan_pdfviewer.load_pdf(folder, file_id);
+    },
+
+    download_pdf: function(paper_id, file_id, folder, display_name) {
+        var url = '/pdfworker/download_pdf/' + folder + '/' + file_id;
+        url += "?fn=" + encodeURI(display_name);
+        window.open(url);
+    },
+
+    remove_pdf: function(paper_id, file_id, folder) {
+        var ret = window.confirm('Deleted files could NOT be recovered. Are you sure to continue?');
+
+        if (!ret) {
+            return;
+        }
+
+        $.post(
+            srv_pdfworker.api_url.remove_pdf,
+            {
+                paper_id: paper_id,
+                pdf_metas: JSON.stringify([{
+                    folder: folder,
+                    file_id: file_id
+                }])
+            },
+            function(data) {
+                console.log(data);
+
+                var paper = data.paper;
+
+                // update hte pdf list UI
+                $('#tb-rowext-pdfs-list-' + paper.paper_id).html(
+                    tbjs_paperlist.__get_div_pdfs(paper)
+                );
+
+                // update the tb data list
+                tbjs_paperlist.update_data_by_paper(paper);
+            }, 'json'
+        );
+    }
+};
+
+
+var srv_collector = {
+
+    api_url: {
+        export: "[[ url_for('collector.export') ]]"
+    },
+
+    export: function(project_id, format, seq_nums) {
+        this.submit_form(
+            this.api_url.export,
+            {
+                project_id: project_id,
+                seq_nums: seq_nums.join(','),
+                format: format
+            },
+            'POST'
+        );
+    },
+
+    submit_form: function(path, params, method) {
+        method = method || "POST";
+
+        var form = document.createElement("form");
+
+        form.setAttribute("target", '_blank');
+        form.setAttribute("method", method);
+        form.setAttribute("action", path);
+
+        for(var key in params) {
+            if(params.hasOwnProperty(key)) {
+                var hiddenField = document.createElement("input");
+                hiddenField.setAttribute("type", "hidden");
+                hiddenField.setAttribute("name", key);
+                hiddenField.setAttribute("value", params[key]);
+
+                form.appendChild(hiddenField);
+            }
+        }
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+};
+
+
+var jarvis = {
+    create_src_url: function(d) {
+        return 'https://pubmed.ncbi.nlm.nih.gov/' + d.pid;
+    },
+
+    project: [[ project_json_str|safe ]],
+    debug: false,
+
+    init: function () {
+        var enable_debug_info = this.get_url_paramter('di');
+        if (enable_debug_info == 'yes') {
+            this.debug = true;
+        }
+
+        tbjs_paperlist.init();
+
+        // load stats
+        ui_category_stat.load();
+
+        // init the tbjs_paperlist_filters
+        tbjs_paperlist_topbar.init();
+
+        // load unscreened papers by default
+
+        var stage = jarvis.get_url_paramter('stage');
+
+        if (stage == '' || stage == srv_screener.STAGE_UNSCREENED) {
+            tbjs_paperlist.load_by_stage(srv_screener.STAGE_UNSCREENED);
+
+        } else if (stage == srv_screener.STAGE_INCLUDED_SR) {
+            tbjs_paperlist.load_by_stage(srv_screener.STAGE_INCLUDED_SR);
+
+        } else {
+            tbjs_paperlist.load_by_stage(srv_screener.STAGE_UNSCREENED);
+        }
+
+        // load the pdf workers
+        pan_pdfviewer.init();
+
+        // load the sync panel
+        pan_datasync.init();
+
+        // load the prisma panel
+        pan_prisma.init();
+
+        // bind resize event
+        this.bind_resize_event();
+    },
+
+    sort_rct_seq: function() {
+        var txt = $('#btn_update_original_followup').html();
+        $('#btn_update_original_followup')
+            .attr('disabled', 'disabled')
+            .attr('text', txt)
+            .html('<i class="fas fa-spinner fa-pulse"></i> Updating ...');
+        srv_extractor.sort_rct_seq(function(data) {
+            toast('Finished updating the original/follow-up!');
+            $('#btn_update_original_followup')
+                .attr('disabled', null)
+                .attr('text', txt)
+                .html(function(){ return $(this).attr('text'); });
+
+            tbjs_paperlist.load();
+        });
+    },
+
+    toast: function(msg, type) {
+        toast(msg, type);
+    },
+
+    prompt: function(text, value) {
+        return window.prompt(text, value);
+    },
+
+    confirm: function(text) {
+        return window.confirm(text);
+    },
+
+    bind_resize_event: function() {
+        $(window).on('resize', function(){
+            // pan_outcomes.resize();
+        });
+    }
+};
+
+{% include 'js/jarvis_ext_utils.js' %}
+
+$(document).ready(function () {
+    jarvis.init();
+})
+</script>
+{% endblock %}

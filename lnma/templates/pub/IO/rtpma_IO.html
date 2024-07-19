@@ -1,0 +1,3906 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
+<title>Pairwise Meta-Analysis</title>
+
+<link rel="shortcut icon" href="./favicon.ico">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+
+<style>
+html, body {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+body {
+    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+a {
+    color: #333333;
+    text-decoration: none;
+}
+h4 {
+    margin: 0.1em 0;
+}
+p {
+    margin: 0.1em 0;
+}
+
+{% include 'css/box.css' %}
+.flex-row {
+    flex-direction: row;
+}
+.flex-col {
+    flex-direction: column;
+}
+.cursor-pointer {
+    cursor: pointer !important;
+}
+/* the label values items */
+.bbi-label {
+    width: 100%;
+    padding: 0 0 3px 0;
+    font-size: .8em;
+    color: #666666;
+    /* just for using the question marks */
+    justify-content: space-between;
+}
+.bbi-value {
+    width: calc(100% - 10px);
+    padding: 2px 0px 2px 10px;
+    font-size: .9em;
+    color: #000000;
+}
+.bbi-label-hint {
+    color: #999999;
+    cursor: help;
+}
+.bbi-label-hint:hover {
+    color: #333333;
+}
+.box-body h5 {
+    padding: 0;
+    margin: 0;
+    font-size: 1em;
+    height: 1.6em;
+    line-height: 1.6em;
+    margin: 3px 0;
+}
+.box-p {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    font-size: .9em;
+}
+.box-p-fixlen {    
+    white-space: nowrap;
+    text-overflow:ellipsis;
+    overflow: hidden;
+}
+.box-footer {
+    width: 100%;
+    min-height: 20px;
+    padding: 5px 0 5px 0;
+}
+.box-tab-header {
+    padding: 1px 8px;
+    cursor: pointer;
+    align-items: center;
+}
+.box-tab-header-active {
+    font-weight: bold;
+    border: 1px solid #A0A0A0;
+    border-bottom: 1px solid white;
+    margin-bottom: -1px;
+}
+/* font sizes */
+.txt-sm {
+    font-size: 0.9em;
+}
+.txt-nm {
+    font-size: 1em;
+}
+.txt-lg {
+    font-size: 1.3em;
+}
+.txt-xl {
+    font-size: 1.6em;
+}
+.txt-italic {
+    font-style: italic;
+}
+/* font bold */
+.txt-fb {
+    font-weight: bold;
+}
+.box-header h4 {
+    margin: 2px 0;
+}
+.select-sm {
+    width: 80px;
+}
+#wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+#start-screen {
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#ss-msg {
+    width: 100%;
+    padding: 10px 0;
+    text-align: center;
+}
+
+/* for this page */
+#app_pma {
+    width: 100%;
+    /* height: calc(100% - 42px); */
+    height: 100%;
+}
+#app_ocrst {
+    height: calc(100% - 50px);
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+}
+#app_oclist {
+    width: 300px;
+    padding: 0 5px;
+    height: 100%;
+    /* height: 810px; */
+    /* background-color: whitesmoke; */
+}
+#app_oclist_aespanel {
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+#app_marst {
+    width: calc(100% - 330px);
+    max-width: 1000px;
+}
+#vw_ocplots_mainpanel {
+    width: calc(100% - 320px);
+    padding: 0 5px;
+    height: 100%;
+}
+#vw_ocplots_plotpanel {
+    height: 100%;
+    overflow-y: hidden;
+}
+.oc-group {
+    cursor: pointer;
+    padding: 3px 0;
+    text-align: left;
+    /* text-transform: uppercase; */
+    background-color: #f3f3f3;
+    border-top: 1px solid #cccccc;
+}
+.oc-name {
+    width:     200px;
+    min-width: 200px;
+    cursor: pointer;
+    padding: 2px 0;
+}
+.oc-type {
+    width: 30px;
+    min-width: 30px;
+    text-align: center;
+    cursor: pointer;
+    padding: 2px 0;
+}
+.oc-type:hover {
+    background-color: #cccccc;
+    font-weight: bold;
+}
+.oc-type-selected {
+    background-color: #555555;
+    color: #ffffff;
+    font-weight: bold;
+}
+.oc-cate {
+    flex-direction: column;
+}
+.oc-cate-info {
+    width: 100%;
+    /* border-top: 1px solid #dddddd; */
+    padding: 2px 0;
+    border-bottom: 1px solid transparent;
+}
+.oc-cate-info:hover {
+    border-bottom: 1px solid #555555;
+}
+.oc-cate-info .oc-name {
+    font-weight: bold;
+}
+.oc-cate-info .oc-type {
+    font-weight: bold;
+}
+.oc-items {
+    width: 100%;
+    padding-left: 20px;
+}
+.oc-items-hide {
+    display: none;
+}
+.oc-item {
+    width: 100%;
+    border-left: 1px solid #aaaaaa;
+}
+.oc-item-info {
+    width: calc(100% - 20px);
+    border-bottom: 1px solid transparent;
+}
+.oc-item-info:hover {
+    background-color: #efefef;
+    border-bottom: 1px solid #cccccc;
+}
+.oc-item-info .oc-name {
+    width:       170px;
+    min-width:   170px;
+    padding-left: 10px;
+}
+.oc-plot-img {
+    width: 100%;
+}
+.oc-plot-tab {
+    padding: 4px 15px;
+    border: 0;
+    color: #999999;
+    border-bottom: 1px solid #999999;
+    cursor: pointer;
+}
+.oc-plot-tab:hover {
+    color: #555555;
+    border-bottom: 1px solid #555555;
+}
+.oc-plot-tab-selected {
+    color: #000000;
+    font-weight: bold;
+    border-bottom: 1px solid #000000;
+}
+.oc-plot-tab-page {
+    display: none;
+    padding: 10px 10px 0 15px;
+    overflow-y: auto;
+}
+.oc-plot-tab-page-selected {
+    display: block;
+    overflow-y: auto;
+}
+
+.sfilter {
+    margin-right: 15px;
+}
+.sfilter-name {
+    font-size: 1.1em;
+    padding: 2px 0;
+}
+.sfilter-select {
+    width: 100%;
+}
+#app_filter {
+    padding: 5px 0 5px 5px;
+    margin: 0 0 5px;
+    border-bottom: 1px solid #efefef;
+}
+#fig_scatter {
+    width: 500px; 
+    height: 500px;
+}
+#fig_sunburst {
+    width: 600px; 
+    height: 600px;
+}
+.fig-tooltip-header {
+    border-bottom: 1px solid rgba(255,255,255,.3); 
+    font-size: 1.2em;
+    padding-bottom: 7px;
+    margin-bottom: 7px;
+}
+.d-flex {
+    display: flex;
+}
+.flex-row {
+    flex-direction: row;
+}
+.flex-wrap {
+    flex-wrap: wrap;
+}
+.flex-col {
+    flex-direction: column;
+}
+.flex-align-items-sof_baseline {
+    align-items: sof_baseline;
+}
+.flex-align-items-center {
+    align-items: center;
+}
+#plot_nav {
+    /* margin-top: -15px; */
+    display: flex;
+    flex-direction: row;
+}
+.plot-nav {
+    padding: 3px 10px;
+    color: #777777;
+    border-bottom: 1px solid #333;
+}
+.plot-nav-active {
+    border: 1px solid #333;
+    color: #000000 !important;
+    border-bottom: 0 !important;
+    font-weight: bold;
+}
+#plot_main {
+    padding: 5px;
+    /* border-bottom: 1px solid #dfdfdf; */
+}
+#fig_sunburst {
+
+}
+#fig_sunburst_legend {
+    position: relative;
+    z-index: 10;
+}
+#fig_sunburst_legend img {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 160px;
+}
+.fig-legend {
+    opacity: 0.5;
+}
+.fig-legend:hover {
+    opacity: 1;
+}
+
+.fh-g {
+
+}
+.fh-g-name {
+
+}
+.fh-c {
+    padding: 2px;
+    margin: 2px;
+    /* border-right: 1px dotted #efefef; */
+    /* border-bottom: 1px dotted #efefef; */
+    border: 1px dotted #efefef;
+}
+.fh-c-5 {
+    width: 90px;
+}
+.fh-c-8 {
+    width: 145px;
+}
+.fh-c-10 {
+    width: 190px;
+}
+.fh-c:hover {
+    border-color: #777777;
+}
+.fh-c-name {
+    font-size: 0.85em;
+    padding: 1px 0;
+    margin: 0 0 2px 0;
+}
+.fh-o {
+    width: 10px;
+    height: 10px;
+    padding: 2px;
+    margin: 1px;
+    white-space: nowrap;
+    text-overflow: clip;
+    overflow: hidden;
+    font-size: 0.7em;
+    color: #999999;
+    border: 1px solid #efefef;
+}
+.fh-o:hover {
+    border-color: #777777;
+}
+#app_comptb {
+    min-height: 800px;
+    height: 99%;
+    min-width: 1000px;
+    padding: 0 5px;
+}
+.cmp-tb {
+
+}
+.cmp-tb-row {
+    display: flex;
+    flex-direction: row;
+}
+.cmp-tb-row:hover{
+    background-color: whitesmoke;
+}
+.cmp-tb-row-header {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 99;
+}
+.cmp-tb-cell {
+    width: 50px;
+    min-width: 50px;
+
+    height: 24px;
+    min-height: 24px;
+    display: flex;
+    justify-content: center;
+    /* align-self: center;    <---- REMOVE */
+    align-items: center;   /* <---- NEW    */
+    padding: 3px 0;
+    border-bottom: 1px solid #dfdfdf;
+}
+.cmp-tb-cell-header {
+    font-weight: bold;
+    border-bottom: 1px solid #777777;
+    padding: 4px 0;
+}
+.cmp-tb-cell-header-sortable {
+    cursor: pointer;
+}
+.cmp-tb-cell-footer {
+    font-weight: bold;
+    /* border-top: 1px solid #777777; */
+    padding: 4px 0;
+}
+.cmp-tb-cell-xs {
+    width: 20px !important;
+    min-width: 20px !important;
+}
+.cmp-tb-cell-sm {
+    width: 50px !important;
+    min-width: 50px !important;
+}
+.cmp-tb-cell-ocname {
+    width: 160px !important;
+    min-width: 160px !important;
+}
+.cmp-tb-cell-ocname-item {
+    cursor: pointer;
+}
+.cmp-tb-cell-smtxt {
+    font-size: 0.95em;
+    list-style: 0.8em;
+}
+.cmp-tb-cell-sep {
+    width: 45px !important;
+    min-width: 45px !important;
+}
+.cmp-tb-cell-category {
+    width: 120px !important;
+    min-width: 120px !important;
+}
+.cmp-tb-cell-treatment {
+    width: 140px !important;
+    min-width: 140px !important;
+}
+.cmp-tb-cell-effect-lg {
+    min-width: 360px !important;
+    width: 360px !important;
+    /* display: block !important; */
+    position: relative;
+    text-align: center;
+}
+.cmp-tb-cell-effect {
+    min-width: 120px !important;
+    width: 120px !important;
+    /* display: block !important; */
+    position: relative;
+    text-align: center;
+}
+.cmp-tb-cell-eft {
+    display: block !important;
+    text-align: center;
+}
+.cmp-filters {
+    width: 100%;
+    font-style: italic;
+    font-size: .85em;
+}
+.cmp-occate {
+    width: 100%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.cmp-ocname {
+    width: 100%;
+    white-space: nowrap;
+    text-overflow: clip;
+    overflow: hidden;
+}
+.cmp-eft-ci-line {
+    height: 1px;
+    position: absolute;
+    top: 14px;
+    border-bottom: 1px solid #333333;
+}
+.cmp-eft-dot {
+    width: 7px;
+    height: 7px;
+    top: 12px;
+    position: absolute;
+    /* opacity: 0.8; */
+}
+.cmp-eft-value {
+    font-size: .8em;
+    color: #555555;
+    margin-top: 0.5em;
+    /* margin-left: 1em; */
+    /* position: absolute; */
+    /* left: 0; */
+    width: 88px;
+}
+.cmp-tb-cell-effect .cmp-ref-one {
+    position: absolute;
+    left: 59px;
+    top: 0;
+    height: 100%;
+    border-right: 1px dotted #aaaaaa;
+}
+.cmp-tb-cell-effect-lg .cmp-ref-one {
+    position: absolute;
+    left: 179px;
+    top: 0;
+    height: 100%;
+    border-right: 1px dotted #aaaaaa;
+}
+
+.cmp-ref-50 {
+    position: absolute;
+    left: 60px;
+    top: 0;
+    height: 100%;
+    border-right: 1px dotted #aaaaaa;
+}
+
+.btn {
+    padding: 3px 5px;
+    text-decoration: none !important;
+}
+.btn:hover {
+    background-color: #cacaca;
+}
+.btn-remove {
+    color: #ffdcdc;
+}
+.btn-remove:hover {
+    color: white;
+    background-color: rgb(255, 70, 70);
+}
+.btn-add-ocs {
+    color: #888888;
+}
+.btn-add-ocs:hover {
+    color: #333333;
+    background-color: #cccccc;
+}
+#app_sclist {
+    width: 600px;
+}
+.sc-item-panel {
+    margin-top: 5px;
+    height: 150px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+.sc-item-box {
+    position: relative;
+}
+.sc-item {
+    margin: 5px 5px 0 0;
+    padding: 1px;
+    height: 130px;
+    border-bottom: 1px solid #efefef;
+}
+.sc-item:hover {
+    cursor: pointer;
+    background-color: whitesmoke;
+}
+.sc-img {
+    height: 110px;
+}
+.sc-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+.sc-info {
+    width: 100%;
+    text-align: center;
+    font-size: .8em;
+    font-style: italic;
+    white-space: nowrap;
+    text-overflow: clip;
+    overflow: hidden;
+}
+.forest-plot-panel {
+    height: 100%;
+    overflow-y: auto;
+}
+.hide {
+    display: none;
+}
+.badge {
+    padding: 1px 4px;
+    background-color: #eeeeee;
+    border-radius: 4px;
+}
+.badge-t, 
+.badge-treatment {
+    background-color: #EBF8FF;
+}
+.badge-i,
+.badge-immune {
+    background-color: #F4EBFF;
+}
+
+.ml-1 {
+    margin-left: 1em;
+}
+.ml-2 {
+    margin-left: 2em;
+}
+.ml-3 {
+    margin-left: 3em;
+}
+.mr-1 {
+    margin-right: 1em;
+}
+.mr-2 {
+    margin-right: 2em;
+}
+.mr-3 {
+    margin-right: 3em;
+}
+
+/* for the SoF table */
+.sof-table {
+    /* min-width: 1100px; */
+    width: calc(100% - 10px);
+    /* width: 1100px; */
+}
+.sof-table th {
+    text-align: center;
+    background: whitesmoke;
+    padding: 5px 0;
+}
+.sof-table td {
+    text-align: center;
+    line-height: 1.45em;
+    padding: 3px 0;
+    border-bottom: 1px solid #e6e6e6;
+    border-right: 1px solid #e6e6e6;
+    cursor: default;
+}
+.sof-table .col-oc-name {
+    width: 150px;
+    max-width: 180px;
+}
+.sof-table .col-ta-left {
+    text-align: left !important;
+    padding-left: 10px;
+}
+.sof-table .col-flipable {
+    cursor: pointer;
+}
+.sof-table .col-flipable:hover {
+    background: whitesmoke;
+}
+.coe-bene-4 { background: rgb(55, 86, 35); color: white; }
+.coe-bene-3 { background: rgb(169, 208, 142); color: black; }
+.coe-bene-2 { background: rgb(226, 239, 218); color: black; }
+.coe-bene-1 { background: rgb(255, 242, 204); color: black; }
+.coe-harm-4 { background: rgb(150, 0, 0); color: white; }
+.coe-harm-3 { background: rgb(255, 103, 91); color: black; }
+.coe-harm-2 { background: rgb(255, 199, 193); color: black; }
+.coe-harm-1 { background: rgb(255, 242, 204); color: black; }
+.coe-nner-4 { background: rgb(66, 66, 66); color: rgb(255, 255, 255); }
+.coe-nner-3 { background: rgb(128, 128, 128); color: rgb(255, 255, 255); }
+.coe-nner-2 { background: rgb(191, 191, 191); color: black; }
+.coe-nner-1 { background: rgb(255, 242, 204); color: black; }
+.coe-nner-0 { background: rgb(236, 236, 236); color: black; }
+
+.coe-dv { padding: 0 1em; }
+.coe-dv-0 { background: rgb(191, 191, 191); color: black; }
+.coe-dv-1 { background: rgb(255, 250, 237); color: black; }
+.coe-dv-2 { background: rgb(255, 199, 193); color: black; }
+.coe-dv-3 { background: rgb(255, 103, 91); color: black; }
+.coe-dv-4 { background: rgb(150, 0, 0); color: white; }
+
+#app_study_viewer {
+    position: absolute;
+    top: 100px;
+    left: 100px;
+    display: none;
+    width: 500px;
+    height: 150px;
+    padding: 5px;
+    border: 1px solid #888888;
+    box-shadow: 5px 5px 5px #a0a0a0;
+    background-color: white;
+}
+
+.td-long-text {
+    max-width: 200px;
+    overflow-wrap: break-word;
+}
+
+.link-pmid {
+    color: rgb(22, 67, 134);
+}
+.link-pmid:hover {
+    text-decoration: underline;
+}
+
+.plot-header {
+    padding: 5px 0;
+    border-left: 1px solid #a0a0a0;
+    text-indent: 1em;
+}
+.text-align-left {
+    text-align: left !important;
+}
+</style>
+</head>
+
+<body>
+    
+<div id="start-screen">
+    <h1>
+        <i class="fa fa-chart-bar"></i>
+        Pairwise Meta-Analysis for IO Toxicity
+    </h1>
+    <div id="ss-msg">Loading data and initializing ...</div>
+</div>
+
+<div id="wrapper">
+
+<div id="color_guide" style="display: none;" title="Color guide">
+    {% include 'pub/_shared/_table_color_guide_pma.html' %}
+</div>
+    
+<div id="app_pma">
+
+    <div v-show="is_using_filters"
+        id="app_filter" 
+        class="d-flex flex-row">
+        <div class="sfilter d-flex flex-col mr-1">
+            <div class="sfilter-name">&nbsp;</div>
+            <div style="font-weight: bold;">
+                Filters: 
+            </div>
+        </div>
+    
+        <div v-for="dropdown, dpd_idx in dropdowns"
+            class="sfilter d-flex flex-col mr-3">
+            <div class="sfilter-name">
+                {{ dropdown.display_name }}
+            </div>
+            <div>
+                <select class="sfilter-select"
+                    v-bind:value="dropdown.value"
+                    v-bind:disabled="is_filter_disabled(dpd_idx)"
+                    v-on:change="on_filter_value_change($event, dpd_idx)">
+                    <option v-for="opt in dropdown.options" 
+                        v-bind:value="opt.value">
+                        {{ opt.name }}
+                    </option>
+                </select>
+            </div>
+        </div>
+    
+        <div class="d-flex flex-col mr-3">
+            <div class="sfilter-name">
+                Number of studies
+            </div>
+            <div style="height: 20px; line-height: 20px;">
+                {{ n_papers }}
+            </div>
+        </div>
+    </div>
+    <!-- /#app_filter -->
+
+
+    <div id="app_ocrst">
+
+        <div id="app_oclist">
+            <div class="box" style="height: 100%;">
+                <div class="box-header">
+                    <h4>
+                        <i class="fa fa-search"></i>
+                        Outcome List | 
+                    </h4>
+                    <div class="d-flex flex-align-items-center">
+                        <select v-model="color_mode_by_sm"
+                            class="select-sm">
+                            <option value="RR">RR: Color by Risk Ratio</option>
+                            <option value="OR">OR: Color by Odds Ratio</option>
+                        </select>
+    
+                        <select v-model="cnt_rule"
+                            class="select-sm">
+    
+                            <optgroup label="Simple Threshold">
+                                <option value="ge1">All outcomes with at lease 1 study</option>
+                                <option value="ge5">Equal or greater than 5 studies</option>
+                                <option value="ge10">Equal or greater than 10 studies</option>
+                                <option value="ge20">Equal or greater than 20 studies</option>
+                            </optgroup>
+    
+                            <optgroup label="Complex Rules">
+                                <option value="ge1s5">At lease 1 study but less than 5</option>
+                                <option value="ge5ls10">Equal or greater than 5 but less than 10</option>
+                                <option value="ge10ls20">Equal or greater than 10 but less than 20</option>
+                            </optgroup>
+                        </select>
+    
+                    </div>
+                </div>
+                <div class="box-body" style="height: calc(100% - 40px);">
+                    
+                    <div class="d-flex flex-col">
+                        <div class="d-flex flex-row ">
+                            <div class="oc-name" style="font-weight: bold;">
+                                <div class="d-flex flex-row"
+                                    style="align-items: baseline;">
+                                    <span>
+                                        Search: 
+                                    </span>
+                                    <input type="text" v-model="keyword"
+                                        style="width: 80px;">
+                                    <a v-on:click="keyword = ''"
+                                        class="btn btn-remove"
+                                        style="margin: 3px 0 0 -24px;"
+                                        href="javascript:void(0);">
+                                        <i class="fa fa-times"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="d-flex"
+                                style="width: 90px; text-align: center; border-bottom: 1px solid #555555; justify-content: center; align-items: flex-end;">
+                                <span style="font-weight: bold; padding: 3px 0;">
+                                    Grade
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+        
+                    <div class="oc-cate d-flex flex-col">
+                        <div class="oc-cate-info d-flex flex-row">
+                            <div class="oc-name" style="font-weight: bold;">
+                                {{ n_all() }}
+                                Outcomes
+
+                                <button class="ml-3"
+                                    v-on:click="update_all_oc_mas();">
+                                    <span v-if="is_updating_all_oc_mas">
+                                        <i class="fas fa-sync fa-spin"></i>
+                                        Updating ...
+                                    </span>
+                                    <span v-else>
+                                        <i class="fa fa-sync"></i>
+                                        Update PWMA
+                                    </span>
+                                </button>
+                            </div>
+                            <div class="oc-type" title="All Grades">
+                                ALL
+                            </div>
+                            <div class="oc-type" title="Grade 3 or Higher">
+                                3+
+                            </div>
+                            <div class="oc-type" title="Grade 5 Only">
+                                5
+                            </div>
+                        </div>
+                    </div>
+        
+                    <div id="app_oclist_aespanel" style="height: calc(100% - 50px);">
+                        <div class="oc-cate d-flex flex-col"
+                            v-for="group in rs">
+                            <div class="oc-group d-flex flex-row">
+                                <div class="oc-name" 
+                                    v-on:click="toggle_group(group.group)">
+                                    <i class="far fa-folder" v-if="group.is_close"></i>
+                                    <i class="far fa-folder-open" v-else></i>
+                                    {{ group.group }} related
+                                    ({{ n_group(group) }})
+                                </div>
+                                <div class="oc-type">
+                                    <a v-if="flag_is_work_mode_sof"
+                                        v-on:click="add_group(group, 'GA')"
+                                        :title="'Add [' + group.group + '] GA outcomes'"
+                                        class="btn-add-ocs"
+                                        href="javascript:void(0);">
+                                        <i class="fa fa-plus"></i>
+                                    </a>
+                                </div>
+                                <div class="oc-type">
+                                    <a v-if="flag_is_work_mode_sof"
+                                        :title="'Add [' + group.group + '] G3+ outcomes'"
+                                        class="btn-add-ocs"
+                                        v-on:click="add_group(group, 'G3H')"
+                                        href="javascript:void(0);">
+                                        <i class="fa fa-plus"></i>
+                                    </a>
+                                </div>
+                                <div class="oc-type">
+                                    <a v-if="flag_is_work_mode_sof"
+                                        v-on:click="add_group(group, 'G5N')"
+                                        :title="'Add [' + group.group + '] G5 outcomes'"
+                                        class="btn-add-ocs"
+                                        href="javascript:void(0);">
+                                        <i class="fa fa-plus"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <div v-for="r in group.cates"
+                                v-bind:class="{hide: group.is_close}"
+                                v-show="match_keyword_in_cate(r)">
+                                <div class="oc-cate-info d-flex flex-row">
+                                    <div v-on:click="toggle_cate(group.group, r.cate)"
+                                        class="oc-name">
+                                        <i class="far fa-folder" v-if="r.is_close"></i>
+                                        <i class="far fa-folder-open" v-else></i>
+                                        
+                                        <span class="badge"
+                                            :class="'badge-' + group.group">
+                                            {{ group.group[0] }}
+                                        </span>
+                                        {{ r.cate }}
+                                        ({{ n_cate(r) }})
+                                    </div>
+                                    <div class="oc-type">
+                                        <a v-if="flag_is_work_mode_sof"
+                                            v-on:click="add_cate(r, 'GA')"
+                                            :title="'Add [' + r.cate + '] GA outcomes'"
+                                            class="btn-add-ocs"
+                                            href="javascript:void(0);">
+                                            <i class="fa fa-plus"></i>
+                                        </a>
+                                    </div>
+                                    <div class="oc-type">
+                                        <a v-if="flag_is_work_mode_sof"
+                                            v-on:click="add_cate(r, 'G3H')"
+                                            :title="'Add [' + r.cate + '] G3+ outcomes'"
+                                            class="btn-add-ocs"
+                                            href="javascript:void(0);">
+                                            <i class="fa fa-plus"></i>
+                                        </a>
+                                    </div>
+                                    <div class="oc-type">
+                                        <a v-if="flag_is_work_mode_sof"
+                                            v-on:click="add_cate(r, 'G5N')"
+                                            :title="'Add [' + r.cate + '] G5 outcomes'"
+                                            class="btn-add-ocs"
+                                            href="javascript:void(0);">
+                                            <i class="fa fa-plus"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="oc-items d-flex flex-col"
+                                    v-bind:class="{hide: r.is_close}">
+                                    <div class="oc-item"
+                                        v-for="oc in r.ocs">
+                                        <div class="oc-item-info d-flex flex-row"
+                                            v-show="show_oc(oc) && match_keyword(oc.name)">
+                                            <div class="oc-name">
+                                                <i class="far fa-clipboard"></i>
+                                                {{ oc.name }}
+                                            </div>
+    
+                                            
+                                            <div class="oc-type"
+                                                v-if="show_oc_grade(oc, 'GA')"
+                                                v-bind:style="{ backgroundColor: get_eft_color(ma_dict[oc.abbr].GA.PRIM.rsts[color_mode_by_sm]) }"
+                                                v-on:click="add_oc(oc, 'GA')">
+                                                {{ oc.cnt_ga }}
+                                            </div>
+                                            <div class="oc-type"
+                                                v-else
+                                                title="Not enough records">
+                                                &nbsp;
+                                            </div>
+    
+    
+                                            <div class="oc-type"
+                                                v-if="show_oc_grade(oc, 'G3H')"
+                                                v-bind:style="{ backgroundColor: get_eft_color(ma_dict[oc.abbr].G3H.PRIM.rsts[color_mode_by_sm]) }"
+                                                v-on:click="add_oc(oc, 'G3H')">
+                                                {{ oc.cnt_g3h }}
+                                            </div>
+                                            <div class="oc-type"
+                                                v-else
+                                                title="Not enough records">
+                                                &nbsp;
+                                            </div>
+    
+    
+                                            <div class="oc-type"
+                                                v-if="show_oc_grade(oc, 'G5N')"
+                                                v-bind:style="{ backgroundColor: get_eft_color(ma_dict[oc.abbr].G5N.PRIM.rsts[color_mode_by_sm]) }"
+                                                v-on:click="add_oc(oc, 'G5N')">
+                                                {{ oc.cnt_g5n }}
+                                            </div>
+                                            <div class="oc-type"
+                                                v-else
+                                                title="Not enough records">
+                                                &nbsp;
+                                            </div>
+    
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+        
+                    </div>
+                    
+                </div>
+        
+                <div class="box-footer">
+        
+                </div>
+            </div>
+        </div>
+        <!-- /#app_oclist tree -->
+
+        
+        <div v-if="flag_is_work_mode_sof"
+            id="app_marst" 
+            class="box" 
+            style="height: calc(100% - 20px);">
+            <div class="box-header">
+                <h4>
+                    <i class="fas fa-table"></i>
+                    Summary of Findings | 
+                </h4>
+
+                <div class="d-flex flex-align-items-center">
+
+                    <button v-on:click="remove_all_sof()"
+                        class="mr-2">
+                        <i class="far fa-trash-alt"></i>
+                        Remove All
+                    </button>
+
+                    <span>|</span>
+
+                    <!-- <button v-on:click="export_sof_csv()"
+                        class="mr-2">
+                        <i class="fas fa-file-export"></i>
+                        Export CSV
+                    </button>
+
+                    <span>|</span> -->
+
+                    <div class="box-menu-group d-flex fx-row">
+                        <div class="box-menu-link" 
+                            @click="show_color_guide">
+                            <i class="fa fa-paint-brush"></i>
+                            Color guide
+                        </div>
+
+                        <!-- <div style="margin-right: 15px;">
+                            <span class="coe-bene-2">
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                            </span>&nbsp;
+                            Benefit
+                        </div>
+                        <div style="margin-right: 15px;">
+                            <span class="coe-harm-2">
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                            </span>&nbsp;
+                            Harm
+                        </div> -->
+                    </div>
+
+                </div>
+                
+            </div>
+
+            <div class="box-body"
+                style="height: calc(100% - 20px);">
+                <div class="plot-nav-tab d-flex">
+                    <div class="box-radio-group d-flex flex-row">
+
+                        <!-- SM -->
+                        <div>
+                            <i class="fa fa-cog"></i>
+                            Measure of effect: &nbsp;
+                        </div>
+                        <select v-model="sof_sm"
+                            class="select-sm mr-2"
+                            style="width: 120px;">
+                            <option value="RR">Risk Ratio (RR)</option>
+                            <option value="OR">Odds Ratio (OR)</option>
+                        </select>
+
+
+                        <!-- CI -->
+                        <div title="Intervention CI">
+                            <i class="fa fa-cog"></i>
+                            Show CI: &nbsp;
+                        </div>
+                        <select v-model="sof_show_ci"
+                            class="select-sm mr-2"
+                            style="width: 60px;">
+                            <option :value="true">Yes</option>
+                            <option :value="false">No</option>
+                        </select>
+
+
+                        <!-- Absolute Risk Difference -->
+                        <div title="Absolute Risk Difference">
+                            <i class="fa fa-cog"></i>
+                            Show ARD: &nbsp;
+                        </div>
+                        <select v-model="sof_show_ard"
+                            class="select-sm mr-2"
+                            style="width: 60px;">
+                            <option :value="true">Yes</option>
+                            <option :value="false">No</option>
+                        </select>
+
+                        
+
+                        <!-- columns -->
+                        <div>
+                            <i class="fa fa-cog"></i>
+                            Columns: 
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="checkbox" 
+                                id="sof_chk_col_1"
+                                class="cursor-pointer"
+                                v-model="sof_columns_totals">
+                            <label for="sof_chk_col_1"
+                                class="cursor-pointer">
+                                Number of Patients
+                            </label>
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="checkbox" 
+                                id="sof_chk_col_2"
+                                class="cursor-pointer"
+                                v-model="sof_columns_filters">
+                            <label for="sof_chk_col_2"
+                                class="cursor-pointer">
+                                Filter Details
+                            </label>
+                        </div>
+                        <!-- <div class="box-radio-item">
+                            <input type="checkbox" 
+                                id="sof_chk_col_3"
+                                v-model="plot_sm">
+                            <label for="sof_chk_col_3">visualization</label>
+                        </div> -->
+                    </div>
+                </div>
+
+                <table class="sof-table"
+                    style="min-width: 1100px;">
+                    <tr>
+                        <th rowspan="2">Category</th>
+                        <th rowspan="2">Outcome</th>
+                        <th rowspan="2">Grade</th>
+
+                        <!-- columns for treatment/control -->
+                        <th v-if="sof_columns_filters"
+                            rowspan="2">
+                            Treatment
+                        </th>
+                        <th v-if="sof_columns_filters"
+                            rowspan="2">
+                            Control
+                        </th>
+                        <th v-if="sof_columns_filters"
+                            rowspan="2">
+                            Cancer
+                        </th>
+
+                        <!-- columns for number of patients -->
+                        <th v-if="sof_columns_totals"
+                            title="The total number of studies"
+                            rowspan="2">
+                            Studies
+                        </th>
+                        <th v-if="sof_columns_totals"
+                            title="Ec"
+                            rowspan="2">
+                            Et
+                        </th>
+                        <th v-if="sof_columns_totals"
+                            title="Nt"
+                            rowspan="2">
+                            Nt
+                        </th>
+                        <th v-if="sof_columns_totals"
+                            title="Ec"
+                            rowspan="2">
+                            Ec
+                        </th>
+                        <th v-if="sof_columns_totals"
+                            title="Nc"
+                            rowspan="2">
+                            Nc
+                        </th>
+
+                        <!-- columns for MA -->
+                        <th rowspan="2">Relative</th>
+                        <th colspan="3">Absolute</th>
+                        <th rowspan="2">Certainty in <br>Evidence</th>
+                        <!-- <th rowspan="2">Importance</th> -->
+                    </tr>
+                    <tr>
+                        <th>Intervention</th>
+                        <th>Control</th>
+                        <th>Risk Difference</th>
+                    </tr>
+
+                    <tr v-for="r in sof_rs">
+                        <td class="col-oc-name">
+                            {{ r.oc.cate }}
+                        </td>
+                        <td class="col-oc-name">
+                            {{ r.oc.name }}
+                        </td>
+                        <td>
+                            {{ get_txt_by_type(r.grade, 'grade') }}
+                        </td>
+
+                        <!-- columns for treatment/control -->
+                        <td v-if="sof_columns_filters">
+                            {{ get_treatment_txt_by_filters(r.fl) }}
+                        </td>
+                        <td v-if="sof_columns_filters">
+                            {{ get_txt_by_type(r.fl[4], 'filter') }}
+                        </td>
+                        <td v-if="sof_columns_filters">
+                            {{ get_txt_by_type(r.fl[5], 'filter') }}
+                        </td>
+
+                        <!-- columns for number of patients -->
+                        <td v-if="sof_columns_totals">
+                            {{ r.ma.PRIM.stus.length }}
+                        </td>
+                        <td v-if="sof_columns_totals">
+                            {{ add_comma_to_number(r.ma.PRIM.total[0]) }}
+                        </td>
+                        <td v-if="sof_columns_totals">
+                            {{ add_comma_to_number(r.ma.PRIM.total[1]) }}
+                        </td>
+                        <td v-if="sof_columns_totals">
+                            {{ add_comma_to_number(r.ma.PRIM.total[2]) }}
+                        </td>
+                        <td v-if="sof_columns_totals">
+                            {{ add_comma_to_number(r.ma.PRIM.total[3]) }}
+                        </td>
+
+                        <!-- columns for MA -->
+                        <td v-bind:style="{ backgroundColor: get_eft_color(r.ma.PRIM.rsts[sof_sm]) }">
+                            {{ sof_sm }}: 
+                            <b>
+                                {{ _round2(r.ma.PRIM.rsts[sof_sm].random.SM) }}
+                            </b>
+                            <br>
+                            (
+                                {{ _round2(r.ma.PRIM.rsts[sof_sm].random.SM_lower) }} 
+                                to 
+                                {{ _round2(r.ma.PRIM.rsts[sof_sm].random.SM_upper) }}
+                            )
+                        </td>
+
+                        <!-- Absolute values -->
+                        <td>
+                            {{ get_CIR(r).toFixed(0) }} 
+                            <span class="txt-sm txt-italic">per {{ sof_baseline }}</span>
+                            <span v-if="sof_show_ci">
+                                <br>
+                                CI: {{ _int(get_CIR(r, 'lower')) }} to 
+                                {{ _int(get_CIR(r, 'upper')) }}
+                            </span>
+                        </td>
+                        
+                        <td>
+                            {{ get_ACR(r).toFixed(0) }} 
+                            <span class="txt-sm txt-italic">per {{ sof_baseline }}</span>
+                        </td>
+
+                        <td>
+                            {{ get_ARD_txt(r) }} 
+                            <span class="txt-sm txt-italic">per {{ sof_baseline }}</span>
+                            <span v-if="sof_show_ard" 
+                                class="col-ta-left">
+                                <br>
+                                CI: {{ get_ARD_txt(r, 'lower') }} to 
+                                    {{ get_ARD_txt(r, 'upper') }}<br>
+                                RD(%): {{ get_ARDp_txt(r) }}<br>
+                                ({{ get_ARDp_txt(r, 'lower')}} to {{ get_ARDp_txt(r, 'upper')}})
+                            </span>
+                        </td>
+
+                        <!-- CoE -->
+                        <td v-if="r.coe == null">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            Loading ...
+                        </td>
+                        <td v-else-if="r.coe == 'NA'">
+                            Insufficient Data
+                        </td>
+                        <td v-else
+                            class="cursor-pointer"
+                            @click="r.is_show.coe_detail = !r.is_show.coe_detail">
+                            <div v-if="r.is_show.coe_detail">
+                                Risk of bias: 
+                                <span :class="'coe-dv coe-dv-' + r.coe.risk_of_bias"
+                                    :title="r.coe.info.risk_of_bias.reason.msg">
+                                    {{ coe_helper.val_to_label(r.coe.risk_of_bias, 'risk_of_bias') }}
+                                </span>
+                                <br>
+
+                                Inconsistency: 
+                                <span :class="'coe-dv coe-dv-' + r.coe.inconsistency"
+                                    :title="r.coe.info.inconsistency.reason.msg">
+                                    {{ coe_helper.val_to_label(r.coe.inconsistency, 'inconsistency') }}
+                                </span>
+                                <br>
+
+                                Imprecision: 
+                                <span :class="'coe-dv coe-dv-' + r.coe.imprecision"
+                                    :title="r.coe.info.imprecision.reason.msg">
+                                    {{ coe_helper.val_to_label(r.coe.imprecision, 'imprecision') }}
+                                </span>
+                                <br>
+
+                                Publication Bias: 
+                                <span :class="'coe-dv coe-dv-' + r.coe.publication_bias"
+                                    :title="r.coe.info.publication_bias.reason.msg">
+                                    {{ coe_helper.val_to_label(r.coe.publication_bias, 'publication_bias') }}
+                                </span>
+                                <br>
+
+                                Indirectness: 
+                                <span :class="'coe-dv coe-dv-' + r.coe.indirectness"
+                                    :title="r.coe.info.indirectness.reason.msg">
+                                    {{ coe_helper.val_to_label(r.coe.indirectness, 'indirectness') }}
+                                </span>
+                            </div>
+                            <div v-else
+                                :class="get_coe_bg_color_cls(coe_helper.get_overall_coe(r.coe), r.ma.PRIM.rsts[sof_sm].random.SM)"
+                                title="Click to check more details">
+                                {{ coe_helper.val_to_label(coe_helper.get_overall_coe(r.coe), 'overall') }}
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+            </div>
+        </div>
+        <!-- /#app_marst for SoF table -->
+
+
+
+        <!-- for PWMA plots -->
+        <div v-if="flag_is_work_mode_plot"
+            id="app_marst" 
+            class="box" 
+            style="height: calc(100% - 20px);">
+            <div class="d-flex box-header"
+                style="padding: 0; border-bottom: 1px solid #a0a0a0;">
+                <h4 style="margin-right: 10px">
+                    <i class="fa fa-chart-bar"></i>
+                    Outcome Detail | 
+                </h4>
+
+                <div class="d-flex box-tab-header"
+                    :class="{'box-tab-header-active': plot_active_tab=='plot'}"
+                    @click="show_plot_tab('plot');">
+                    <i class="fa fa-chart-bar"></i> &nbsp;
+                    Forest Plot
+                </div>
+
+                <div class="d-flex box-tab-header"
+                    :class="{'box-tab-header-active': plot_active_tab=='list'}"
+                    @click="show_plot_tab('list')">
+                    <i class="fa fa-list"></i> &nbsp;
+                    Study List
+                </div>
+
+                <!-- <div class="d-flex flex-align-items-center">
+                    <button v-if="plot_oc != null"
+                        v-on:click="export_oc_csv()"
+                        class="mr-2">
+                        <i class="fas fa-file-export"></i>
+                        Export CSV
+                    </button>
+                </div> -->
+                
+            </div>
+
+            <div v-show="plot_active_tab == 'plot'"
+                class="box-body" 
+                style="height: calc(100% - 20px);">
+                <p v-if="plot_oc != null"
+                    class="plot-header">
+                    {{ plot_oc.group }} |
+                    <b>
+                        {{ plot_oc.cate }} |
+                        {{ plot_oc.name }} |
+                        {{ get_grade_label(plot_grade) }}
+                    </b>
+                </p>
+                <div class="plot-nav-tab d-flex">
+                    <div class="box-radio-group d-flex flex-row">
+                        <div>
+                            <i class="fa fa-cog"></i>
+                            Measure of effect: 
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="radio" name="vw_ocplots_input_sm"
+                                value="RR" id="vw_ocplots_input_sm_rr"
+                                v-on:change="update_ma_plot_by_sm('RR')"
+                                v-model="plot_sm">
+                            <label for="vw_ocplots_input_sm_rr">Risk Ratio (RR)</label>
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="radio" checked name="vw_ocplots_input_sm"
+                                value="OR" id="vw_ocplots_input_sm_or"
+                                v-on:change="update_ma_plot_by_sm('OR')"
+                                v-model="plot_sm">
+                            <label for="vw_ocplots_input_sm_or">Odds Ratio (OR)</label>
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="radio" name="vw_ocplots_input_sm"
+                                value="INCD" id="vw_ocplots_input_sm_plogit"
+                                v-on:change="update_ma_plot_by_sm('INCD')"
+                                v-model="plot_sm">
+                            <label for="vw_ocplots_input_sm_plogit">Incidence</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="forest-plot-panel"
+                    v-show="plot_sm == 'RR' || plot_sm == 'OR'"
+                    style="height: calc(100% - 20px);">
+                    
+                    <div id="fg_pwma_forest" 
+                        style="width: 100%; height: 100%;">
+                        <svg id="fg_pwma_forest_svg"></svg>
+                    </div>
+                </div>
+
+                <div class="forest-plot-panel"
+                    v-show="plot_sm == 'INCD'"
+                    style="height: calc(100% - 20px);">
+                    
+                    <div id="fg_incd_forest" 
+                        style="width: 100%; height: 100%;">
+                        <svg id="fg_incd_forest_svg"></svg>
+                    </div>
+                </div>
+
+            </div>
+            
+
+            <div v-show="plot_active_tab == 'list'"
+                class="box-body"
+                style="height: calc(100% - 20px); overflow-y: auto;">
+                <p v-if="plot_oc != null"
+                    class="plot-header">
+                    {{ plot_oc.group }} |
+                    <b>
+                        {{ plot_oc.cate }} |
+                        {{ plot_oc.name }} |
+                        {{ get_grade_label(plot_grade) }}
+                    </b>
+                </p>
+                <table class="sof-table">
+                    <thead style="position: sticky; top: 0;">
+                        <tr>
+                            <th colspan="6">
+                                Study Information
+                            </th>
+    
+                            <th colspan="2">Treatment</th>
+                            <th colspan="2">Control</th>
+                        </tr>
+                        <tr>
+                            <th width="200px">Study</th>
+                            <th>Year</th>
+                            <th>PMID</th>
+                            <th>Class</th>
+    
+                            <th>Treatment</th>
+                            <th>Control</th>
+    
+                            <th>Events</th>
+                            <th>Total</th>
+    
+                            <th>Events</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>                            
+                        <tr v-for="r in plot_oc_rs">
+                            <td class="text-align-left">{{ r.oc['author'] }}</td>
+                            <td>{{ r.oc['year'] }}</td>
+                            <td>
+                                <a :href="srv_pubmed.mk_url(r.oc['pid'])"
+                                    class="link-pmid"
+                                    target="_blank">
+                                    {{ r.oc['pid'] }}
+                                </a>
+                            </td>
+
+                            <td>{{ get_it_val_by_key(r.it, 'Class of ICI') }}</td>
+
+                            <td class="td-long-text">{{ get_it_val_by_key(r.it, 'Treatment regimen') }}</td>
+                            <td class="td-long-text">{{ get_it_val_by_key(r.it, 'Control regimen') }}</td>
+
+                            <td>{{ r.oc[plot_grade + '_Et'] }}</td>
+                            <td>{{ r.oc['GA_Et'] }}</td>
+
+                            <td>{{ r.oc[plot_grade + '_Ec'] }}</td>
+                            <td>{{ r.oc['GA_Nt'] }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- /#app_marst for PWMA plots -->
+
+
+    </div>
+    <!-- /#app_ocrst -->
+
+    <div id="app_study_viewer"
+        v-if="sv_obj != null">
+        <div>
+            <h4>
+                {{ sv_obj.paper.title }}
+            </h4>
+            <p>
+                {{ sv_obj.paper.journal }}, {{ sv_obj.paper.pub_date }},
+                {{ sv_obj.paper.rct_id }}
+            </p>
+            <p>
+                {{ sv_obj.itable['Authors'] }}
+            </p>
+            <hr>
+            <p>
+                Treatment Regimen: <b>{{ sv_obj.itable['Treatment regimen'] }}</b> 
+                <br>
+                Control Regimen: <b>{{ sv_obj.itable['Control regimen'] }}</b>
+            </p>
+        </div>
+    </div>
+
+</div>
+<!-- /#app_pma -->
+
+</div>
+<!-- /#wrapper -->
+
+<!-- use third party libs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/alasql/0.5.5/alasql.min.js"></script>
+
+<!-- D3.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.1/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.9.1/d3-tip.min.js"></script>
+
+<!-- load the scripts for meta analysis -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.1.1/math.min.js"></script>
+<script src="https://ohnlp.github.io/Meta.js/dist/metajs-0.0.5.js"></script>
+
+<!-- for data exploration -->
+<script src="https://cdn.jsdelivr.net/npm/danfojs@1.1.0/lib/bundle.js"></script>
+
+<!-- for visualization -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.3.2/echarts.min.js"></script>
+
+<!-- PapaParse for export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.1/papaparse.min.js"></script>
+
+<!-- filesaver -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script>
+
+
+<script>
+var isIE = /*@cc_on!@*/false || !!document.documentMode;
+if (isIE) {
+    document.getElementById('ss-msg').innerHTML = 'The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.';
+}
+</script>
+
+<script>
+
+// for linking to pubmed
+{% include 'js/srv_pubmed.js' %}
+
+// for rplt service
+{% include 'js/srv_rpltapi.js' %}
+
+// for coe_helper
+{% include 'js/coe_helper.js' %}
+
+
+///////////////////////////////////////////////////////////
+// The plots for PWMA
+///////////////////////////////////////////////////////////
+{% include 'js/fgmk_pwma_forest_for_metajs.js' %}
+{% include 'js/fgmk_incd_forest_for_metajs.js' %}
+{% include 'js/fgmk_cumu_forest.js' %}
+
+// Alias for the pwma plots
+var fg_pwma_forest = fgmk_pwma_forest.make_fig(
+    'fg_pwma_forest'
+);
+// alias for the incidence plots
+var fg_incd_forest = fgmk_incd_forest.make_fig(
+    'fg_incd_forest'
+);
+// alias for the cumulative plots
+var fg_cumu_forest = fgmk_cumu_forest.make_fig(
+    'fg_cumu_forest'
+);
+
+var app_pma = {
+    // bind the Vue.js object
+    vpp: null,
+    vpp_id: '#app_pma',
+
+    // the default attrs for filters
+    attrs: [{
+        display_name: 'ICI Class (Rx)',
+        name: 'Class of ICI',
+        values: [
+            'PD-1',
+            'PD-L1',
+            'CTLA-4'
+        ]
+    }, {
+        display_name: 'ICI Name (Rx)',
+        name: 'Name of ICI',
+        values: [
+            'Atezolizumab',
+            'Avelumab',
+            'Cemiplimab',
+            'Durvalumab',
+            'Ipilimumab',
+            'Nivolumab',
+            'Pembrolizumab',
+            'Tremelimumab'
+        ]
+    }, {
+        display_name: 'Type of Therapy (Rx)',
+        name: 'Monotherapy/combination',
+        values: [
+            'Combination',
+            'Monotherapy'
+        ]
+    }, {
+        display_name: 'Type of combination (Rx)',
+        name: 'Type of combination',
+        values: [
+            'ICI+ICI',
+            'ICI+Chemo',
+            'ICI+TKI',
+            'ICI+MEKi',
+            'ICI+Anti-VEGF',
+            'ICI+RadiatICIn',
+            'ICI+Vaccine',
+            'ICI+BRAFi+MEKi',
+            'ICI+Chemo+Anti-VEGF',
+            'ICI+ICI+Chemo',
+        ]
+    }, {
+        display_name: 'Control Arm',
+        name: 'Type of control',
+        values: [
+            'Chemo',
+            'TKI',
+            'Interferon',
+            'Multikinase inhibitor',
+            'mTOR inhibitor',
+            'Radiation',
+            'Vaccine',
+            'Placebo',
+            'Chemo/Anti-EGFR',
+            'Chemo+Anti-VEGF',
+            'Chemo/TKI',
+            'BRAFi+MEKi',
+            'Best supportive care'
+        ]
+    }, {
+        display_name: 'Cancer Type',
+        name: 'Cancer type',
+        values: [
+            'Bladder',
+            'Breast',
+            'Colorectal',
+            'Esophageal/GEJ',
+            'Gastric/GEJ',
+            'Head and Neck ',
+            'Hepatocellular',
+            'Melanoma',
+            'Mesothelioma',
+            'Multiple Myeloma',
+            'Non-Small Cell Lung',
+            'Pancreatic',
+            'Prostate',
+            'Renal cell',
+            'Small Cell Lung',
+            'Urothelial'
+        ]
+    }],
+
+    // for searching oc
+    oc_dict: {},
+    oc_dict3: {},
+
+    // vpp data object
+    vpp_data: {
+        // coe helper for quick access
+        coe_helper: coe_helper,
+
+        // pubmed helper for quick access
+        srv_pubmed: srv_pubmed,
+
+        // vpp level parameter
+        // work mode includes:
+        // 1: plot: just show the selected single outcome
+        // 2: sof: show 
+        work_mode: 'plot',
+
+        // for filters
+        dropdowns: [],
+        n_papers: 0,
+
+        // for oc list
+        group: 'treatment',
+        color_mode_by_sm: 'RR',
+
+        // rs is a three level dict
+        // {
+        //     group: {
+        //         group,
+        //         is_close,
+        //         cates: {
+        //             cate_name: {
+        //                 cate,
+        //                 ocs: []
+        //             }
+        //         }
+        //     }
+        // },
+        rs: {},
+        rs_stat: {
+            cnt_cates: 0,
+            cnt_ocs: 0,
+        },
+        ma_dict: {},
+
+        keyword: '',
+
+        // for filter number of outcomes
+        cnt_rule: 'ge1',
+
+        is_updating_all_oc_mas: false,
+
+        is_using_filters: true,
+
+        ///////////////////////////////////////////////////////////
+        // for study viewer
+        ///////////////////////////////////////////////////////////
+        sv_pid_arm: null,
+        sv_obj: null,
+
+        ///////////////////////////////////////////////////////////
+        // for plots
+        ///////////////////////////////////////////////////////////
+        plot_active_tab: 'plot',
+        plot_fl: null,
+        plot_oc: null,
+        plot_grade: null,
+        plot_sm: 'RR',
+        
+        plot_params: {
+            fixed_or_random: 'random'
+        },
+
+        plot_oc_rs: [],
+
+        ///////////////////////////////////////////////////////////
+        // for sof
+        ///////////////////////////////////////////////////////////
+        sof_sm: 'OR',
+        sof_baseline: 1000,
+        sof_external_risk_calculated: 10,
+        sof_use_internal_baseline: true,
+        sof_columns_filters: false,
+        sof_columns_totals: false,
+        sof_show_ard: false,
+        sof_show_ci: true,
+
+        // for display
+        sof_rs: []
+    },
+
+    vpp_methods: {
+        show_color_guide: function() {
+            $('#color_guide').dialog({
+                width: 680
+            });
+        },
+
+        show_study_viewer: function() {
+            // this.sv_obj = {
+            //     itable: alasql("select * from papers where pid='' limit 1")[0],
+            //     paper: app_pma.data_itable.paper_dict[pid]
+            // };
+        },
+
+        hide_study_viewer: function() {
+            this.sv_obj = null;
+        },
+
+        show_plot_tab: function(tab_name) {
+            this.plot_active_tab = tab_name;
+        },
+
+        ///////////////////////////////////////////////////////////
+        // for filters
+        ///////////////////////////////////////////////////////////
+        is_filter_disabled: function(idx) {
+            if (idx == 0) {
+                return false;
+            } else {
+                if (idx == 1 || idx == 2 || idx == 5) {
+                    
+                    if (this.dropdowns[idx-1].value == '%') {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+
+                // for the Type of combination
+                // this dropdown depends on the value of previous
+                if (idx == 3) {
+                    if (this.dropdowns[2].value.toLocaleLowerCase() == 'combination') {
+                        return false;
+                    } else {
+                        return true;
+                    }
+                }
+
+                // for the next, it depends on the m/c value
+                // and also the choose of type of comb
+                if (idx == 4) {
+                    if (this.dropdowns[2].value == '%') {
+                        return true;
+                    } else if ( this.dropdowns[2].value == 'all' ||
+                        this.dropdowns[2].value.toLocaleLowerCase() == 'monotherapy') {
+                        return false;  
+                    } else {
+                        // depends on the value of 
+                        if (this.dropdowns[3].value == '%') {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                }
+            }
+        },
+
+        on_filter_value_change: function(event, idx) {
+            var new_val = event.target.value;
+            this.set_filter_value_at(new_val, idx, true);
+
+            // update other views
+            let pid_arms = this.get_pid_arms_by_filter();
+            console.log('* pid_arms:', pid_arms);
+            // this.n_papers = pid_arms.length;
+            // 2023-04-06: change the method for calcuating n papers
+            // as the data structure changed, use different way
+            this.update_n_papers_by_pid_arms(pid_arms);
+
+            // update oc_list
+            this.update_oclist(pid_arms);
+        },
+
+        update_n_papers_by_pid_arms: function(pid_arms) {
+            var pid_set = new Set();
+            for (let i = 0; i < pid_arms.length; i++) {
+                const pa = pid_arms[i];
+                pid_set.add(pa.pid);
+            }
+            this.n_papers = pid_set.size;
+        },
+
+        get_current_filter_values: function() {
+            var vals = [];
+            for (let i = 0; i < this.dropdowns.length; i++) {
+                var val = this.dropdowns[i].value;
+                vals.push(val);
+            }
+            return vals;
+        },
+
+        set_filter_value_at: function(new_val, idx, update_related_views) {
+            if (typeof(update_related_views) == 'undefined') {
+                update_related_views = false;
+            }
+
+            this.dropdowns[idx].value = new_val;
+
+            // update the affected
+            if (idx < this.dropdowns.length - 1) {
+                // now, reset all of the following options
+                for (let i = idx + 1; i < this.dropdowns.length; i++) {
+                    // reset the value
+                    this.dropdowns[i].value = '%';
+                    // reset the options
+                    this.dropdowns[i].options = this.get_filter_options(i, true);
+                }
+                
+                if (new_val != '%') {
+                    // now, update the options of the next dropdown
+                    var next = 1;
+                    if (idx == 2 &&
+                        new_val.toLocaleLowerCase() == 'all') {
+                        next = 2;
+                    }
+                    if (idx == 2 &&
+                        new_val.toLocaleLowerCase() == 'monotherapy') {
+                        next = 2;
+                    }
+                    
+                    var next_options = this.get_filter_options(idx + next);
+                    // console.log(next_options);
+                    this.dropdowns[idx + next].options = next_options;
+                }
+            }
+            // finally, update the filter UI
+
+            this.$forceUpdate();
+
+        },
+
+        set_filter_values: function(vals) {
+            for (let i = 0; i < vals.length; i++) {
+                const val = vals[i];
+                
+                // set all values
+                if (i == (vals.length - 1)) {
+                    // update the last one
+                    this.set_filter_value_at(val, i, true);
+                } else {
+                    this.set_filter_value_at(val, i, false);
+                }
+            }
+        },
+
+        get_pid_arms_by_filter: function() {
+            // now need to get the pmids
+            // so, first, get the current values of all dropdowns
+            var conditions = [];
+            if (this.is_using_filters) {
+                for (let i = 0; i < this.dropdowns.length; i++) {
+                    const dropdown = this.dropdowns[i];
+                    var name_i = dropdown.name;
+                    var val_i = dropdown.value;
+                    if (val_i == '%' || val_i == 'all') {
+                        // skip the default
+                        // but we still need a condition, so this one
+                        conditions.push(
+                            '1=1'
+                        );
+                    } else {
+                        conditions.push(
+                            '`' + name_i + '` like "%' + val_i + '%"'
+                        );
+                    }
+                }
+            } else {
+                conditions.push(
+                    '1=1'
+                );
+            }
+            // second, use the conditions to search for the 
+            var pid_arms = this.get_pid_arms_by_filter_conditions(conditions);
+            return pid_arms;
+        },
+
+        get_pid_arms_by_filter_conditions: function(conditions) {
+            var sql_conds = conditions.join(' and \n');
+            var sql = "select pid,_arm_idx from papers " + '\n' +
+                "where " + sql_conds + '\n';
+            
+            var rs = alasql(sql);
+            return rs;
+        },
+
+        get_filter_options: function(idx, skip) {
+            if (typeof(skip) == 'undefined') {
+                // use this option to skip checking, just return the default options
+                skip = false;
+            }
+            var options = [{
+                name: '',
+                value: '%'
+            }, {
+                name: 'All',
+                value: 'all'
+            }];
+            var name_idx = app_pma.attrs[idx].name;
+            var vals_idx = app_pma.attrs[idx].values;
+
+            if (idx == 0) {
+                for (let i = 0; i < app_pma.attrs[idx].values.length; i++) {
+                    const val = app_pma.attrs[idx].values[i];
+                    options.push({
+                        name: val,
+                        value: val
+                    })
+                }
+            } else {
+                if (skip) {
+                    return options;
+                }
+                // for all other dropdown, the option is decided by ALL of the selections
+                // of dependencies for example:
+                // for the 2nd dropdown, the options are decided by the 1st selection
+                // for the 3rd dropdown, the options are decided by the selections of the 1st and 2nd.
+                // for the 4th, by 1st, 2nd, and 3rd
+                // etc.
+                // So, first, need to generate the condition by all previous 
+                var conditions = [];
+                for (let j = 0; j < idx; j++) {
+                    var name_j = this.dropdowns[j].name;
+                    var val_j = this.dropdowns[j].value;
+
+                    if (val_j == this.blank_val || val_j == 'all') {
+                        // skip the blank dropdown
+                        // but we still need a condition, so this one
+                        conditions.push(
+                            '1=1'
+                        );
+                    } else {
+                        conditions.push(
+                            '`' + name_j + '` like "%' + val_j + '%"'
+                        );
+                    }
+                }
+                var sql_cond = conditions.join(' and \n');
+
+                // then, use these conditions to query the itable data to get the available records
+                var sql = "select `" + name_idx + '` as attr, count(PMID) as cnt ' + '\n' +
+                    'from papers ' + '\n' +
+                    'where ' + sql_cond + '\n' +
+                    'group by `' + name_idx + '` ';
+
+                console.log(sql);
+                var rs = alasql(sql);
+                console.log(rs);
+
+                // last, check each value whether available in the rs
+                for (let i = 0; i < app_pma.attrs[idx].values.length; i++) {
+                    const val = app_pma.attrs[idx].values[i];
+                    var val_upper = val.toLocaleUpperCase();
+
+                    // check whether this val in rs or not
+                    for (let j = 0; j < rs.length; j++) {
+                        const r = rs[j];
+
+                        if (typeof(r.attr) == 'undefined' ||
+                            r.attr == null) {
+                            continue;
+                        }
+                        
+                        var R_VAL = r.attr.toLocaleUpperCase();
+                        
+                        if (R_VAL.lastIndexOf(val_upper)>=0) {
+                            // which means this value exists in the selection
+                            // Then we could put this val in the result
+                            options.push({
+                                name: val,
+                                value: val
+                            });
+                            
+                            // since we already found this value
+                            // just break and check next value
+                            break;
+
+                        } else {
+                            
+                        }
+                    }
+                }
+            }
+
+            return options;
+        },
+
+        cmp_val: function(a, b) {
+            if (a == b) {
+                return true;
+
+            } else if (a == '%') {
+                if (b == 'all') {
+                    return true;
+                }
+            } else if (a == 'all') {
+                if (b == '%') {
+                    return true;
+                }
+            }
+
+            return false;
+        },
+
+        cmp_vals: function(va, vb) {
+            for (let i = 0; i < va.length; i++) {
+                const a = va[i];
+                const b = vb[i];
+                if (this.cmp_val(a, b)) {
+                    // ok
+                } else {
+                    return false;
+                }
+            }
+            return true;
+        },
+
+        ///////////////////////////////////////////////////////////
+        // for oc list
+        ///////////////////////////////////////////////////////////
+        
+        n_all: function() {
+            var n = 0;
+            for (const key in this.rs) {
+                if (Object.hasOwnProperty.call(this.rs, key)) {
+                    const group = this.rs[key];
+                    n += this.n_group(group);
+                }
+            }
+            return n;
+        },
+
+        n_group: function(group) {
+            var n = 0;
+            for (const key in group.cates) {
+                const cate = group.cates[key];
+                n += this.n_cate(cate);
+            }
+
+            return n;
+        },
+
+        n_cate: function(cate) {
+            var n = 0;
+            for (let i = 0; i < cate.ocs.length; i++) {
+                const ae = cate.ocs[i];
+                if (this.show_oc(ae) && this.match_keyword(ae.name)) {
+                    n += 1;
+                }
+            }
+            return n;
+        },
+
+        match_keyword: function(s) {
+            if (this.keyword.length < 3) {
+                return true;
+            }
+
+            if (s.toUpperCase().indexOf(this.keyword.toUpperCase())>=0) {
+                return true;
+            }
+
+            return false;
+        },
+
+        match_keyword_in_cate(cate) {
+            for (let i = 0; i < cate.ocs.length; i++) {
+                const ae = cate.ocs[i];
+                
+                if (this.match_keyword(ae.name)) {
+                    return true;
+                }
+            }
+
+            return false;
+        },
+
+        is_cnt_ok: function(cnt) {
+            if (this.cnt_rule == 'ge1') {
+                if (cnt >= 1) {
+                    return true;
+                }
+            } else if (this.cnt_rule == 'ge5') {
+                if (cnt >= 5) {
+                    return true;
+                }
+            } else if (this.cnt_rule == 'ge10') {
+                if (cnt >= 10) {
+                    return true;
+                }
+            } else if (this.cnt_rule == 'ge20') {
+                if (cnt >= 20) {
+                    return true;
+                }
+            } else if (this.cnt_rule == 'ge1ls5') {
+                if (cnt >= 1 && cnt < 5) {
+                    return true;
+                }
+            } else if (this.cnt_rule == 'ge5ls10') {
+                if (cnt >= 5 && cnt < 10) {
+                    return true;
+                }
+            } else if (this.cnt_rule == 'ge10ls20') {
+                if (cnt >= 10 && cnt < 20) {
+                    return true;
+                }
+            }
+
+            return false;
+        },
+        
+        show_oc: function(ae) {
+            var gs = ['ga', 'g3h', 'g5n'];
+            for (let i = 0; i < gs.length; i++) {
+                if (this.show_oc_grade(ae, gs[i])) {
+                    return true;
+                }
+            }
+            return false;
+        },
+
+        show_oc_grade: function(ae, grade) {
+            if (typeof(grade) == 'undefined') {
+                grade = 'GA';
+            }
+            var _g = grade.toLocaleLowerCase();
+
+            if (this.is_cnt_ok(ae['cnt_'+ _g])) {
+                return true;
+            }
+            return false;
+        },
+
+        add_group: function(group, ae_grade) {
+            var cnt = 0;
+            var ret = window.confirm(
+                'Adding ALL '+ae_grade+' outcomes in current ['+group.group+'] group may take a while, are sure to continue?'
+            );
+            if (ret) {
+
+            } else {
+                return cnt;
+            }
+
+            for (const cate_name in group.cates) {
+                if (Object.hasOwnProperty.call(group.cates, cate_name)) {
+                    const cate = group.cates[cate_name];
+                    cnt += this.add_cate(cate, ae_grade);
+                }
+            }
+
+            console.log('* finished add group of ' + cnt);
+            return cnt;
+        },
+
+        get_grade_label: function(g) {
+            return jarvis.texts[g];
+        },
+
+        toggle_group: function(group) {
+            this.rs[group].is_close = !this.rs[group].is_close;
+        },
+
+        toggle_cate: function(group, cate) {
+            this.rs[group].cates[cate].is_close = !this.rs[group].cates[cate].is_close;
+        },
+
+        toggle_all_cates: function(flag) {
+            for (var key in this.rs) {
+                this.rs[key].is_close = flag;
+            }
+        },
+
+        get_eft_color: function(d) {
+            if (typeof(d) == 'undefined') {
+                // which means it is empty now
+                return 'transparent';
+            }
+            return jarvis.get_color(
+                d.random.SM,
+                d.random.SM_lower,
+                d.random.SM_upper,
+            )
+        },
+
+        clear: function() {
+            $('.oc-type').removeClass('oc-type-selected');
+            jarvis.clear_all_ae();
+        },
+
+        update_oclist: function(pid_arms) {
+            var updated_data = app_pma.get_oclist_data(
+                pid_arms,
+                this.group
+            );
+
+            this.rs = updated_data.rs;
+            this.rs_stat = updated_data.rs_stat;
+            this.ma_dict = updated_data.ma_dict;
+
+            // when update the oclist, should hide the current img
+            // vw_ocplot.hide_plot();
+
+            this.clear();
+        },
+
+        update_all_oc_mas: function() {
+            this.is_updating_all_oc_mas = true;
+            var cnt_mas = 0;
+            const t0 = performance.now();
+            for (const abbr in this.ma_dict) {
+                for (const grade in this.ma_dict[abbr]) {
+                    var ma_prim = this.ma_dict[abbr][grade].PRIM;
+                    if (ma_prim.stus.length != 0) {
+
+                // console.log('* update_ma_rsts',abbr,grade, this.ma_dict[abbr][grade]);
+
+                        var rst_sm = metajs.metabin(
+                            ma_prim.stus, {
+                                sm: this.color_mode_by_sm
+                            }
+                        );
+
+                        this.ma_dict[abbr][grade].PRIM.rsts[this.color_mode_by_sm] = rst_sm;
+                        cnt_mas += 1;
+                    }
+                }
+            }
+
+            // get the total time
+            const t1 = performance.now();
+            const dur = (t1 - t0) / 1000;
+
+            console.log('* finished calculation of ' + cnt_mas + ' MAs in ' + dur.toFixed(4) + ' seconds');
+            this.is_updating_all_oc_mas = false;
+        },
+
+        add_cate: function(cate, ae_grade) {
+            // the cate contains all AE
+            var cnt = 0;
+            for (let i = 0; i < cate.ocs.length; i++) {
+                const ae = cate.ocs[i];
+                
+                if (this.match_keyword(ae.name)) {
+                    cnt += this.add_oc(
+                        ae,
+                        ae_grade
+                    );
+                }
+            }
+
+            return cnt;
+        },
+
+        add_oc: function(oc, grade, count) {
+            /* 
+            oc is an object like the following:
+            {
+                "abbr": "E69BHJ1A",
+                "group": "treatment",
+                "cate": "Cardiovascular",
+                "name": "Atrial fibrillation",
+                "cnt_ga": 2,
+                "cnt_g3h": 3,
+                "cnt_g5n": 0
+            }
+            so we can use the abbr to search it in ma_dict
+            */
+            console.log("* add oc", oc, grade);
+            if (this.show_oc_grade(oc, grade)) {
+
+            } else {
+                // this oc can NOT be displayed for some reason
+                // so won't be added for comparison
+                console.log('* failed to add_oc by show_oc_grade', oc);
+                return 0;
+            }
+
+            if (typeof(count) == 'undefined') {
+
+            } else {
+                // just for counting
+                return 1;
+            }
+
+            // now need to get the pwma result of this oc grade
+            var ma_prim = this.ma_dict[oc.abbr][grade].PRIM;
+            var ma_incd = this.ma_dict[oc.abbr][grade].INCD; 
+
+            /* it returns:
+            {
+                PRIM: { rsts: { OR: metajs_rst_OR, RR: metajs_rst_RR } },
+                INCD: { rsts: { INCD: metajs_rst_INCD } },
+            }
+            */
+            var r = this.calc_prim_incd(ma_prim, ma_incd);
+
+            // add the result to original place
+            this.ma_dict[oc.abbr][grade].PRIM.rsts = r.PRIM.rsts;
+            this.ma_dict[oc.abbr][grade].INCD.rsts = r.INCD.rsts;
+
+            // then the following steps depend on which work mode
+            if (this.flag_is_work_mode_sof) {
+                this.add_fl_oc_gd_to_sof(
+                    this.get_current_filter_values(),
+                    oc,
+                    grade
+                );
+
+            } else if (this.flag_is_work_mode_plot) {
+                // just show the forest plots
+                this.plot_fl = this.get_current_filter_values();
+                this.plot_oc = oc;
+                this.plot_grade = grade;
+
+                // draw
+                this.draw_ma_plot();
+
+                // update detail
+                this.view_oc_details();
+            }
+        },
+
+        view_oc_details: function(fl, oc, grade) {
+            // get the ma_prim as it contains the raw rs
+            var ma_prim = this.ma_dict[this.plot_oc.abbr][this.plot_grade].PRIM;
+
+            // get papers?
+            var sql = "select * from papers where " + 
+                app_pma.get_condition_by_pid_arms_and_group(ma_prim.rs);
+            var pis = alasql(sql);
+
+            // need to convert to a dictionary
+            var ocpi_dict = {};
+            for (let i = 0; i < pis.length; i++) {
+                const pi = pis[i];
+                
+                if (!ocpi_dict.hasOwnProperty(pi.pid)) {
+                    ocpi_dict[pi.pid] = {}
+                }
+
+                if (!ocpi_dict[pi.pid].hasOwnProperty(pi._arm_idx)) {
+                    ocpi_dict[pi.pid][pi._arm_idx] = pi;
+                }
+            }
+
+            // the oc+paper itable list
+            var ocpis = [];
+
+            for (let i = 0; i < ma_prim.rs.length; i++) {
+                const oc = ma_prim.rs[i];
+
+                // init as an null value
+                var it = null;
+                if (ocpi_dict.hasOwnProperty(oc.pid)) {
+                    if (ocpi_dict[oc.pid].hasOwnProperty(oc._arm_idx)) {
+                        ocpi_dict[oc.pid][oc._arm_idx];
+                    } else {
+                        // use the first default arm
+                        ocpi_dict[oc.pid][0];
+                    }
+                }
+
+                ocpis.push({
+                    oc: oc,
+                    it: it
+                })
+            }
+
+            // set the rs
+            this.plot_oc_rs = ocpis;
+        },
+
+
+        ///////////////////////////////////////////////////////////
+        // for plots
+        ///////////////////////////////////////////////////////////
+        update_ma_plot_by_sm: function(sm) {
+            // just reset the sm
+            // this.plot_sm = sm;
+
+            // re-draw
+            this.draw_ma_plot();
+        },
+
+        draw_ma_plot: function() {
+
+            if (this.plot_sm == 'RR' || this.plot_sm == 'OR') {
+                var ma_prim = this.ma_dict[this.plot_oc.abbr][this.plot_grade].PRIM;
+
+                // get the pma data for plot?
+                var r = app_pma.mk_data_cfg_by_ma(
+                    ma_prim,
+                    this.plot_sm,
+                    this.plot_params.fixed_or_random
+                );
+
+                // then draw it?
+                fg_pwma_forest.draw(
+                    r.data,
+                    r.cfg
+                );
+
+            } else if (this.plot_sm == 'INCD') {
+                var ma_incd = this.ma_dict[this.plot_oc.abbr][this.plot_grade].INCD;
+
+                // get the pma data for plot?
+                var r = app_pma.mk_data_cfg_by_ma(
+                    ma_incd,
+                    this.plot_sm,
+                    this.plot_params.fixed_or_random
+                );
+
+                fg_incd_forest.draw(
+                    r.data,
+                    r.cfg
+                );
+            }
+        },
+
+        export_oc_csv: function() {
+            var ma_prim = this.ma_dict[this.plot_oc.abbr][this.plot_grade].PRIM;
+            var ma_incd = this.ma_dict[this.plot_oc.abbr][this.plot_grade].INCD;
+
+            // get the plot data
+            var r = app_pma.mk_data_cfg_by_ma(
+                ma_prim,
+                this.plot_sm,
+                this.plot_params.fixed_or_random
+            );
+
+            // prepare a papa csv format object
+            var papa_csv = {
+                fields: [
+                    'study',
+                    'year',
+                    'Et',
+                    'Nt',
+                    'Ec',
+                    'Nc',
+                    'SM',
+                    'SM_lower',
+                    'SM_upper',
+                    'w',
+                    'treatment',
+                    'control',
+                    'pid',
+                ],
+                data: []
+            };
+
+            // convert the the studies
+            for (let i = 0; i < r.data.stus.length; i++) {
+                const stu = r.data.stus[i];
+
+                // data element
+                var d = [];
+                for (let j = 0; j < papa_csv.fields.length; j++) {
+                    const f = papa_csv.fields[j];
+                    d.push(stu[f]);
+                }
+                papa_csv.data.push(d);
+            }
+            
+            // r.data contains model and stus
+            var csv = Papa.unparse(
+                papa_csv
+            );
+
+            var blob = new Blob([csv], {type: "text/plain;charset=utf-8"});
+            var filename = this.plot_oc.cate + '-' + 
+                this.plot_oc.name + "-" +
+                r.data.stus.length + 
+                '.csv';
+            saveAs(blob, filename);
+        },
+
+        ///////////////////////////////////////////////////////////
+        // for soft (Summary of Findings Table)
+        ///////////////////////////////////////////////////////////
+        find_fl_oc_gd_in_sof: function(fl, oc, grade) {
+            for (let i = 0; i < this.sof_rs.length; i++) {
+                const r = this.sof_rs[i];
+                if (r.grade == grade &&
+                    r.oc.abbr == oc.abbr &&
+                    this.cmp_vals(r.fl, fl)) {
+                    // found the exact same result!
+                    // same abbr, same grade, under same filter options
+                    return i;
+                }
+            }
+            return -1;
+        },
+
+        add_fl_oc_gd_to_sof: function(fl, oc, grade) {
+            if (this.find_fl_oc_gd_in_sof(fl, oc, grade) >= 0) {
+                // which means this fl-oc has already be added
+                return;
+            }
+            // ok, add this item
+            var ma = this.ma_dict[oc.abbr][grade];
+
+            // get the record for this sof row
+            var r = {
+                fl: fl,
+                oc: oc,
+                grade: grade,
+                ma: ma,
+                is_show: {
+                    // show sm / study info
+                    sm: true,
+                    // show ARD / ARD CI
+                    ARD: true,
+                    // show coe detail
+                    coe_detail: false
+                },
+                // the CoE information from backend service
+                coe: null
+            }
+
+            // 2023-04-10: check the number of studies
+            // if there are less than 3, just skip
+            if (ma.PRIM.stus.length < 3) {
+                r.coe = 'NA';
+            } else {
+                // create rs for RPLT API
+                var rplt_rs = [];
+                for (let i = 0; i < ma.PRIM.stus.length; i++) {
+                    const stu = ma.PRIM.stus[i];
+                    rplt_rs.push({
+                        "Et": stu[0],
+                        "Nt": stu[1],
+                        "Ec": stu[2],
+                        "Nc": stu[3],
+                        "study": stu[4],
+                        "treatment": stu[5],
+                        "control": stu[6],
+                        "pid": stu[7],
+                        "year": stu[8],
+                        "rob": stu[9],
+                        "ind": stu[10]
+                    });
+                }
+                rplt_rs = JSON.stringify(rplt_rs);
+
+                // send a request for the CoE
+                let _this = 
+                srv_rpltapi.analyze_pwma_raw_coe({
+                    am: 'FORESTDATA',
+                    sm: this.sof_sm,
+                    rs: rplt_rs,
+                    hk: 'FALSE',
+                    apikey: "[[ config['settings'].API_SYSTEM_APIKEYS[0] ]]"
+                }, (function(fl, oc, grade){
+                    return function(data) {
+                        console.log('* analyze_pwma_raw_coe result', fl, oc, grade, data);
+                        // The
+                        // update the coe information for this fl-oc-grade item in sof
+                        app_pma.vpp.update_coe_by_fl_oc_gd(
+                            fl, oc, grade, 
+                            data.data.coe
+                        );
+                    }
+                })(fl, oc, grade));
+            }
+
+            // update the UI
+            console.log('* add_fl_oc_gd_to_sof:', r);
+            this.sof_rs.push(r);
+        },
+
+        update_coe_by_fl_oc_gd: function(fl, oc, grade, coe) {
+            let sof_r_idx = this.find_fl_oc_gd_in_sof(fl, oc, grade);
+            if (sof_r_idx < 0) {
+                // which means this fl-oc-grade doesn't exist
+                return;
+            }
+
+            // ok, let's update
+            this.sof_rs[sof_r_idx].coe = coe;
+        },
+
+        export_sof_csv: function() {
+            var ret = window.confirm('Export all records in the following summary of findings table?');
+
+            if (ret) {
+
+            } else {
+                return;
+            }
+        },
+
+        remove_all_sof: function() {
+            this.sof_rs = [];
+        },
+
+        get_ACR: function(r) {
+            if (this.sof_use_internal_baseline) {
+                // return r.oc.Ec / r.oc.Nc * this.sof_baseline;
+                // the r.ma.PRIM.total is [Et, Nt, Ec, Nc]
+                return r.ma.PRIM.total[2] / r.ma.PRIM.total[3] * this.sof_baseline;
+            } else {
+                return external_risk_calculated;
+            }
+        },
+
+        get_obj: function(r, obj, fixed_or_random) {
+            // get the obj of this record
+            // obj could be: sm, lower, upper
+            if (typeof(obj)=='undefined') {
+                obj = 'SM';
+            }
+            if (obj == 'lower' || obj == 'upper') {
+                obj = 'SM_' + obj;
+            }
+            if (typeof(fixed_or_random)=='undefined') {
+                fixed_or_random = 'random';
+            }
+            return r.ma.PRIM.rsts[this.sof_sm][fixed_or_random][obj];
+        },
+
+        get_CIR: function(r, obj) {
+            // get the obj of this CIR
+            // obj could be
+            // sm, lower, upper
+            // calculate the CIR based on measure
+            if (this.sof_sm == 'OR') {
+                var a = this.get_ACR(r) / this.sof_baseline * this.get_obj(r, obj);
+                var b = 1 - this.get_ACR(r) / this.sof_baseline;
+                var c = a + b;
+                var d = a / c;
+                var e = d * this.sof_baseline;
+                return e;
+            } else if (this.sof_sm == 'RR') {
+                var a = this.get_ACR(r) * this.get_obj(r, obj);
+                return a;
+            }
+        },
+
+        get_ARD: function(r, obj) {
+            // get the obj of this CIR
+            // obj could be
+            // sm, lower, upper
+            if (this.sof_sm == 'OR') {
+                var a = (1 - this.get_obj(r, obj)) * this.get_ACR(r) / this.sof_baseline;
+                var b = 1 - this.get_ACR(r) / this.sof_baseline;
+                var c = a + b;
+                var d = a / c;
+                var e = d * this.sof_baseline;
+                return e;
+            } else if (this.sof_sm == 'RR') {
+                var a = this.get_ACR(r) * (1 - this.get_obj(r, obj));
+                return a;
+            }
+        },
+
+        get_ARD_txt: function(r, obj) {
+            var ARD = this.get_ARD(r, obj);
+            var txt = ' less';
+            if (ARD < 0) {
+                txt = ' more';
+            }
+            return Math.abs(ARD).toFixed(0) + txt;
+        },
+
+        get_ARDp_txt: function(r, obj) {
+            var ARDp = 100 * this.get_ARD(r, obj) / this.sof_baseline;
+            var txt = ' less';
+            if (ARDp < 0) {
+                txt = ' more';
+            }
+            return Math.abs(ARDp).toFixed(1) + '%' + txt;
+        },
+
+        // get_bg_color_class_by_oc: function(oc_abbr, grade) {
+        //     var r = {
+        //         ae: app_softpma.data.oc_dict[oc_abbr].results[grade]
+        //     };
+        //     return this.get_bg_color_class(r);
+        // },
+
+        // get_bg_color_class: function(r) {
+        //     var fixed_or_random = 'random';
+        //     var sm = r.oc.result[this.sof_sm][fixed_or_random].model['sm'];
+        //     var lower = r.oc.result[this.sof_sm][fixed_or_random].model['lower'];
+        //     var upper = r.oc.result[this.sof_sm][fixed_or_random].model['upper'];
+        //     var cls =  this.calc_bg_color_class(sm, lower, upper);
+        //     console.log('* ae class:', cls);
+
+        //     return cls;
+        // },
+
+        get_coe_bg_color_cls: function(coe, sm) {
+            if (coe == 0) {
+                return 'coe-nner-0';
+            }
+            if (sm < 1) {
+                return 'coe-bene-' + cie;
+
+            } else if (sm > 1) {
+                return 'coe-harm-' + cie;
+
+            } else {
+                return 'coe-nner-' + cie;
+            }
+        },
+
+        // get_grade_label: function(g) {
+        //     // return jarvis.texts[g];
+        //     return g;
+        // },
+
+        _round2: function(v) {
+            return (Math.round(v * 100) / 100).toFixed(2);
+        },
+
+
+        _int: function(v) {
+            return Math.round(v);
+        },
+
+        flip_cell: function(r) {
+            // first, find this ae in rs
+            // if (this.tbrs[ae_grade].hasOwnProperty(r.abbr)) {
+            //     // flip this cell!
+            //     this.tbrs[ae_grade][r.abbr].is_show[cell] = 
+            //         !this.tbrs[ae_grade][r.abbr].is_show[cell];
+            // } else {
+            //     // how can it be ???
+            // }
+            // this.$forceUpdate();
+        },
+        
+        get_txt_by_type: function(s, type) {
+            if (typeof(type) == 'undefined') {
+                return s;
+            }
+            // for grade
+            if (type == 'grade') {
+                return {
+                    'GA': 'ALL',
+                    'G3H': '3+',
+                    'G5N': '5'
+                }[s];
+
+            } else if (type == 'filter') {
+                if (s == '%' || s == 'all') {
+                    return 'ALL'
+                } else {
+                    return s;
+                }
+
+            } else {
+                return s;
+            }
+        },
+
+        get_treatment_txt_by_filters: function(filter_values) {
+            var txt = this.get_txt_by_type(filter_values[0], 'filter') + 
+                        '.' +
+                        this.get_txt_by_type(filter_values[1], 'filter');
+
+            if (filter_values[2] == '%' || filter_values[2] == 'all') {
+                
+                if (filter_values[1] == '%' || filter_values[1] == 'all') {
+                    return txt;
+                } else {
+                    
+                    return txt + ' (ALL)';
+                }
+                
+            } else if (filter_values[2] == 'Monotherapy') {
+                // mono
+                return txt + ' (MONO)';
+
+            } else {
+                // comb
+                if (filter_values[3] == '%' || filter_values[3] == 'all') {
+                    // all comb
+                    return txt + ' (COMB)';
+                } else {
+                    // specific comb
+                    return txt + ' (' + this.get_txt_by_type(filter_values[3], 'filter') + ')';
+                }
+            }
+        },
+
+        ///////////////////////////////////////////////////////////
+        // for study detail
+        ///////////////////////////////////////////////////////////
+        get_it_val_by_key: function(it, key) {
+            if (it == null) {
+                return 'NULL'
+            }
+            if (it.hasOwnProperty(key)) {
+                return it[key];
+            } else {
+                return 'NA';
+            }
+        },
+
+        ///////////////////////////////////////////////////////////
+        // app-level functions
+        ///////////////////////////////////////////////////////////
+
+        add_comma_to_number: function(x) {
+            x = x.toString();
+            var pattern = /(-?\d+)(\d{3})/;
+            while (pattern.test(x))
+                x = x.replace(pattern, "$1,$2");
+            return x;
+        },
+
+        calc_prim_incd: function(ma_prim, ma_incd) {
+            var ret = {
+                PRIM: { rsts: {} },
+                INCD: { rsts: {} },
+            };
+
+            if (ma_prim.stus.length != 0) {
+                // OK, let's do INCD ANA
+                var rst_OR = metajs.metabin(
+                    ma_prim.stus, {
+                        sm: 'OR'
+                    }
+                );
+
+                var rst_RR = metajs.metabin(
+                    ma_prim.stus, {
+                        sm: 'RR'
+                    }
+                );
+
+                // update the data
+                ret.PRIM.rsts = {
+                    OR: rst_OR,
+                    RR: rst_RR
+                };
+
+            }
+
+            if (ma_incd.stus.length != 0) {
+                // OK, let's do INCD ANA
+                var rst_INCD = metajs.metaprop(
+                    ma_incd.stus, {}
+                );
+
+                // update the data
+                ret.INCD.rsts = {
+                    INCD: rst_INCD
+                };
+
+            }
+
+            return ret;
+        },
+
+    },
+
+    vpp_computed: {
+        flag_is_work_mode_sof: function() {
+            return this.work_mode == 'sof';
+        },
+
+        flag_is_work_mode_plot: function() {
+            return this.work_mode == 'plot';
+        }
+    },
+
+    init: function(data_itable, data_pma) {
+        // bind local access
+        this.data_itable = data_itable;
+        this.data_pma = data_pma;
+
+        // just init the dropdown for filters
+        this.init_filter(data_itable);
+
+        // init the oclist
+        this.init_oclist(data_pma);
+
+        // init the app
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: this.vpp_data,
+            methods: this.vpp_methods,
+            computed: this.vpp_computed
+        });
+
+        // update the oc_list
+        this.vpp.set_filter_values([
+            'all', 'all', 'all',
+            '%', // type of comb
+            'all', 'all'
+        ]);
+        this.vpp.update_oclist([]);
+
+        // update the study viewer 
+        this.vpp.show_study_viewer();
+    },
+
+    init_filter: function(data) {
+        // update the number of papers/records
+        this.vpp_data.n_papers = data.rs.length;
+
+        // update the dropdown of filters
+        var dropdowns = [];
+        for (let i = 0; i < app_pma.attrs.length; i++) {
+            const attr = app_pma.attrs[i];
+            dropdowns.push({
+                display_name: attr.display_name,
+                name: attr.name,
+                value: '%',
+                options: this.vpp_methods.get_filter_options(i, true)
+            });
+        }
+        this.vpp_data.dropdowns = dropdowns;
+    },
+
+    init_oclist: function(data) {
+        var ocds = this.get_oc_dicts(data);
+        this.oc_dict = ocds.oc_dict;
+        this.oc_dict3 = ocds.oc_dict3;
+    },
+
+    get_condition_by_pid_arms_and_group: function(pid_arms, group) {
+        var conditions = [];
+        // so first condition is the pid
+        if (pid_arms.length == 0) {
+            conditions = ['pid is not null'];
+        } else {
+            // 2023-04-07: get key
+            var pid_key = 'pid'
+            if (pid_arms[0].hasOwnProperty('PMID')) {
+                pid_key = 'PMID';
+            }
+            // var cond = pids.map(function(v) { return '"' + v + '"'}).join(',');
+            // conditions += 'pid in (' + cond + ') ';
+            // 2023-04-03: use pid + arm_idx to locate a treatment option
+            for (let i = 0; i < pid_arms.length; i++) {
+                const pa = pid_arms[i];
+                conditions.push(
+                    "(pid = '" + pa[pid_key] + "' and _arm_idx = " + pa._arm_idx + ")"
+                );
+            }
+        }
+        conditions = conditions.join(' OR ')
+
+        // second condition is the group
+        // var group = this.vpp.$data.group;
+        if (typeof(group) == 'undefined') {
+
+        } else {
+            // conditions += '\n';
+            // conditions += 'and oc_group = "'+group+'" ';
+        }
+
+        return conditions;
+    },
+
+    get_oclist_data: function(pid_arms, group) {
+        if (typeof(pid_arms) == 'undefined') {
+            pid_arms = [];
+        }
+
+        // get updated rs for oc list
+        var oc_list = this.get_oc_list(
+            pid_arms,
+            group
+        );
+
+        // get updated MAs
+        var ma_dict = this.get_ma_dict(
+            pid_arms,
+            group
+        );
+
+        return {
+            rs: oc_list.rs,
+            rs_stat: oc_list.rs_stat,
+            ma_dict: ma_dict
+        };
+
+    },
+
+
+    /**
+     * Get the init default oc dictionaries for searching oc
+     * 
+     * @returns the oc_dict and oc_dict3
+     */
+    get_oc_dicts: function() {
+        var sql = 'select oc_group, oc_cate, oc_abbr, first(oc_name) as oc_name, ' + '\n' +
+            '  count(case when has_GA = true then pid else null end) as cnt_ga, ' + '\n' +
+            '  count(case when has_G3H = true then pid else null end) as cnt_g3h, ' + '\n' +
+            '  count(case when has_G5N = true then pid else null end) as cnt_g5n ' + '\n' +
+            'from ocs ' + '\n' +
+            'group by oc_group, oc_cate, oc_abbr ' + '\n' +
+            'order by oc_group asc, oc_cate asc, oc_name asc';
+
+        var raw_rs = alasql(sql);
+
+        // oc_dict3 is a three level dict
+        // {
+        //      group: { cate: { abbr: {}}}
+        // }
+        // oc_dict2 is a one level dict
+        // {
+        //      abbr: {}
+        // }
+        
+        var oc_dict = {};
+        var oc_dict3 = {};
+
+        for (var i = 0; i < raw_rs.length; i++) {
+            var r = raw_rs[i];
+
+            if (typeof(r.oc_cate) == 'undefined' ||
+                r.oc_cate == null) {
+                continue;
+            }
+
+            // first, update this abbr in one-level dict
+            if (!oc_dict.hasOwnProperty(r.oc_abbr)) {
+                oc_dict[r.oc_abbr] = {
+                    group: r.oc_group,
+                    cate: r.oc_cate,
+                    abbr: r.oc_abbr,
+                    name: r.oc_name,
+                    cnt_ga: r.cnt_ga,
+                    cnt_g3h: r.cnt_g3h,
+                    cnt_g5n: r.cnt_g5n
+                }
+            }
+
+            // second, update this abbr in three-level dict
+            if (!oc_dict3.hasOwnProperty(r.oc_group)) {
+                oc_dict3[r.oc_group] = {}
+            }
+
+            if (!oc_dict3[r.oc_group].hasOwnProperty(r.oc_cate)) {
+                oc_dict3[r.oc_group][r.oc_cate] = {}
+            }
+
+            if (!oc_dict3[r.oc_group][r.oc_cate].hasOwnProperty(r.oc_abbr)) {
+                
+                oc_dict3[r.oc_group][r.oc_cate][r.oc_abbr] = {
+                    group: r.oc_group,
+                    cate: r.oc_cate,
+                    abbr: r.oc_abbr,
+                    name: r.oc_name,
+                    cnt_ga: r.cnt_ga,
+                    cnt_g3h: r.cnt_g3h,
+                    cnt_g5n: r.cnt_g5n,
+                    // this is for In-Cate-IndeX
+                    icix: Object.values(oc_dict3[r.oc_group][r.oc_cate]).length
+                }
+            }
+        }
+
+        return {
+            oc_dict: oc_dict,
+            oc_dict3: oc_dict3
+        };
+    },
+    
+    get_oc_list: function(pid_arms, group) {
+        var sql = 'select oc_group, oc_cate, oc_abbr, first(oc_name) as oc_name, ' + '\n' +
+            '  count(case when has_GA = true then pid else null end) as cnt_ga, ' + '\n' +
+            '  count(case when has_G3H = true then pid else null end) as cnt_g3h, ' + '\n' +
+            '  count(case when has_G5N = true then pid else null end) as cnt_g5n ' + '\n' +
+            'from ocs ' + '\n' +
+            'where ' + '\n' +
+            this.get_condition_by_pid_arms_and_group(pid_arms, group) + ' ' + '\n' +
+            'group by oc_group, oc_cate, oc_abbr ' + '\n' +
+            'order by oc_group desc, oc_cate asc, oc_name asc';
+
+        // console.log(sql);
+        // init the result
+        var raw_rs = alasql(sql);
+        // console.log("* raw_rs", raw_rs);
+
+        var rs = {};
+        var rs_stat = {
+            cnt_cates: 0,
+            cnt_ocs: 0,
+        };
+        for (var i = 0; i < raw_rs.length; i++) {
+            var r = raw_rs[i];
+
+            if (typeof(r.oc_group) == 'undefined' ||
+                r.oc_group == null) {
+                continue;
+            }
+
+            if (typeof(r.oc_cate) == 'undefined' ||
+                r.oc_cate == null) {
+                continue;
+            }
+            
+            // add group first
+            if (rs.hasOwnProperty(r.oc_group)) {
+                //
+            } else {
+                rs[r.oc_group] = {
+                    group: r.oc_group,
+                    is_close: false,
+                    cates: {}
+                }
+                rs_stat.cnt_cates += 1;
+            }
+            
+            if (rs[r.oc_group].cates.hasOwnProperty(r.oc_cate)) {
+                //
+            } else {
+                rs[r.oc_group].cates[r.oc_cate] = {
+                    cate: r.oc_cate,
+                    is_close: false,
+                    ocs: []
+                }
+                rs_stat.cnt_cates += 1;
+            }
+            // put this ae into cate
+            rs[r.oc_group].cates[r.oc_cate]['ocs'].push({
+                group: r.oc_group,
+                cate: r.oc_cate,
+                name: r.oc_name,
+                abbr: r.oc_abbr,
+
+                cnt_ga: r.cnt_ga,
+                cnt_g3h: r.cnt_g3h,
+                cnt_g5n: r.cnt_g5n
+            });
+            rs_stat.cnt_ocs += 1;
+        }
+
+        return {
+            rs: rs,
+            rs_stat: rs_stat
+        };
+    },
+
+    get_ma_dict: function(pid_arms, group) {
+        var sql = 'select * ' + '\n' +
+            'from ocs ' + '\n' +
+            'where ' + '\n' +
+            this.get_condition_by_pid_arms_and_group(pid_arms);
+
+        var rs = alasql(sql);
+        console.log('* rs for mas:', rs);
+
+        // the dict for final records and MA results
+        var ma_dict = {};
+
+        for (let i = 0; i < rs.length; i++) {
+            const r = rs[i];
+            
+            if (!ma_dict.hasOwnProperty(r.oc_abbr)) {
+                // Oh, no such record yet, save it
+                ma_dict[r.oc_abbr] = {
+                    GA: { 
+                        PRIM: { total: [0,0,0,0], rs: [], stus: [], rsts: {} }, 
+                        INCD: { total: [0,0,0,0], rs: [], stus: [], rsts: {} } 
+                    },
+                    G3H: { 
+                        PRIM: { total: [0,0,0,0], rs: [], stus: [], rsts: {} }, 
+                        INCD: { total: [0,0,0,0], rs: [], stus: [], rsts: {} } 
+                    },
+                    G5N: { 
+                        PRIM: { total: [0,0,0,0], rs: [], stus: [], rsts: {} }, 
+                        INCD: { total: [0,0,0,0], rs: [], stus: [], rsts: {} } 
+                    },
+                }
+            }
+
+            // try to get the RoB for CoE
+            var r_coe_rob = this.get_rob_from_itable_by_pid(r['pid']);
+            var r_coe_ind = this.get_ind_from_itable_by_pid(r['pid']);
+            // console.log('* get_ma_dict parsing', r);
+
+            // now check each grade
+            for (let j = 0; j < 3; j++) {
+                var grade = {0: 'GA', 1: 'G3H', 2: 'G5N'}[j];
+                
+                if (r['has_'+grade+'_prim']) {
+                    // save this record for ref
+                    ma_dict[r.oc_abbr][grade].PRIM.rs.push(r);
+                    // ok, this has grade prim data
+                    ma_dict[r.oc_abbr][grade].PRIM.stus.push([
+                        r[grade+'_Et'],
+                        r['GA_Nt'],
+                        r[grade+'_Ec'],
+                        r['GA_Nc'],
+                        r['author'],
+                        // treatment
+                        'T', 
+                        // control
+                        'C',
+                        // add more infor vis
+                        r['pid'],
+                        r['year'],
+                        // add this RoB for CoE
+                        r_coe_rob,
+                        // add this Ind for CoE
+                        r_coe_ind
+                    ]);
+                    ma_dict[r.oc_abbr][grade].PRIM.total = math.add(
+                        ma_dict[r.oc_abbr][grade].PRIM.total,
+                        [
+                            r[grade+'_Et'],
+                            r['GA_Nt'],
+                            r[grade+'_Ec'],
+                            r['GA_Nc'],
+                        ]
+                    );
+                }
+                
+                // add incidence analysis
+                if (r['has_'+grade+'_incd']) {
+                    // save this record for ref
+                    ma_dict[r.oc_abbr][grade].INCD.rs.push(r);
+                    // ok, this has grade prim data
+                    ma_dict[r.oc_abbr][grade].INCD.stus.push([
+                        r[grade+'_Et'],
+                        r['GA_Nt'],
+                        r[grade+'_Ec'],
+                        r['GA_Nc'],
+                        r['author'],
+                        // treatment
+                        'T', 
+                        // control
+                        'C',
+                        // add more infor vis
+                        r['pid'],
+                        r['year'],
+                        // add this RoB for CoE
+                        r_coe_rob,
+                        // add this Ind for CoE
+                        r_coe_ind
+                    ]);
+                    ma_dict[r.oc_abbr][grade].INCD.total = math.add(
+                        ma_dict[r.oc_abbr][grade].INCD.total,
+                        [
+                            r[grade+'_Et'],
+                            r['GA_Nt'],
+                            0,
+                            0,
+                        ]
+                    );
+                }
+            }
+        }
+
+        return ma_dict;
+    },
+
+    get_decision_by_rj_ar: function(rj, ar) {
+        if (rj === undefined || rj == '' || rj == 'NA') {
+            // which means there is no reviewer judgement
+            if (ar === undefined || ar == '') {
+                // which means no algorithm result
+                return 'NA'
+            } else {
+                // whatever it is, it is
+                return ar;
+            }
+        } else {
+            // ok, we have a reviewer judgement
+            return rj;
+        }
+    },
+
+    get_rob_from_itable_by_pid: function(pid) {
+        // reviewer
+        let rj = '';
+        if (this.data_itable.itable.data.hasOwnProperty(pid)) {
+            rj = this.data_itable.itable.data[pid].attrs.main.g0['COE_RCT_ROB_OVERALL_RJ'];
+        }
+        // algorithm
+        let ar = '';
+        if (this.data_itable.itable.data.hasOwnProperty(pid)) {
+            ar = this.data_itable.itable.data[pid].attrs.main.g0['COE_RCT_ROB_OVERALL_AR'];
+        }
+        
+        return this.get_decision_by_rj_ar(rj, ar);
+    },
+
+    get_ind_from_itable_by_pid: function(pid) {
+        // reviewer
+        let rj = '';
+        if (this.data_itable.itable.data.hasOwnProperty(pid)) {
+            this.data_itable.itable.data[pid].attrs.main.g0['COE_RCT_IND_OVERALL_RJ'];
+        }
+        // algorithm
+        let ar = '';
+
+        if (this.data_itable.itable.data.hasOwnProperty(pid)) {
+            this.data_itable.itable.data[pid].attrs.main.g0['COE_RCT_IND_OVERALL_AR'];
+        }
+
+        return this.get_decision_by_rj_ar(rj, ar);
+    },
+
+    mk_data_cfg_by_ma: function(ma_prim, sm, fixed_or_random) {
+        if (typeof(fixed_or_random) == 'undefined') {
+            fixed_or_random = 'random';
+        }
+        var stus = [];
+        var model = {};
+        var cfg = {
+            sm: {
+                'OR': { sm: 'OR', name: 'Odds Ratio' },
+                'RR': { sm: 'RR', name: 'Risk Ratio' },
+                'INCD': { sm: 'INCD', name: 'Incidence' },
+            }[sm],
+            mode: 'pwma_prcm',
+            params: {
+                input_format: 'PRIM_CAT_RAW',  // or PRIM_CAT_PRE
+                fixed_or_random: fixed_or_random,     // or fixed
+                prediction_interval: false,    // or true
+            }
+        };
+
+        // update stus
+        for (let i = 0; i < ma_prim.stus.length; i++) {
+            const _stu = ma_prim.stus[i];
+            stus.push({
+                Et: _stu[0],
+                Nt: _stu[1],
+                Ec: _stu[2],
+                Nc: _stu[3],
+                study: _stu[4],
+                treatment: _stu[5],
+                control: _stu[6],
+                pid: _stu[7],
+                year: _stu[8],
+
+                // MA information
+                SM: ma_prim.rsts[sm].SM[i],
+                SM_lower: ma_prim.rsts[sm].SM_lower[i],
+                SM_upper: ma_prim.rsts[sm].SM_upper[i],
+                w: ma_prim.rsts[sm][fixed_or_random].wp[i]
+            });
+        }
+
+        // update the model
+        model = JSON.parse(JSON.stringify(ma_prim.rsts[sm]));
+
+        // just for display in forest plot
+        model[fixed_or_random].study = jarvis.capitalize(fixed_or_random) + ' effects model';
+        model[fixed_or_random].Et = ma_prim.total[0];
+        model[fixed_or_random].Nt = ma_prim.total[1];
+        model[fixed_or_random].Ec = ma_prim.total[2];
+        model[fixed_or_random].Nc = ma_prim.total[3];
+        model[fixed_or_random].w = 1;
+
+        var ret = {
+            data: {
+                stus: stus,
+                model: model
+            },
+            cfg: cfg
+        };
+        return ret;
+    },
+
+    update_ma_rsts: function(ma_dict) {
+        // mark start time
+        const t0 = performance.now();
+        var cnt_mas = 0;
+
+        // let's check 
+        for (const abbr in ma_dict) {
+            for (const grade in ma_dict[abbr]) {
+                // get prim data
+                var ma_prim = ma_dict[abbr][grade].PRIM;
+                var ma_incd = ma_dict[abbr][grade].INCD;
+
+                if (ma_prim.stus.length != 0) {
+                    // OK, let's do INCD ANA
+                    var rst_OR = metajs.metabin(
+                        ma_prim.stus, {
+                            sm: 'OR'
+                        }
+                    );
+
+                    var rst_RR = metajs.metabin(
+                        ma_prim.stus, {
+                            sm: 'RR'
+                        }
+                    );
+
+                    // update the data
+                    ma_dict[abbr][grade].PRIM.rsts = {
+                        OR: rst_OR,
+                        RR: rst_RR
+                    };
+
+                    // update count
+                    cnt_mas += 2;
+                }
+
+                if (ma_incd.stus.length != 0) {
+                    // OK, let's do INCD ANA
+                    var rst_INCD = metajs.metaprop(
+                        ma_incd.stus, {}
+                    );
+
+                    // update the data
+                    ma_dict[abbr][grade].INCD.rsts = {
+                        INCD: rst_INCD
+                    };
+
+                    // update the total count
+                    cnt_mas += 1;
+                }
+            }
+        }
+
+        // get the total time
+        const t1 = performance.now();
+        const dur = (t1 - t0) / 1000;
+
+        console.log('* finished calculation of ' + cnt_mas + ' MAs in ' + dur.toFixed(4) + ' seconds');
+
+        return ma_dict;
+    },
+
+    get_ma_df: function(ma_dict, oc_dict) {
+        const t0 = performance.now();
+        // I guess we need 
+        var rs = [];
+        for (const abbr in ma_dict) {
+            for (const grade in ma_dict[abbr]) {
+                // get prim data
+                var ma_prim = ma_dict[abbr][grade].PRIM;
+                var ma_incd = ma_dict[abbr][grade].INCD;
+
+                // put primary
+                var r = {
+                    abbr: abbr,
+                    name: oc_dict[abbr].oc_name,
+                    grade: grade
+                };
+                if (ma_prim.stus.length == 0) {
+                    Object.assign(r, {
+                        // values
+                        OR_n_stus: 0,
+                        OR_sm: NaN,
+                        OR_lower: NaN,
+                        OR_upper: NaN,
+                    });
+                } else {
+                    Object.assign(r, {
+                        // values
+                        OR_n_stus: ma_prim.stus.length,
+                        OR_sm: ma_prim.rsts.OR.random.SM,
+                        OR_lower: ma_prim.rsts.OR.random.SM_lower,
+                        OR_upper: ma_prim.rsts.OR.random.SM_upper,
+                    });
+                }
+
+                // put incidence
+                if (ma_incd.stus.length == 0) {
+                    Object.assign(r, {
+                        // values
+                        INCD_n_stus: 0,
+                        INCD_sm: NaN,
+                        INCD_lower: NaN,
+                        INCD_upper: NaN,
+                    });
+                } else {
+                    Object.assign(r, {
+                        // values
+                        INCD_n_stus: ma_incd.stus.length,
+                        INCD_sm: ma_incd.rsts.INCD.random.SM,
+                        INCD_lower: ma_incd.rsts.INCD.random.SM_lower,
+                        INCD_upper: ma_incd.rsts.INCD.random.SM_upper,
+                    });
+                }
+
+                rs.push(r);
+            }
+        }
+
+        var df = new dfd.DataFrame(rs);
+
+        // get the total time
+        const t1 = performance.now();
+        const dur = (t1 - t0) / 1000;
+
+        console.log('* finished converting ' + rs.length + ' MAs to in ' + dur.toFixed(4) + ' seconds');
+
+        return df;
+    },
+
+    update_vis_data: function(df) {
+        var cols = [
+            'INCD_sm',
+            'OR_sm', 
+            'name',
+            'grade',
+            'OR_n_stus',
+            'OR_lower',
+            'OR_upper',
+            'INCD_lower',
+            'INCD_upper',
+        ];
+        var data_ga = df.loc({
+            rows: df['OR_n_stus'].gt(0).and(
+                df['grade'].eq('GA')
+            ),
+            columns: cols
+        }).values;
+
+        var data_g3h = df.loc({
+            rows: df['OR_n_stus'].gt(0).and(
+                df['grade'].eq('G3H')
+            ),
+            columns: cols
+        }).values;
+
+        var data_g5n = df.loc({
+            rows: df['OR_n_stus'].gt(0).and(
+                df['grade'].eq('G5N')
+            ),
+            columns: cols
+        }).values;
+
+        return {
+            data_ga: data_ga,
+            data_g3h: data_g3h,
+            data_g5n: data_g5n
+        };
+    }
+    
+};
+
+
+
+var jarvis = {
+    color: {
+        group: {
+            treatment: '#5CC8FF',
+            immune: '#DEC1FF'
+        },
+        cate_by_group: {
+            treatment: '#EBF8FF',
+            immune: '#F4EBFF'
+        },
+        bene: {
+            sig: '#0cab0c',
+            not: '#c7ffc7'
+        },
+        harm: {
+            sig: '#ff3a3a',
+            not: '#ffe0e5'
+        }
+    },
+
+    get_color: function(SM, SM_lower, SM_upper) {
+        if (SM < 1) {
+            if (SM_upper < 1) {
+                return this.color.bene.sig;
+            } else {
+                return this.color.bene.not;
+            }
+        } else{
+
+            if (SM_lower > 1) {
+                return this.color.harm.sig;
+            } else {
+                return this.color.harm.not;
+            }
+        }
+    },
+
+    texts: {
+        "GA": "All Grade",
+        "G34": "Grade 3/4",
+        "G3H": "Grade 3 or higher",
+        "G5N": "Grade 5 only"
+    },
+
+    capitalize: function(s) {
+        return s.charAt(0).toUpperCase() + s.slice(1);
+    },
+    
+    init: function() {
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+
+        console.log('* User is using IE:', isIE);
+        if (isIE) {
+            jarvis.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
+            return;
+        }
+
+        // OK, 
+        var prj = jarvis.get_url_paramter('prj');
+        if (prj == null || prj == '') {
+            jarvis.ssmsg('Project information error.')
+            prj = 'IO';
+        }
+
+        var src = jarvis.get_url_paramter('src');
+        if (src == null || src == '') {
+            src = 'cache';
+        }
+
+        // clinical question
+        var cq = jarvis.get_url_paramter('cq');
+        if (cq == null || cq == '') {
+            cq = 'default';
+        }
+
+        // work mode
+        var wm = jarvis.get_url_paramter('wm');
+        if (wm == '') {
+            wm = 'plot';
+        }
+        app_pma.vpp_data.work_mode = wm;
+
+        // use filters
+        var is_uf = jarvis.get_url_paramter('uf');
+        if (is_uf == '') {
+            is_uf = true;
+        } else {
+            is_uf = false;
+        }
+        app_pma.vpp_data.is_using_filters = is_uf;
+
+        // load all data
+        $.when(
+            $.get(
+                '/pub/graphdata/' + prj + '/ITABLE.json',
+                {rnd: Math.random(), src: src, cq: cq}
+            ),
+            $.get(
+                '/pub/graphdata/'+prj+'/GRAPH_PMA.json',
+                {ver: Math.random(), src: src, cq: cq},
+            )
+        ).done(function(r1, r2) {
+            var data_itable = r1[0];
+            var data_pma = r2[0];
+
+            // init the table
+            console.log(data_itable);
+            console.log(data_pma);
+
+            // pre-processing to add pid to itable rs
+            for (let i = 0; i < data_itable.rs.length; i++) {
+                data_itable.rs[i].pid = data_itable.rs[i].PMID;
+            }
+
+            // init the local db for the papers
+            alasql('create table papers');
+            alasql('select * into papers from ?', [data_itable.rs]);
+            
+            // init the local db for the outcome / AE records
+            alasql('create table ocs');
+            alasql('select * into ocs from ?', [data_pma.rs])
+
+            // init the filter with ITABLE data
+            app_pma.init(data_itable, data_pma);
+
+            // ok, remove the 
+            jarvis.ssmsg('Almost initialized.');
+            setTimeout('jarvis.ssclose();', 400);
+
+        });
+
+        
+    },
+
+    get_url_paramter: function(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    },
+
+    clear_all_ae: function() {
+
+    },
+
+    ssmsg: function(msg) {
+        $('#ss-msg').html(msg);
+    },
+
+    ssclose: function() {
+        $('#start-screen').hide();
+    },
+
+    tf2: function(v) {
+        if (isNaN(v)) {
+            return 'NA';
+        } 
+        return v.toFixed(2);
+    },
+
+    set_mode: function(mode) {
+        if (typeof(mode) == 'undefined') {
+            mode = 0;
+        }
+        if (mode == 0) {
+            this.set_mode(1);
+            this.set_mode(3);
+        }
+        if (mode == 1) {
+            $('#app_comptb_box').height('calc(50% - 20px)');
+            $('#app_detail_box').height('calc(50% - 20px)');
+        }
+        if (mode == 2) {
+            $('#app_comptb_box').height('calc(100% - 150px)');
+            $('#app_detail_box').height('20px');
+        }
+        if (mode == 3) {
+            $('#show_overview').hide();
+            $('#vw_ocplot').show();
+            $('#app_comptb').width('auto');
+        }
+        if (mode == 4) {
+            $('#vw_ocplot').hide();
+            $('#show_overview').show();
+            $('#app_comptb').width('calc(100% - 300px)');
+        }
+    }
+};
+
+$(document).ready(function() {
+    jarvis.init();
+});
+</script>
+
+</body>
+</html>

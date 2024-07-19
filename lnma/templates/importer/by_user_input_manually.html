@@ -1,0 +1,256 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Study Importer
+{% endblock %}
+
+{% block style %}
+<style>
+.result-item {
+    padding: 1px 0;
+}
+</style>
+{% endblock %}
+
+{% block page_name %}
+<i class="nav-icon fas fa-file-upload"></i> 
+Study Importer Manually
+{% endblock %}
+
+{% block active_nav_link %}importer-manually{% endblock %}
+
+{% block content %}
+
+<div class="content">
+    <div class="container-fluid">
+
+        <div id="vw_uploader_userinput" class="row">
+            <div class="col-md-5">
+                <h5>Import Study</h5>
+                <p class="card-text">Input the main information manually.</p>
+
+                <form id="upload_userinput" method="post" enctype="multipart/form-data">
+                    
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="exampleFormControlInput1">DOI *</label>
+                            <input v-model="paper.pid" name="pid"
+                                class="form-control" id="exampleFormControlInput1" placeholder="DOI">
+                            <small id="passwordHelpBlock1" class="form-text text-muted">
+                                Please provide a DOI which is accessiable from http://dx.doi.org/{{ paper.pid }}.
+                            </small>
+                        </div>
+
+                        <div class="form-group col-md-6">
+                            <label for="exampleFormControlInpute">NCT Number</label>
+                            <input v-model="paper.nct" name="nct"
+                                class="form-control" id="exampleFormControlInpute" placeholder="NCT12345678">
+                            <small id="passwordHelpBlock2" class="form-text text-muted">
+                                If there is no clinical trial number yet, just leave empty.
+                            </small>
+                        </div>
+
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label>Title *</label>
+                            <input v-model="paper.title"
+                                type="text" name="title"
+                                class="form-control">
+                            <small class="form-text text-muted">
+                                The paper title
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label>Authors *</label>
+                            <input v-model="paper.authors"
+                                type="text" name="authors"
+                                class="form-control">
+                            <small class="form-text text-muted">
+                                The authors of this paper, seperated by comma or semi
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label>Publication Date *</label>
+                            <input v-model="paper.pub_date"
+                                type="text" name="pub_date"
+                                class="form-control">
+                            <small class="form-text text-muted">
+                                The publication date of this paper
+                            </small>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>Journal *</label>
+                            <input v-model="paper.journal"
+                                type="text" name="journal"
+                                class="form-control">
+                            <small class="form-text text-muted">
+                                The publication journal name of this paper
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label>Abstract</label>
+                            <textarea v-model="paper.abstract"
+                                type="text" name="abstract"
+                                class="form-control"></textarea>
+                            <small class="form-text text-muted">
+                                The abstract of this paper
+                            </small>
+                        </div>
+                    </div>
+
+                </form>
+                <div>                    
+                    <button class="btn btn-primary"
+                        v-bind:disabled="btn_import.disabled"
+                        v-on:click="import_study">
+                        <i class="fa fa-upload"></i>
+                        Import this study to the current project
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block script %}
+<script>
+
+{% include 'js/srv_importer.js' %}
+
+
+var vw_uploader_userinput = {
+    vpp: null,
+    vpp_id: '#vw_uploader_userinput',
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                result: null,
+                paper: {
+                    pid: '',
+                    pid_type: 'DOI',
+                    title: '', 
+                    authors: '', 
+                    pub_date: '', 
+                    journal: '',
+                    abstract: '', 
+                    nct: '',
+                },
+                btn_import: {
+                    disabled: false
+                }
+            },
+            methods: {
+                import_study: function() {
+                    vw_uploader_userinput.import_study();
+                }
+            }
+        });
+    },
+
+    import_study: function() {
+        var project_id = Cookies.get('project_id');
+        if (project_id == undefined) {
+            alert('Set working project first.');
+            return;
+        }
+
+        // remove blanks
+        var pid = this.vpp.$data.paper.pid.trim();
+        var pid_type = this.vpp.$data.paper.pid_type.trim();
+        var title = this.vpp.$data.paper.title.trim();
+        var authors= this.vpp.$data.paper.authors.trim();
+        var pub_date= this.vpp.$data.paper.pub_date.trim();
+        var journal= this.vpp.$data.paper.journal.trim();
+        var abstract= this.vpp.$data.paper.abstract.trim();
+        var nct = this.vpp.$data.paper.nct.trim();
+
+        if (pid == '') {
+            alert('DOI cannot be empty')
+            return;
+        }
+
+        if (title == '') {
+            alert('Title cannot be empty')
+            return;
+        }
+
+        if (pub_date == '') {
+            alert('Publication date cannot be empty')
+            return;
+        }
+
+        if (authors == '') {
+            alert('Authors cannot be empty')
+            return;
+        }
+
+        if (journal == '') {
+            alert('Journal cannot be empty')
+            return;
+        }
+        // update UI
+        this.vpp.btn_import.disabled = true;
+
+        // create form for upload
+        srv_importer.upload_user_input_manually(
+            pid,
+            pid_type,
+            title,
+            authors,
+            pub_date,
+            journal,
+            abstract,
+            nct,
+            function(data) {
+                vw_uploader_userinput.show_result(data);
+            }
+        );
+    },
+
+    show_result: function(data) {
+        console.log(data);
+        this.vpp.result = data;
+
+        this.vpp.btn_import.disabled = false;
+
+        if (data.success) {
+            toast('Imported the study ['+data.paper.pid+'] successfully!');
+        } else {
+            if (data.is_existed) {
+                toast('The PMID ['+data.paper.pid+'] already exists!', 'error');
+            } else {
+                toast('System Error!')
+            }
+        }
+    }
+};
+
+var jarvis = {
+    init: function() {
+        vw_uploader_userinput.init();
+    }
+};
+
+$(document).ready(function() {
+    jarvis.init();
+})
+</script>
+{% endblock %}

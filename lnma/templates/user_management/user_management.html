@@ -1,0 +1,73 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Create New User
+{% endblock %}
+
+{% block style %}
+{% endblock %}
+
+{% block page_name %}
+<i class="far fa-user"></i>
+Create New User
+{% endblock %}
+
+{% block content %}
+
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-6">
+                <p class="lead">Please provide the following information to create a User:</p>
+
+            
+                    <form method="POST" class="needs-validation" novalidate="" action="/usermanagement/create">
+                        <div class="row">
+                            <div class="form-group col-6 ">
+                                <label for="input_title">First Name</label>
+                                <input type="text" class="form-control" id="input_title" name="first_name" required="">
+                               
+                            </div>
+
+                            <div class="form-group col-6">
+                                <label for="input_keystr">Last Name</label>
+                                <input type="text" class="form-control" id="input_keystr" name="last_name" placeholder="">
+                        
+                            </div>
+                            </div>
+
+                        <div class="form-group">
+                            <label for="input_query">Email</label>
+                            <input type="email" class="form-control" id="input_keystr" name="email" placeholder="">
+                    
+                        </div>
+
+                        <div class="form-group">
+                            <label for="input_abstract">Password</label>
+                            <input type="text" class="form-control" id="input_keystr" name="password" placeholder="">
+                
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="far fa-save"></i>
+                            Create User
+                        </button>
+                    </form>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+{% endblock %}
+
+{% block active_nav_link %}project-create{% endblock %}
+
+{% block script %}
+<script>
+
+</script>
+{% endblock %}

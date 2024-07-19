@@ -1,0 +1,276 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+My Projects
+{% endblock %}
+
+{% block stylelink %}
+{% endblock %}
+
+{% block style %}
+<style>
+/* fix vuetify row */
+.row {
+    margin-right: -7.5px;
+    margin-left: -7.5px;
+}
+
+.hidden-div {
+  display: none;
+}
+</style>
+{% endblock %}
+
+{% block page_name %}
+<i class="fa fa-list"></i>
+My Projects
+{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="//cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+<script src="//code.jquery.com/jquery-3.5.1.js"></script>
+<script src="//cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<div class="content">
+    <div class="container-fluid">
+
+        <div class="row">
+            <div class="col-12">
+                <a id="nav-link-project-create" 
+                    href="[[ url_for('project.create') ]]" 
+                    class="btn btn-primary">
+                    <i class="nav-icon far fa-folder"></i>
+                    <p>Create New Project</p>
+                </a>
+            </div>
+
+            <div id="tb_project_list" class="col-12 mt-5">
+                    
+                <table id="projects_table" class="table table-striped mt-5 table-bordered" style="width:100%">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Project </th>
+                            <th>Project Identifier</th>
+                            <th>Users Assigned</th>
+                            <th>Set as Working</th>
+                            <th>Projects Assignement</th>
+                            <th> Details</th>
+                        </tr>
+
+
+
+
+                    </thead>
+                    <tbody >
+                        <tr v-for="item in projects"  data-toggle="modal"  class ="" >
+                            <td >{{ item.title }} </td>
+                            <td>{{ item.keystr }}</td>
+                            <td>{{ item.related_users.length }}</td>
+                            <td>
+                                <button type="submit" class="btn btn-primary btn-sm mb-2 d-block"
+                                v-on:click="set_as_working_project(item.project_id, item.title);">
+                                <i class="far fa-edit"></i>
+                                Set as Working Project
+                            </button>
+                            </td>
+                            <td>
+                                <button v-if="current_user.uid == item.owner_uid || current_user.role =='admin'"
+                                        id="nav-link-project-create" 
+                                        v-on:click="load_next_page(item.keystr);"
+                                        class="btn btn-success btn-sm">
+                                        <i class="nav-icon far fa-folder"></i>
+                                        Assign Project
+                                    </button>
+                            </td>
+                            
+
+                            <td>
+                                <button class="see_more  btn-primary  show-button"
+                                >See More </button><br>
+                            
+                                <table class ="hidden-div-table">
+                                    <tr>
+                                        <td>
+                                
+                                            <div class="  hidden-div row">
+                                
+                                                <div class="col-12"
+                                                >
+                                                    <div class="card mb-0">
+
+                                                        <div class="card-body">
+                    
+                                                            <p>Project Owner: <b>{{ item.owner_uid }}</b></p>
+                                                            <p>Date of Creation: <b>{{ item.date_created }}</b></p>
+                                                            <p>Clinical Questions:  
+                                                                <span class=" mr-2" v-for="cq in item.settings['clinical_questions']">
+                                                                    <i class="fas fa-notes-medical mr-2"></i>
+                                                                    {{cq.abbr}}&nbsp;&nbsp;&nbsp;
+                                                                </span>
+        
+                                                                
+                                                               
+                                                        
+                                                               
+                                                            </p>
+
+                                                            <p>
+                                                                Members: 
+                                                                <span class="badge badge-primary mr-2" v-for="user in item.related_users">
+                                                                    <i class="fa fa-user"></i> {{ user.first_name }} {{ user.last_name }}
+                                                                </span>
+                                                            </p>
+                                                            
+         
+                                            
+                                                        </div>
+                                                        
+                                                            
+                                                    </div>
+                                                </div>
+                                    
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                </table>
+                                
+
+                            </td>
+
+
+                        
+        
+
+                            
+                        </tr>
+                        
+                
+                    </tbody>
+                
+                </table>
+            </div>
+
+
+        </div><!-- /.row -->
+
+
+
+    </div><!-- /.container-fluid -->
+</div>
+
+
+{% endblock %}
+
+{% block active_nav_link %}project-list{% endblock %}
+
+{% block script %}
+
+<!-- my script -->
+<script>
+var current_user = {
+    uid: "[[ current_user.uid ]]",
+    role: "[[ current_user.role ]]",
+};
+
+var tb_project_list = {
+    vpp: null,
+    vpp_id: '#tb_project_list',
+    vpp_data: {
+        
+    },
+
+    data_url: "[[ url_for('project.api_list') ]]",
+    item_url: "[[ url_for('project.project_assignment') ]]",
+    load: function() {
+        $.get(
+            this.data_url,
+            {},
+            function(data) {
+                tb_project_list.init(data);
+            }, 'json'
+        )
+    },
+
+    init: function(data) {
+
+        
+        this.data = data;
+        this.vpp_data = {
+            projects: data.projects,
+            item_url: this.item_url,
+            current_user: current_user
+        }
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: this.vpp_data,
+            methods: {
+                show_project_info: function(project) {
+                    tb_project_info.update(project);
+                },
+
+                set_as_working_project: function(project_id, title) {
+                    Cookies.set('project_id', project_id);
+                    Cookies.set('project_title', title);
+                    location.reload();
+                },
+                load_next_page: function(qp){
+                    window.location.href = `${this.item_url}?project_keystr=${qp}`
+
+                },
+
+                delete_project: function() {
+                    
+                }
+            }
+        })
+
+        let table = new DataTable('#projects_table', {
+        
+        });
+
+        $('#projects_table').on('click', '.show-button', function() {
+            var tr = $(this).closest('tr');
+            var row = table.row(tr);
+            var hiddenDiv = tr.find('.hidden-div');
+            
+
+            if (row.child.isShown()) {
+            // Hide the child row and the hidden div
+            row.child.hide();
+            hiddenDiv.hide();
+            } else {
+            // Show the child row and the hidden div
+            row.child(hiddenDiv.html()).show();
+            //   row.child('<tbody><tr><td>Row 1</td><td>Row2</td></tr></tbody>').show();
+            // hiddenDiv.show();
+            
+            }
+      });
+
+
+    }
+}
+
+
+var jarvis = {
+    init: function() {
+        $.get(
+            tb_project_list.data_url,
+
+            {},
+            function(data) {
+                tb_project_list.init(data);
+            }, 'json'
+        )
+
+
+        
+    }
+}
+
+$(document).ready(function() {
+    jarvis.init();    
+})
+</script>
+{% endblock %}

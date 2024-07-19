@@ -1,0 +1,2205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
+<title>Study Characteristics Table</title>
+
+<link rel="icon" href="/static/img/favicon.png" type="image/png">
+<script src="https://kit.fontawesome.com/cb45cc91b0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+<style>
+{% include 'css/box.css' %}
+html, body {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+body {
+    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+a {
+    color: #333333;
+    text-decoration: none;
+}
+.flex-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+.footer {
+    width: 100%;
+    align-items: flex-end;
+    font-size: .75em;
+    line-height: 1.5em;
+    height: 1.5em;
+}
+.footer div {
+    height: 1em;
+    line-height: 1em;
+}
+.footer-link a {
+    padding: 0 5px;
+    color: #999999;
+}
+/* layouts */
+#wrapper {
+    flex-direction: row;
+}
+#dt_tbcore {
+    float: left;
+    width: 100%;
+}
+#tb_stucha {
+    float: left;
+    width: 100%;
+}
+.xbox {
+    width: 100%;
+    height: auto;
+    clear: both;
+}
+.col-sel {
+    float: left;
+    height: 40px;
+    padding: 3px 10px;
+}
+/* for study table */
+.sct-header {
+    height: 30px;
+}
+.sct-header-sm {
+    height: 16px;
+}
+.sct-body {
+}
+.sct-col0 {
+    min-width: 10px;
+    max-width: 10px;
+    width: 10px;
+}
+.sct-tr {
+    background: white;
+}
+.sct-tr:hover {
+    background-color: #EEEEEE;
+}
+.sct-tr:hover .sct-td {
+    color: black;
+}
+.sct-th {
+    /* max-width: 100px; */
+    width: 50px;
+    padding: 0 3px;
+    flex-direction: column;
+    text-align: left;
+    border-top: 1px solid #666666;
+    border-right: 1px solid #aaaaaa;
+}
+    
+.sct-th-sm {
+    /* max-width: 100px; */
+    min-width: 24px;
+    height: 16px;
+    line-height: 16px;
+    padding: 0 3px;
+    text-align: left;
+    font-size: .85em;
+    text-align: center;
+}
+.sct-th-sm-item {
+    padding: 0;
+    color: #aaaaaa;
+}
+.sct-th-sm-item:hover {
+    color: #555555;
+}
+.sct-td {
+    max-width: max-content !important;
+    width: 50px;
+    padding: 2px 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border: 1px solid white;
+    border-left: 0;
+    color: #333333;
+    border-bottom: 1px solid #aaaaaa;
+    border-right: 1px solid #aaaaaa;
+}
+.sct-th-trunk {
+    width: 105px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.sct-th-branch {
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.studies-data{
+    width: 100%;
+    padding: 3px 0px;
+    display: flex;
+    flex-direction: row;
+}
+
+.sct-th-branch-parent {
+    width: 100%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.sct-th-branch:hover {
+    background-color: #dddddd;
+}
+.sct-td-val {
+    color: #333333;
+}
+.sct-col-hide {
+    width: 1px !important;
+    display: none;
+}
+
+.sct-col-undefined-hide {
+    width: 1px !important;
+    display: none;
+}
+/* .sct-col-collapse{
+    visibility: collapse;
+} */
+.sct-td-val-na {
+    color: #dddddd !important;
+    font-size: .9em;
+}
+.sct-td-val-marked {
+    border-bottom-color: #eeeeee;
+    background-color: #9bcdf1;
+}
+/* for the col table */
+.chk-group {
+    padding: 2px 5px;
+}
+.chk-group:hover {
+    background: lightgrey;
+}
+/* for the table */
+.url_pubmed {
+    color: #0263b9;
+    cursor: pointer;
+}
+/* for the start screen */
+#start-screen {
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#ss-msg {
+    width: 100%;
+    padding: 10px 0;
+    text-align: center;
+}
+.cate-toggle-btn {
+    background-color: transparent;
+    border: 1px solid transparent;
+    padding: 0 0.4em;
+    margin: 0 !important;
+    display: block;
+    cursor: pointer;
+}
+.cate-toggle-btn:hover {
+    background-color: whitesmoke;
+    border: 1px solid #DEDEDE;
+}
+.column-tiles {
+    display: table;
+    min-height: 81px;
+    max-width: 992px;
+    margin: 100px auto 0;
+    padding: 0;
+    text-align: center;
+}
+.bbi-font{
+    width: calc(100% - 10px);
+    padding: 2px 0px 0px 10px;
+    font-size: .9em;
+    color: #000000;
+}
+.dynamic-space{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+
+.column-tiles  a {
+    border-radius: 25px;
+    border-bottom: 3px solid #144766;
+    display: inline-table;
+    text-align: center;
+    margin: 0 10px 20px;
+    width: 218px;
+    height: 65px;
+    background-color: #17a2b8!important;
+    color: white;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.2;
+    padding: 16px 20px 0;
+}
+
+.filters-menu{
+    width: 100%;
+    font-size: 12px;
+}
+.table td, .table th {
+    padding: 0.25rem 0.75rem;
+    border-bottom: 1px solid black;
+    text-align: center;
+}
+
+
+.table thead th {
+    vertical-align: middle;
+    border-bottom: 1px solid;
+
+}
+
+.table-border-custom{
+    border: 1px solid black;
+
+}
+
+.sidebar {
+        height: 100%;
+        width: 0;
+        z-index: 1;
+        border-right: 1px solid #dee2e6;
+        background: whitesmoke;
+        overflow-x: hidden;
+        transition: 0.5s;
+        padding-top: 60px;
+      }
+
+      .sidebar_filter {
+        position: realtive;
+        padding-bottom: 30px;
+      }
+
+      .sidebar_feature {
+        position: fixed;
+        top: 0;
+        right: 0;
+      }
+
+      .sidebar a {
+        padding: 8px 8px 8px 32px;
+        text-decoration: none;
+        font-size: 14px;
+        color: #818181;
+        display: block;
+        transition: 0.3s;
+      }
+
+      .sidebar .closebtn {
+        position: absolute;
+        top: 0;
+        right: 15px;
+        font-size: 36px;
+        margin-left: 50px;
+      }
+
+      .openbtn {
+        font-size: 16px;
+        cursor: pointer;
+        background-color: #e7e7e7 ;
+        color: black;
+        padding: 10px 15px;
+        border: none;
+      }
+
+      .openbtn:hover {
+        background-color: rgb(245, 240, 240);
+      }
+
+      .button_container_top {
+        display: flex;
+        justify-content: space-between;
+        padding: 5px;
+      }
+
+      #main_content {
+        padding: 0;
+        margin: 0;
+        transition: margin 0.5s;
+        overflow: auto;
+      }
+
+.button-custom-design{
+    background-color: #e7e7e7;
+    color: black;
+}
+
+.static-td-th-first{
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background-color: #e7e7e7;
+    color: black;
+    padding: 10px;
+  text-align: left;
+  min-width: 158px;
+ 
+}
+
+table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+table td {
+    max-width: max-content !important;
+}
+
+.static-td-th-first-t-name{
+    position: sticky;
+    left: 0px;
+    z-index: 2;
+    background-color: #e7e7e7;
+    color: black;
+    padding: 10px;
+  text-align: left;
+  min-width: 150px;
+ 
+}
+.static-td-th-second{
+    position: sticky;
+    left: 149px;
+    z-index: 2;
+    background-color: #e7e7e7;
+    color: black;
+    padding: 10px;
+  text-align: left;
+  
+}
+
+.static-td-th-second-year{
+    position: sticky;
+    left: 260px;
+    z-index: 2;
+    background-color: #e7e7e7;
+    color: black;
+    padding: 10px;
+  text-align: left;
+  
+}
+
+.static-td-th-first-author{
+    position: sticky;
+    left: 150px;
+    z-index: 2;
+    background-color: #e7e7e7;
+    color: black;
+    padding: 10px;
+  text-align: left;
+  min-width: 110px;
+  
+}
+
+#tb_schtab_view table thead tr th {
+    position: sticky;
+    top: 0;
+    background-color: #e7e7e7;
+    z-index: 5;
+}
+
+#tb_schtab_view table thead tr:nth-child(2) th {
+    top: 44px !important;
+}
+#tb_schtab_view table thead tr:nth-child(3) th {
+    top: 88px !important;
+}
+
+#tb_schtab_view table thead tr:nth-child(4) th {
+    top: 133px !important;
+}
+
+.sct-header.parent_header th:nth-child(3),
+.sct-header.parent_header th:nth-child(4),
+.sct-header.parent_header th:nth-child(5) {
+    z-index: 6 !important;
+}
+.table-responsive {
+    display: inline-table !important;
+}
+
+.toggle-button {
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+    margin-left: 12px;
+}
+
+.toggle-button input {
+    display: none;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    border-radius: 34px;
+    height: 15px;
+    width: 30px;
+    background-color: #ccc; /* Unchecked (grey) background color */
+    transition: 0.4s;
+    top: 2px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 12px;
+    width: 12px;
+    left: 2px;
+    bottom: 2px;
+    border-radius: 50%;
+    background-color: #fff;
+    transition: 0.4s;
+}
+
+input:checked + .slider {
+    background-color: #007bff; /* Checked (blue) background color */
+}
+
+input:checked + .slider:before {
+    transform: translateX(14px);
+}
+
+
+
+</style>
+</head>
+<body>
+
+<div id="start-screen">
+    <h1>
+        <i class="fa fa-table"></i>
+        Study Characteristics Table
+    </h1>
+    <div id="ss-msg">Table Initializing ...</div>
+</div>
+
+
+<div class="button_container_top" >
+    <button class="openbtn button-custom-design " id= "filter-btn-open" >Filters</button>
+    <div>
+        <button title="Zoom in"class="openbtn" id="zoom-in-table"><i class="fa fa-search-plus" aria-hidden="true"></i></button>
+        <button title="Zoom out"class="openbtn" id="zoom-out-table"><i class="fa fa-search-minus" aria-hidden="true"></i></button>
+        <button class="openbtn button-custom-design" id= "features-btn-open">Columns/Features</button>
+    </div>
+    
+  </div>
+
+
+<div id="wrapper" class="flex-container" >
+
+
+
+<div id="left-panel" class="flex-container " 
+    style="flex-direction: column; justify-content: space-between;  width: 0px; height: 100%; background: whitesmoke; margin: 11px;
+    padding-bottom: 32px; overflow: auto;">
+    
+    <div class="upper">
+        <div id="tb_filter" class="box">
+            <div class="box-header "  style="justify-content: space-between; font-size: 16px;">
+                <h4>
+                    &nbsp;&nbsp<i class="fa fa-filter"></i> 
+                    Filters 
+                </h4>
+                <div>
+                    <button class="btn"
+                        v-on:click="reset">
+                        <i class="fa fa-sync"></i>
+                        Reset
+                    </button>
+                </div>
+            </div>
+            <div class="box-body filters-menu">
+                <div class="box-body-item"
+                    v-for="filter, i in filters">
+                    <div v-if="filter.type=='radio'">
+                        <div class="bbi-label flex-container">
+                            <span>
+                                {{ filter.display_name }}
+                            </span>
+                            <span class="bbi-label-hint"
+                                v-bind:title="'Using attribute ['+filter.attr+'] to filter.'">
+                                <i class="fa fa-question-circle"></i>
+                            </span>
+                        </div>
+                        <div class="bbi-value  bbi-font"
+                            v-for="val, j in filter.values">
+                            <input type="radio" 
+                                v-bind:name="'filter-' + i" 
+                                v-bind:id="'filter-' + i + '-' + j"
+                                v-model="filter.value"
+                                v-on:change="update_table"
+                                v-bind:value="j">
+                            <label v-bind:for="'filter-' + i + '-' + j">{{ val.display_name }}</label>
+                        </div>
+                    </div>
+                    <!-- /.radio filter -->
+                    <div v-else-if="filter.type=='select' || filter.type=='dropdown'">
+                        <div class="bbi-label flex-container">
+                            <span>
+                                {{ filter.display_name }}
+                            </span>
+                            <span class="bbi-label-hint"
+                                v-bind:title="'Using attribute ['+filter.attr+'] to filter.'">
+                                <i class="fa fa-question-circle"></i>
+                            </span>
+                        </div>
+                        <div class="bbi-value bbi-font">
+                            <select v-bind:id="'filter-' + i"
+                                v-bind:name="'filter-' + i"
+                                v-model="filter.value"
+                                v-on:change="update_table">
+                                <option v-bind:value="j" 
+                                    v-for="val, j in filter.values">
+                                    {{ val.display_name }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- /.filters -->
+            </div>
+    
+        </div>
+
+    </div>
+
+</div> <!-- /#left-panel -->
+
+<!-- <div id="main-panel" style="display: flex; flex-direction: row; align-items: stretch; min-width: 600px; width: calc(100% - 200px); height: 100%; background: white; padding: 0 5px; overflow-y: auto;">
+     -->
+
+    <!-- iTable Start -->
+
+    <div id="tb_schtab" class=""  style=" align-items: stretch; min-width: 500px; background: white; padding: 0 5px; overflow-y: auto; width: 100%; height: 90%; overflow-x: scroll;" >
+        <div class="box-header studies-data" style="font-size: 16px;">
+            <h4>
+                <i class="fa fa-table"></i>
+                Data of Studies |
+            </h4>
+            <div>
+                <p>{{ get_n_rcts(rs) }} trials, {{ get_n_pids(rs) }} citations</p>
+                <!-- <p>{{ rs.length }} records ({{ n_citations }} citations)</p> -->
+            </div>
+        </div>
+        <div id="tb_schtab_view" class="box-body " >
+            <table class="table table-hover table-striped mt-2  table-responsive" style="width:100%">
+                <thead>
+                    <template v-if="max_rowspan_value>1">
+                        <tr class="sct-header parent_header">
+                            <!-- <th class="sct-col0">&nbsp;</th> -->
+                            <th class="sct-th  " v-for="(attr, idx) in attrs" v-bind:class="get_th_cls(idx)"
+                                v-bind:id="'attr-col-' + idx" v-bind:colspan="get_colspan(idx)" v-bind:rowspan="get_rowspan(idx)"
+                                v-if="create_headers(idx)">
+                                <div class="sct-th-trunk sct-th-branch-parent " v-on:click="toggle_fullname(idx)"
+                                    v-if="attr.is_trunk_shown">
+                                    <span>{{ attr.trunk }}</span>
+            
+            
+                                </div>
+                                <div class="sct-th-trunk dynamic-space" v-else>&nbsp;</div>
+            
+                                <template v-if="attr.is_trunk_shown!=true">
+                                    <div class="sct-th-branch dynamic-space" v-on:click="toggle_fullname(idx)"
+                                        v-bind:title="attr.trunk + ':' + attr.branch">
+                                        <span v-if="attr.is_short_shown">{{ attr.short_branch }}</span>
+                                        <span v-else>{{ attr.branch }}</span>
+                                    </div>
+                                </template>
+            
+            
+                                <div class="sct-th-sm dynamic-space">
+                                    <span class="sct-th-sm-item" v-on:click="sort_by_col(idx, 'asc')">
+                                        <i class="fa fa-arrow-circle-up"></i>
+                                    </span>
+                                    <span class="sct-th-sm-item" v-on:click="sort_by_col(idx, 'desc')">
+                                        <i class="fa fa-arrow-circle-down"></i>
+                                    </span>
+                                </div>
+                            </th>
+                        </tr>
+                            </tr> 
+                        </tr>
+                            </tr> 
+                        </tr>
+                            </tr> 
+                        </tr>
+                    </template>
+            
+            
+                    <!--Nested Table Start  -->
+                    <template v-if="max_rowspan_value >=2">
+                        <tr class="sct-header nested_headers">
+                            <th class="sct-th second_leve_bro " v-for="(attr, idx) in attrs" v-bind:class="get_th_cls(idx)"
+                                v-bind:id="'attr-col-' + idx" v-if="create_nested_headers(idx)"
+                                v-bind:colspan="get_colspan_nested(idx)" v-bind:rowspan="get_rowspan_nested(idx)">
+            
+                                <div class="sct-th-trunk def" style="white-space: nowrap;
+                                                            overflow: hidden;
+                                                            text-overflow: ellipsis;" v-else>&nbsp;</div>
+                                <div class="sct-th-branch branch_trunk" style="white-space: nowrap;
+                                                            overflow: hidden;
+                                                            text-overflow: ellipsis;" v-on:click="toggle_fullname(idx)"
+                                    v-bind:title="attr.branch">
+            
+                                    <span>{{ attr.branch }}</span>
+                                </div>
+                                <div class="sct-th-sm" style="white-space: nowrap;
+                                                                overflow: hidden;
+                                                                text-overflow: ellipsis;">
+                                    <span class="sct-th-sm-item" v-on:click="sort_by_col(idx, 'asc')">
+                                        <i class="fa fa-arrow-circle-up"></i>
+                                    </span>
+                                    <span class="sct-th-sm-item" v-on:click="sort_by_col(idx, 'desc')">
+                                        <i class="fa fa-arrow-circle-down"></i>
+                                    </span>
+                                </div>
+                            </th>
+                        </tr>
+                            </tr> 
+                        </tr>
+                            </tr> 
+                        </tr>
+                            </tr> 
+                        </tr>
+                    </template>
+            
+                    <!-- Nested Header End -->
+            
+            
+                    <!-- sub Category Start  -->
+                    <template v-if="max_rowspan_value>=3">
+                        <tr class="sct-header ">
+                            <th class="sct-th " v-for="(attr, idx) in attrs" v-bind:class="get_th_cls(idx)"
+                                v-bind:id="'attr-col-' + idx" v-if="create_nested_category_header(idx)"
+                                v-bind:colspan="get_colspan_nested_nested(idx)" v-bind:rowspan="get_rowspan_nested_nested(idx)">
+            
+                                <div class="sct-th-trunk def" style="white-space: nowrap;
+                                                        overflow: hidden;
+                                                        text-overflow: ellipsis;" v-else>&nbsp;</div>
+                                <div class="sct-th-branch branch_trunk" style="white-space: nowrap;
+                                                        overflow: hidden;
+                                                        text-overflow: ellipsis;" v-on:click="toggle_fullname(idx)"
+                                    v-bind:title="attr.branch">
+            
+                                    <span>{{ attr.branch }}</span>
+                                </div>
+                                <div class="sct-th-sm" style="white-space: nowrap;
+                                                            overflow: hidden;
+                                                            text-overflow: ellipsis;">
+                                    <span class="sct-th-sm-item" v-on:click="sort_by_col(idx, 'asc')">
+                                        <i class="fa fa-arrow-circle-up"></i>
+                                    </span>
+                                    <span class="sct-th-sm-item" v-on:click="sort_by_col(idx, 'desc')">
+                                        <i class="fa fa-arrow-circle-down"></i>
+                                    </span>
+                                </div>
+                            </th>
+                        </tr>
+                    </template>
+            
+                    <!-- sub Category End  -->
+
+                    <!-- Sub Sub Category Start -->
+                    <!-- sub Category Start  -->
+                    <template v-if="max_rowspan_value==4">
+                        <tr class="sct-header ">
+                            <th class="sct-th  nested_level_option" v-for="(attr, idx) in attrs" v-bind:class="get_th_cls(idx)"
+                                v-bind:id="'attr-col-' + idx" v-if="create_further_nested_headers(idx)">
+            
+                                <div class="sct-th-trunk def" style="white-space: nowrap;
+                                                        overflow: hidden;
+                                                        text-overflow: ellipsis;" v-else>&nbsp;</div>
+                                <div class="sct-th-branch branch_trunk" style="white-space: nowrap;
+                                                        overflow: hidden;
+                                                        text-overflow: ellipsis;" v-on:click="toggle_fullname(idx)"
+                                    v-bind:title="attr.branch">
+            
+                                    <span>{{ attr.branch }}</span>
+                                </div>
+                                <div class="sct-th-sm" style="white-space: nowrap;
+                                                            overflow: hidden;
+                                                            text-overflow: ellipsis;">
+                                    <span class="sct-th-sm-item" v-on:click="sort_by_col(idx, 'asc')">
+                                        <i class="fa fa-arrow-circle-up"></i>
+                                    </span>
+                                    <span class="sct-th-sm-item" v-on:click="sort_by_col(idx, 'desc')">
+                                        <i class="fa fa-arrow-circle-down"></i>
+                                    </span>
+                                </div>
+                            </th>
+                        </tr>
+                    </tr> 
+                        </tr>
+                    </tr> 
+                        </tr>
+                    </tr> 
+                        </tr>
+                    </template>
+                    <!--  Sub Sub category End  -->
+
+                </thead>
+            
+                <tbody class="sct-body">
+                    <tr class="sct-tr" v-for="r, r_idx in rs">
+                        <!-- <td class="sct-col0">&nbsp;</td> -->
+                        <td class="sct-td " v-for="col, idx in cols" v-bind:title="attrs[idx].name + ': ' + r[col]"
+                            v-bind:class="get_td_cls(idx, r[col], r , col, r_idx)" v-bind:id="'attr-col-td'+r_idx + idx">
+                            <span v-if="attrs[idx].attr_id=='_PUBMED ID|PUBMED ID' || attrs[idx].attr_id=='_PMID|PMID'">
+                                <a v-if="r[col] == 'NA'" v-bind:href="r[attr_id2col('_URL|URL')]" class="url_pubmed"
+                                    target="_blank">
+                                    {{ r[attr_id2col('_URL|URL')] }}
+                                </a>
+                                <a v-else v-bind:href="pid2url(r[col])" class="url_pubmed" target="_blank">
+                                    {{ r[col] }}
+                                </a>
+            
+                            </span>
+                            <span v-else-if="attrs[idx].attr_id=='_NCT|NCT'">
+                                <a v-if="r[col] == 'NA'" v-bind:href="r[attr_id2col('_URL|URL')]" class="url_pubmed"
+                                    target="_blank">
+                                    {{ r[attr_id2col('_URL|URL')] }}
+                                </a>
+                                <a v-else v-bind:href="url.ctgov + r[col]" class="url_pubmed" target="_blank">
+                                    {{ r[col] }}
+                                </a>
+            
+                            </span>
+                            <span v-else>
+                                <span v-if="r[col] && r[col]!='NA'">
+                                    {{r[col]}}
+                                </span>
+                                <span v-else class="sct-td-val-na">
+                                    NA
+            
+                                </span>
+            
+                            </span>
+                        </td>
+                    </tr>
+                </tbody><!-- /.sct-body -->
+            </table>
+
+
+
+            
+        </div>
+    </div>
+    <!-- iTable End  -->
+
+
+    <div id="tb_coltab" class=" " style=" height: auto; margin: 0 0 5px 0;">
+        
+        <!-- Right panel start -->
+            <div id="right-panel" class="flex-container ml-auto" 
+            style="flex-direction: column; justify-content: space-between;  width: 0px; height: 90%; background: whitesmoke; margin: 11px;
+            padding-bottom: 32px; overflow: auto;">
+
+                <div class="box-header"  style="justify-content: space-between; font-size: 16px;">
+                    <h4> &nbsp;&nbsp
+                        <i class="fa fa-columns" aria-hidden="true"></i> 
+                        Columns/Features
+                    </h4>
+                    
+                </div>
+
+                <div class="mt-2">
+                    <label class="toggle-button">
+                        <input type="checkbox" id="toggleCheck" v-on:click="checkAll">
+                        <span class="slider round"></span>
+                        <span style="margin-left: 36px; font-size: 14px;">Check All</span>
+                    </label>
+                </div>
+    
+                <!-- <div class="box-header" style ="justify-content: space-between;"> 
+                        <button class=" btn" style="font-size: 14px"
+                            v-on:click="check_all_cols">
+                            <i class="fa fa-toggle-on"></i>
+                            Check All
+                        </button>
+                        <button class=" btn " style="font-size: 14px;"
+                            v-on:click="reset_all_cols">
+                            <i class="fa fa-toggle-off"></i>
+                            Reset All
+                        </button>
+
+                </div> -->
+                
+    
+            <div class="box-body flex-container" style="flex-direction: column; ">
+                <div class="attr_cate "
+                    v-if="!cate.startsWith('_')"
+                    v-for="trunks, cate, cidx in attr_tree">
+                    <div class="attr_cate_name" style=" width: 100%; padding-bottom: 10px; padding-top: 10px;justify-content: center;font-size: 14px;">
+                        <span class="cate-toggle-btn"
+                            v-on:click="toggle_attr_cate(cidx)"
+                            title="Click to collapse/uncollapse details">
+                            <template v-if="get_attr_cate_status(cidx, trunks, cate ).show_attrs">
+                                <i class="fas fa-chevron-circle-down"></i>
+                            </template>
+                            <template v-else>
+                                <i class="fas fa-chevron-circle-right"></i>
+                            </template>
+                            {{ cate }}
+                        </span>
+                    </div>
+                    <div class="" >
+                        <template v-if="get_attr_cate_status(cidx, trunks, cate).show_attrs">
+    
+                            <div class="attr_trunk " style="font-size: 12px;"
+                                v-for="trunkobj, trunk, idx in trunks">
+
+    
+                                <div class="single-options" 
+                                    
+                                    v-if="trunk.substring(0, 1) == '_'">
+                                    <div class="chk-group " 
+                                        v-for="attr, i in trunkobj.branches">
+                                        <input type="checkbox"
+                                            v-bind:name="'chk-attr-' + cidx + '-' + idx + '-' + i" 
+                                            v-model="attr.is_marked"
+                                            v-bind:disabled="attr.is_fixed"
+                                            v-on:click="show_attr_col(i)"
+                                            v-bind:id="'chk-attr-' + cidx + '-' + idx + '-' + i"
+                                            class="">
+                                            <label 
+                                                v-bind:for="'chk-attr-' + cidx + '-' + idx + '-' + i">
+                                                <span v-html="attr.branch"
+                                                class="form-check-label"></span>
+                                            </label>
+                                     </div>
+                                  
+                                </div>
+    
+                                <div class="nested-options-list" 
+                                   
+                                    v-else>
+                                    <div class="chk-group " style="align-items: center;">
+                                        <input type="checkbox"  class = "trunk-class-chk"
+                                            v-on:click="show_trunk_attr_cols(cate, trunk , idx)"
+                                            v-model="trunkobj.is_marked"
+                                            v-bind:name="'chk-trunk-' + cidx + '-' + idx" 
+                                            v-bind:id="'chk-trunk-' + cidx + '-' + idx">
+                                            <label 
+                                                v-bind:for="'chk-trunk-' + cidx + '-' + idx">
+                                                <span v-html="trunk"></span>
+                                            </label>
+                                    </div>
+                                    <div class="d-flex" style="margin-top: 2px; align-items: center;"></div>
+                                    <div class="chk-group " style="align-items: center;"
+                                        v-for="attr, i in trunkobj.branches">
+                                        <input type="checkbox" style="margin: 2px 10px 9px 42px;"
+                                            v-bind:name="'chk-attr-' + cidx + '-' + idx + '-' + i" 
+                                            v-model="attr.is_marked"
+                                            v-bind:disabled=true
+                                            v-bind:id="'chk-attr-' + cidx + '-' + idx + '-' + i">
+                                            
+                                            <label 
+                                                v-bind:for="'chk-attr-' + cidx + '-' + idx + '-' + i">                                       
+                                                <span v-html="attr.branch"></span>
+                                            </label>
+                                        
+
+                                             <!-- Nested Options Satrt  -->
+                                             <div class="nested-options" style="padding-left: 20px;">
+                                                <div class="chk-group" style="align-items: center;"
+                                                v-for="sub, j in attr.sub_branches">
+                                                <input type="checkbox" style="margin: 4px 12px 11px 45px;"
+                                                    v-bind:name="'chk-attr-' + cidx + '-' + idx + '-' + j" 
+                                                    v-model="attr.is_marked"
+                                                    v-bind:disabled=true
+                                                    v-bind:id="'chk-attr-' + cidx + '-' + i + '-' + j">
+                                                    <label 
+                                                        v-bind:for="'chk-attr-' + cidx + '-' + i + '-' + j">                                       
+                                                        <span v-html="sub.branch"></span>
+                                                    </label>
+                                                    <!-- Sub Nested Options Satrt  -->
+                                                    <div class="nested-options" style="padding-left: 20px;">
+                                                       <div class="chk-group d-flex" style="align-items: center;"
+                                                       v-for="subSubBranch, k in sub.sub_sub_branches">
+                                                       <input type="checkbox" style="margin: 4px 12px 11px 45px;"
+                                                           v-bind:name="'chk-attr-' + cidx + '-' + idx + '-' + k" 
+                                                           v-model="attr.is_marked"
+                                                           v-bind:disabled=true
+                                                           v-bind:id="'chk-attr-' + cidx + '-' + idx + '-' + k">
+                                                           <label 
+                                                               v-bind:for="'chk-attr-' + cidx + '-' + idx + '-' + k">                                       
+                                                               <span v-html="subSubBranch.branch"></span>
+                                                           </label>
+                                                       </div>
+                                                    </div>
+                                                   <!-- Sub Nested Option End -->
+                                                </div>
+                                             </div>
+                                            <!-- Nested Option End -->
+
+
+                                    </div>
+
+                            
+                                    <hr>
+    
+                                </div>
+    
+                            </div>
+                        </template>
+                        <template v-else>
+                           
+                        </template>
+                    </div>
+                </div>
+            </div>
+    
+            </div> 
+    
+        <!-- Right Panel End  -->
+    
+    
+    
+                    
+       
+    
+    </div> <!-- /.box -->
+    
+
+    
+
+<!--     
+</div> -->
+
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/alasql/0.5.5/alasql.min.js"></script>
+
+<script>
+{% include "js/tb_filter.js" %}
+
+var dt_tbcore = {
+    rs: [],
+    rs_db: [],
+    rs_col: [], 
+    trial_name: false,
+    sql: {
+        base: 'select * from rs where 1=1\n  and',
+        conditions: '',
+        order_by: ''
+    },
+    attrs: [],
+    attr_dict: {},
+    attr_tree: {},
+    cols: [],
+    // translator for db
+    t_a2c: {},
+    t_c2a: {},
+    papers: [],
+    paper_dict: {},
+
+    has_attr: function(attr_name_or_id) {
+        var attr_id = this.attr_nm2id(attr_name_or_id);
+        return this.attr_dict.hasOwnProperty(attr_id);
+    },
+
+    get_attr: function(attr_name_or_id) {
+        var attr_id = this.attr_nm2id(attr_name_or_id);
+        return this.attr_dict[attr_id];
+    },
+
+    attr_nm2id: function(name) {
+        var ps = name.split('|');
+        var trunk = '';
+        var branch = '';
+        if (ps.length == 1) {
+            branch = ps[0].trim();
+            trunk = '_' + branch;
+        } else if (ps.length == 2) {
+            trunk = ps[0].trim();
+            branch = ps[1].trim();
+        } else {
+            trunk = ps[0].trim();
+            branch = ps[1].trim();
+        }
+        var attr_id = trunk.toUpperCase() + '|' + branch.toUpperCase();
+        return attr_id;
+    },
+
+    init: function(rs, attrs, paper_dict) {
+        // init the data
+        // this.rs = JSON.parse($('#data_rs').html());
+        // this.attrs = JSON.parse($('#data_attrs').html());
+        this.rs = rs;
+        this.attrs = attrs;
+        this.paper_dict = paper_dict;
+        this.papers = Object.values(paper_dict);
+
+        // further init the attrs
+        // since we don't have any information with the attrs
+        // we must add the category data to attr by the attr_dict
+        var last_trunk = '';
+        for (let i = 0; i < this.attrs.length; i++) {
+            var cate = this.attrs[i].cate;
+            var trunk = this.attrs[i].trunk;
+
+            // build translator from name to column
+            this.t_a2c[this.attrs[i].attr_id] = 'col'+i;
+            this.t_c2a['col'+i] = this.attrs[i].attr_id;
+            this.cols.push('col'+i);
+
+            // set hide all attributes as default
+            this.attrs[i]['is_marked'] = false;
+            this.attrs[i]['is_fixed'] = false;
+
+            this.attrs[i].is_trunk_shown = (last_trunk == this.attrs[i].trunk || this.attrs[i].trunk.substring(0, 1) == '_')? false : true;
+            // shorter version for display
+            this.attrs[i].short_name = this.get_short_name(this.attrs[i].name);
+            this.attrs[i].short_trunk = this.get_short_name(this.attrs[i].trunk);
+            this.attrs[i].short_branch = this.get_short_name(this.attrs[i].branch);
+
+            // set the display name
+            this.attrs[i].is_short_shown = true;
+
+            // hide the system
+            this.attrs[i].is_system = this.attrs[i].cate == '_SYS'? true : false;
+
+            // bind to dict
+            this.attr_dict[this.attrs[i].attr_id] = this.attrs[i];
+
+            // bind to tree
+            if (!this.attr_tree.hasOwnProperty(cate)) {
+                this.attr_tree[cate] = {};
+            }
+            if (!this.attr_tree[cate].hasOwnProperty(trunk)) {
+                this.attr_tree[cate][trunk] = {
+                    name: trunk,
+                    is_marked: false,
+                    branches: []
+                };
+            }
+            if(!this.attrs[i].hasOwnProperty('sub_category')){
+                this.attr_tree[cate][trunk].branches.push(this.attrs[i]);
+            }
+            
+            
+            // for display 
+            last_trunk = this.attrs[i].trunk;
+        }
+
+        // add to database AlaSQL
+        for (let i = 0; i < this.rs.length; i++) {
+            const r = this.rs[i];
+            var r_col = {'id': i};
+            // copy the value to this rs_db
+            for (let j = 0; j < this.attrs.length; j++) {
+                const attr = this.attrs[j];
+                var col = this.t_a2c[attr.attr_id];
+                // attention! the rs use attr.name to access!!!
+                var val = r[attr.name];
+                if (val == null) {
+                    val = 'NA';
+                }
+                // force to use string
+                // val = "" + val;
+                // val = val.trim()
+                r_col[col] = val;
+            }
+            this.rs_col.push(r_col);
+        }
+        // ok, save these records into sql for later use ...
+        // how can forget to add the []
+        alasql('create table rs');
+        alasql('select * into rs from ?', [this.rs_col]);
+
+        // bind rs_db
+        this.rs_db = alasql('select * from rs');
+        this.get_max_colspan_value();
+
+    },
+
+    get_max_colspan_value: function(){
+        max_colspan = []
+        max_rowspan_value =1
+        second_depth = false
+        third_depth = false
+        fourth_depth = false
+            for (const [attr_, attr_value] of Object.entries(this.attr_tree)) {
+                    for (const [nested_attr, nested_value] of Object.entries(attr_value)) {
+                        for (const [branches_key, branches_value] of Object.entries(nested_value)) {
+                            max_rowspan_value = 2
+                            second_depth = true 
+                                if (branches_key == "branches"){
+                                        if (Array.isArray(nested_value['branches'], )){
+                                            max_colspan.push(nested_value['branches'].length)
+                                            for(i=0; i<nested_value['branches'].length; i++){
+                                                record = nested_value['branches'][i]
+                                                if(record.hasOwnProperty('sub_branches') &&  record['sub_branches'].length>1  ){
+                                                    //max_rowspan_value = 3
+                                                   third_depth = true
+                                                   second_depth = false
+                                                    if (record['sub_branches'][0].hasOwnProperty('sub_sub_branches') &&record.sub_branches[0].sub_sub_branches.length>0){
+                                                        fourth_depth = true
+                                                    }
+                                                   
+                                                }
+
+                                            }
+                                            //break;
+                                        }
+                                        else{
+                                            max_colspan.push(1)
+                                        }
+
+                                    
+
+                                }
+                            
+                            
+                        }
+                        
+                       
+                
+                }
+               
+
+            }
+            colspan_array = max_colspan
+            max_colspan_value_all  = Math.max(...max_colspan)
+            if(third_depth){
+                max_rowspan_value = 3
+            }
+            else{
+                max_colspan_value = 3
+            }
+            if(fourth_depth){
+                max_rowspan_value = 4
+            }
+            else{
+                max_colspan_value = 4
+            }
+            
+            
+
+    }
+    ,
+    get_short_name: function(name) {
+        // return name.substring(0, 3).toUpperCase();
+        return name;
+    },
+
+    update_rs_db: function() {
+        var sql = this.sql.base + ' \n' +
+                  this.sql.conditions + ' \n' +
+                  this.sql.order_by;
+        console.log('* updated table using SQL:\n', sql);
+        this.rs_db = alasql(sql);
+    },
+
+    count_rs_db: function() {
+        var sql = 'select count(*) as cnt_lines, '+
+            'count(distinct ' + this.t_a2c[this.attr_nm2id('PMID')] + ') as cnt_pmids ' +
+            'from rs where 1=1 and ' +
+            this.sql.conditions + ' ';
+        console.log('* count table using SQL:\n', sql);
+        return alasql(sql)[0];
+    }
+};
+
+var tb_coltab = {
+    vpp: null,
+    vpp_id: '#tb_coltab',
+    cols: {
+        fixed: ['NCT', 'TRIAL REG #', 'TRIAL', 'PUBMED ID', 'PMID', 'AUTHOR', 'YEAR', 'TRIAL NAME'],
+        // default: ['PHASE', 'ORIGINAL/FOLLOW UP', 'TREATMENT ARM', 'CONTROL ARM']
+        default: []
+    },
+
+    reset_cols: function() {
+        for (let i = 0; i < dt_tbcore.attrs.length; i++) {
+            const attr = dt_tbcore.attrs[i];
+            attr.is_marked = false;
+            if (this.cols.fixed.includes(attr.name.toUpperCase())) {
+                attr.is_fixed = true;
+                attr.is_marked = true;
+            }
+            if (this.cols.default.includes(attr.name.toUpperCase())) {
+                attr.is_marked = true;
+            }
+        }
+    },
+
+    init: function() {
+        this.reset_cols();
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                attrs: dt_tbcore.attrs,
+                attr_tree: dt_tbcore.attr_tree,
+                rs_col: dt_tbcore.rs_col,
+                t_c2a: dt_tbcore.t_c2a,
+                attr_cate_status: {}
+            },
+            methods: {
+                show_attr_col: function(idx) {
+                    jarvis.scroll2col('attr-col-' + idx);
+                    dt_tbcore.attrs[idx].is_short_shown = dt_tbcore.attrs[idx].is_marked;
+                },
+
+                get_attr_cate_status: function(cidx, trunks, cate) {
+    
+                    if (!this.attr_cate_status.hasOwnProperty(cidx)) {
+                        this.attr_cate_status[cidx] = {
+                            show_attrs: true
+                        }
+                    }
+                    return this.attr_cate_status[cidx];
+                },
+
+                toggle_attr_cate: function(cidx) {
+                    this.attr_cate_status[cidx].show_attrs = !this.attr_cate_status[cidx].show_attrs;
+                    this.$forceUpdate();
+                },
+
+                show_table_propertites: function(cidx, cate , trunks){
+                    console.log('yes')
+                    // for()
+                    // debugger;
+                } ,
+
+                show_trunk_attr_cols: function(cate, trunk, idx) {
+                    console.log('show_trunk_attr_cols it is being called ')
+                    // debugger;
+                    this.attr_tree[cate][trunk].is_marked = !this.attr_tree[cate][trunk].is_marked;
+                    for (let i = 0; i < this.attr_tree[cate][trunk].branches.length; i++) {
+                        const attr = this.attr_tree[cate][trunk].branches[i];
+                        if (attr.hasOwnProperty('sub_branches')&& attr['sub_branches'].length>1){
+
+                            // $(".nested_level_option").each(function(){
+                                
+                            //     $(this).removeClass('sct-col-hide')
+                            // });
+
+                            // $(".nested-level-opt-td").each(function(){
+                                
+                            //     $(this).removeClass('sct-col-hide')
+                            // });
+
+                            for (j=0; j<attr['sub_branches'].length; j++){
+                                let sub = attr['sub_branches'][j]
+                                sub.is_marked = this.attr_tree[cate][trunk].is_marked;
+                                
+                                for(k=0; k<this.attrs.length ; k++){
+                                    record = this.attrs[k]
+                                    
+                                    console.log(record)
+                                    if(record['name'] == sub.name){
+                                        record.is_marked = this.attr_tree[cate][trunk].is_marked;
+                                        //break;
+                                    }
+                                    // if(record.hasOwnProperty('sub_sub_branches') && record.sub_sub_branches.length>0 ){
+                                    //     console.log("((((((((((((((((((((((((((")
+
+                                    //     for(l=0; k<this.attrs.length ; k++){
+                                    //         record = this.attrs[k]
+                                            
+                                    //         console.log(record)
+                                    //         if(record['name'] == sub.name){
+                                    //             record.is_marked = this.attr_tree[cate][trunk].is_marked;
+                                    //             //break;
+                                    //         }}
+
+                                        
+                                    // }
+
+
+
+                                }
+
+                                for(l=0; l<sub['sub_sub_branches'].length; l++){
+                                    console.log("I am called ")
+                                    sub['sub_sub_branches'][l].is_marked = sub.is_marked
+                                    if(sub.is_marked){
+                                            $(".nested_level_option").each(function(){
+                                            
+                                                $(this).removeClass('sct-col-hide')
+                                            });
+                                            $(".nested-level-opt-td-nested").each(function(){
+                                                
+                                                $(this).removeClass('sct-col-hide')
+                                            });
+                                        
+                                     }
+
+                                    else{
+                                            $(".nested_level_option").each(function(){
+                                    
+                                                $(this).addClass('sct-col-hide')
+                                            });
+
+                                        $(".nested-level-opt-td-nested").each(function(){
+                                                        
+                                                        $(this).addClass('sct-col-hide')
+                                                    });
+                                    }
+                                    
+                                }
+
+                            }
+                            
+
+                        }
+                        attr.is_marked = this.attr_tree[cate][trunk].is_marked;
+                    }
+                },
+
+                check_all_cols: function(evt) {
+                    $(".trunk-class-chk").prop("checked", true);
+                    for (let i = 0; i < this.attrs.length; i++) {
+                        // 2021-02-19: hide _SYS
+                        if (this.attrs[i].cate == '_SYS') {
+                            continue
+
+                        } else {
+                            this.attrs[i].is_marked = true;
+                            this.attrs[i].is_short_shown = !this.attrs[i].is_marked;
+                        }
+                        this.attrs[i].is_marked = true;
+                        this.attrs[i].is_short_shown = !this.attrs[i].is_marked;
+                    }
+                },
+
+                reset_all_cols: function(evt) {
+                    tb_coltab.reset_cols();
+                    $(".trunk-class-chk").prop("checked", false);
+                    $(".nested_level_option").each(function(){
+                                
+                                $(this).addClass('sct-col-hide')
+                            });
+
+                            $(".nested-level-opt-td").each(function(){
+                                
+                                $(this).addClass('sct-col-hide')
+                            });
+                            // $(".nested-level-opt-td-nested").each(function(){
+                                            
+                            //                 $(this).addClass('sct-col-hide')
+                            //             });
+                },
+
+                checkAll: function() {
+                    const toggleButton = document.getElementById("toggleCheck");
+                    if (toggleButton.checked) {
+                        // Call a function when the button is checked
+                        this.check_all_cols();
+                    } else {
+                        // Call a function when the button is unchecked
+                        this.reset_all_cols();
+                    }
+                }
+                
+            }
+
+        });
+    }
+};
+
+var tb_schtab = {
+    vpp: null,
+    vpp_id: '#tb_schtab',
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                url: {
+                    ctgov: 'https://clinicaltrials.gov/ct2/show/',
+                    pubmed: 'https://pubmed.ncbi.nlm.nih.gov/',
+                    doi: 'https://doi.org/'
+                },
+                attrs: dt_tbcore.attrs,
+                cols: dt_tbcore.cols,
+                rs: dt_tbcore.rs_db,
+
+                n_citations: dt_tbcore.papers.length
+            },
+            methods: {
+                get_th_cls: function(idx) {
+
+                    cls = ''
+                    
+
+                    if(dt_tbcore.attrs[idx].branch.split(" ").join("")=="Trial Name".split(" ").join("")){
+                        cls = ' static-td-th-first-t-name'
+                        dt_tbcore.trial_name = true
+                    }
+                    if(dt_tbcore.attrs[idx].branch=="Authors"){
+
+                        
+
+                        if(dt_tbcore.trial_name == true){
+                            cls = ' static-td-th-first-author'
+                        }
+                        else{
+                             cls = ' static-td-th-first'
+                        }
+                    }
+                    if(dt_tbcore.attrs[idx].branch =="Year"){
+
+                        if (dt_tbcore.trial_name==true ){
+                            cls +=' static-td-th-second-year'
+                        }
+                        else{
+                            cls += ' static-td-th-second '
+                        }
+                    }
+                    if (!dt_tbcore.attrs[idx].is_marked) {
+                        return ' sct-col-hide';
+                    } else {
+                        return cls;
+                    }
+                },
+                get_last_header_cls: function(idx){
+                    return ' '
+                },
+
+
+                get_colspan: function(idx){
+                    reocrd_options = dt_tbcore.attr_tree[dt_tbcore.attrs[idx]['cate']][dt_tbcore.attrs[idx]['short_trunk']]['branches']
+                    colspan_value = reocrd_options.length;
+                    sub_branches_flag = false
+                    branches_count =0
+                    for(i=0; i<reocrd_options.length; i++){
+                        if('sub_branches' in reocrd_options[i]){
+
+                            if (!(reocrd_options[i]['sub_branches'].length == 0)){
+                                sub_branches_flag = true
+                            
+                                
+                                // branches_count = branches_count + reocrd_options[i]['sub_branches'].length
+                                if (reocrd_options[i]['sub_branches'][0].sub_sub_branches.length > 0 ){
+                                    sub_sub_branches = reocrd_options[i]['sub_branches']
+                                    for (j=0; j< sub_sub_branches.length ; j++){
+                                        console.log()
+                                        branches_count = branches_count + reocrd_options[i]['sub_branches'][j]['sub_sub_branches'].length
+                                    }
+                                    
+                                }
+                                else{
+                                      
+                                branches_count = branches_count + reocrd_options[i]['sub_branches'].length
+                                }
+                               
+                            }
+                            else{
+                                branches_count = branches_count +1;
+                            }
+                       
+                        }
+                }
+                    if(sub_branches_flag){
+                        return branches_count;
+                    }
+
+                    return colspan_value
+                    // return  dt_tbcore.attr_tree[dt_tbcore.attrs[idx]['cate']][dt_tbcore.attrs[idx]['short_trunk']]['branches'].length
+                    //return dt_tbcore.attrs[idx].sub_length
+                },
+
+                get_colspan_nested: function(idx){
+
+                    // if (dt_tbcore.attrs[idx].sub_categories_length ){
+                    //     sub_name = dt_tbcore.attrs[idx]['sub_parent']
+                    //     idx = idx +1;
+                    //     colspan = 1
+                    //     for(i=idx; i<dt_tbcore.attrs.length; i++){
+                    //         name = dt_tbcore.attrs[i]['sub_parent']
+                    //         if(sub_name == name){
+                    //             colspam = colspan +1;
+                    //         }
+                    //         else{
+                    //             break;
+                    //         }
+                    //     }
+
+                    // }
+                    fourth_nested_level_exist = false
+                    sub_length =0
+                    if(dt_tbcore.attrs[idx].sub_branches && dt_tbcore.attrs[idx].sub_branches.length>0){
+                        for (i=0 ;i<dt_tbcore.attrs[idx].sub_branches.length; i++ )
+                        {
+                          
+                                fourth_nested_level_exist = true;
+                               sub_length =  sub_length + dt_tbcore.attrs[idx].sub_branches[i].sub_sub_branches.length
+                            
+                           
+
+                        }
+
+                    }
+                    if ( sub_length ==0){
+                        sub_length =  dt_tbcore.attrs[idx].sub_categories_length
+                    }
+                    
+                    return sub_length
+
+                },
+
+                get_colspan_nested_nested: function(idx){
+                    // fourth_nested_level_exist = false
+                    // sub_length =0
+                    // if(dt_tbcore.attrs[idx].sub_sub_branches && dt_tbcore.attrs[idx].sub_sub_branches.length>0){
+                    //     sub_length =  dt_tbcore.attrs[idx]..sub_sub_branches.length
+                    // }
+
+                    // return sub_length
+
+                    // },
+                   return  dt_tbcore.attrs[idx].sub_sub_branches?dt_tbcore.attrs[idx].sub_sub_branches.length:0
+
+                    },
+                get_rowspan: function(idx){
+                    colspan_value = this.get_colspan(idx);
+                    if (colspan_value== 1){
+                        return  max_rowspan_value;
+                    }
+                    return 1
+                },
+
+                get_rowspan_nested: function(idx){
+                    colspan_value = this.get_colspan_nested(idx);
+                    if (colspan_value== 1){
+                        return 3
+                    }
+                    return 1
+                },
+                get_rowspan_nested_nested: function(idx){
+                    colspan_value = this.get_colspan_nested_nested(idx);
+                    if (colspan_value<= 1){
+                        return 2
+                    }
+                   
+                    return 1
+                },
+
+                get_parent_cell_name: function(idx) {
+                    if(dt_tbcore.attrs[idx]['is_short_shown'] && dt_tbcore.attrs[idx]['is_trunk_shown']){
+                        return  dt_tbcore.attrs[idx]['short_trunk']
+                    }
+                    return dt_tbcore.attrs[idx]['trunk']
+
+                },
+                create_headers: function(idx){
+                    
+
+                    if (dt_tbcore.attrs[idx]['sub_category']==true){
+                        return false
+                    }
+                    if (idx ==0 ){
+                        return true
+                    }
+
+                    if (dt_tbcore.attrs[idx]['name']==dt_tbcore.attrs[idx]['branch'] &&   dt_tbcore.attrs[idx]['is_trunk_shown']==false){
+                        return true
+                    }
+                    if (dt_tbcore.attrs[idx]['name']!=dt_tbcore.attrs[idx]['branch'] &&   dt_tbcore.attrs[idx]['is_trunk_shown']==true){
+                        return true
+                    }
+
+                    return false
+                },
+
+                create_nested_headers: function(idx){
+
+                    if (dt_tbcore.attrs[idx]['sub_category']==true)
+                    {
+                        return false
+                    }
+
+                    if ((dt_tbcore.attrs[idx]['is_trunk_shown']==false || dt_tbcore.attrs[idx]['is_trunk_shown']==true ) && (
+                        (dt_tbcore.attrs[idx]['name'] != dt_tbcore.attrs[idx]['branch'] )))
+                    {
+                        return true
+                    }
+
+                    if(dt_tbcore.attrs[idx]['name'] != dt_tbcore.attrs[idx]['branch'] && dt_tbcore.attrs[idx]['is_trunk_shown'] == true){
+                        return true
+                    }
+                    return false
+                },
+
+                create_nested_category_header: function(idx){
+
+                    if (dt_tbcore.attrs[idx]['sub_category']==true &&  !(dt_tbcore.attrs[idx]['sub__sub_category']))
+                    {
+                        return true
+                    }
+
+                    return false
+                },
+                create_further_nested_headers: function (idx) {
+                    // if(dt_tbcore.attrs[idx].sub_branches) {
+                    //     if(dt_tbcore.attrs[idx].sub_branches.length > 0) {
+                    //         for (let i = 0; i < dt_tbcore.attrs[idx]?.sub_branches.length; i++) {
+                    //             if(dt_tbcore.attrs[idx]?.sub_branches[i].sub_sub_branches) {
+                    //                 if(dt_tbcore.attrs[idx]?.sub_branches[i].sub_sub_branches.length > 0) {
+                    //                     for(let j=0; j<dt_tbcore.attrs[idx]?.sub_branches[i].sub_sub_branches.length; j++) {
+                    //                         return true;
+                    //                     }
+                    //                 }
+                    //             }
+                                
+                    //         }
+                    //     }
+                    // }
+                    // if (dt_tbcore.attrs[idx].sub_branches){
+                        
+                    //         for (i =0; i< dt_tbcore.attrs[idx].sub_branches.length; i++){
+                    //         if (dt_tbcore.attrs[idx].sub_branches[i].sub_sub_branches.length >0){
+                    //             return true
+                    //         }
+
+                        
+
+                    // }
+                    
+                    if (dt_tbcore.attrs[idx]['sub__sub_category']==true )
+                    {
+                        console.log("yeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+
+                        // if (dt_tbcore.attrs[idx].sub_branches){
+                        //     if (dt_tbcore.attrs[idx].sub_branches[0].sub_sub_branches.length>0){
+                        //         return true
+                        //     }
+                           
+                        // }
+                        return true
+                        
+                    }
+
+
+                    return false
+                },
+
+
+
+
+
+                get_col_name: function(idx, col_idx)
+                {
+                    if (dt_tbcore.attrs[idx+col_idx]){
+                        return dt_tbcore.attrs[idx+col_idx]['branch']
+                    }
+                    else{
+                        console.log('here fishy ')
+                        console.log(idx+col_idx)
+                    }
+                    
+                },
+
+
+                get_n_rcts: function(rs) {
+                    var d = {};
+                    var col_name = 'col0';
+                    for (let i = 0; i < this.rs.length; i++) {
+                        const r = this.rs[i];
+                        if (r.hasOwnProperty(col_name)) {
+                            // this should be the NCT
+                            if (d.hasOwnProperty(r[col_name])) {
+                                d[r[col_name]] += 1;
+                            } else {
+                                d[r[col_name]] = 1;
+                            }
+                        }
+                    }
+                    return Object.keys(d).length;
+                },
+
+                get_n_pids: function(rs) {
+                    var d = {};
+                    var col_name = 'col1';
+                    for (let i = 0; i < this.rs.length; i++) {
+                        const r = this.rs[i];
+                        if (r.hasOwnProperty(col_name)) {
+                            // this should be the NCT
+                            if (d.hasOwnProperty(r[col_name])) {
+                                d[r[col_name]] += 1;
+                            } else {
+                                d[r[col_name]] = 1;
+                            }
+                        }
+                    }
+                    return Object.keys(d).length;
+                    //return dt_tbcore.rs.length;
+                },
+
+                pid2url: function(pid) {
+
+                    if (!(pid)){
+                        return ''
+                    }
+                    if (pid.length < 9) {
+                        return this.url.pubmed + pid;
+                    } else {
+                        return this.url.doi + pid;
+                    }
+                },
+
+                attr_id2col: function(attr_id) {
+                    return dt_tbcore.t_a2c[attr_id];
+                },
+
+                get_td_cls: function(idx, val, r , col, r_idx) {
+                    // hide this if is_marked false
+                    cls_  =  ''
+                   
+                    if(!(r.hasOwnProperty(col))){
+                        
+                        return ' sct-col-undefined-hide'
+
+
+                    }
+             
+                    
+                    if(dt_tbcore.attrs[idx].hasOwnProperty('sub_category') && dt_tbcore.attrs[idx].sub_category ){
+                        new_class_td = 'nested-td-'+idx;
+                        if (dt_tbcore.attrs[idx].hasOwnProperty('sub__sub_category'))
+                        {
+                            cls_ = 'nested-level-opt-td nested-level-opt-td-nested';
+                            
+                      
+                        }
+                        else{
+                        cls_ = 'nested-level-opt-td';
+                        }
+                       
+
+                        if (dt_tbcore.attrs[idx].is_marked) {
+                            //$('#attr-col-'+idx).addClass('scl-col-hide');
+                            $('#attr-col-td'+r_idx+idx).removeClass('scl-col-hide');
+            
+                            return '';
+                        
+                        }
+                        // $('#attr-col-'+idx).removeClass('scl-col-hide');
+                        // $('#attr-col-td'+idx).removeClass('scl-col-hide');
+                        // return '';
+
+                        
+                    }
+                
+                    if (!dt_tbcore.attrs[idx].is_marked) {
+                        cls_ += ' sct-col-hide'
+                        return cls_;
+                    }
+                    var cls = '';
+                    if (dt_tbcore.attrs[idx].is_marked) {
+                        cls += ' ';
+                    } else {
+                        cls += ' '
+                    }
+                    if (val == 'NA') {
+                        cls += ' sct-td-val-na';
+                    } else {
+                        cls += ' sct-td-val';
+                    }
+
+                    if(dt_tbcore.attrs[idx].branch.split(" ").join("")=="Trial Name".split(" ").join("")){
+                        cls = ' static-td-th-first-t-name'
+                        dt_tbcore.trial_name = true
+                    }
+                    if(dt_tbcore.attrs[idx].branch=="Authors"){
+
+                        // debugger;
+
+                        if(dt_tbcore.trial_name == true){
+                            cls = ' static-td-th-first-author'
+                        }
+                        else{
+                             cls = ' static-td-th-first'
+                        }
+                    }
+                    if(dt_tbcore.attrs[idx].branch =="Year"){
+
+                        if (dt_tbcore.trial_name==true ){
+                            cls +=' static-td-th-second-year'
+                        }
+                        else{
+                            cls += ' static-td-th-second '
+                        }
+                    }
+                    return cls.trim();
+                },
+
+                toggle_fullname: function(idx) {
+                    this.attrs[idx].is_short_shown = !this.attrs[idx].is_short_shown;
+                },
+
+                sort_by_col: function(idx, ord) {
+                    var col = this.cols[idx];
+                    var order_by = 'order by ' + col + ' ' + ord;
+                    dt_tbcore.sql.order_by = order_by;
+
+                    jarvis.update_schtab();
+                },
+
+                sort_by_col_name: function(name) {
+                    console.log('* sort_by_col_name:', name);
+                    for (let i = 0; i < this.attrs.length; i++) {
+                        const attr = this.attrs[i];
+                        if (attr.name == name) {
+                            // match the required name
+                            this.sort_by_col(i, jarvis.default_sort_order);
+                            console.log('* sorted by', name, 'order', jarvis.default_sort_order);
+                            break;
+                        }
+                    }
+                }
+            }
+        })
+    },
+
+    update: function() {
+        this.vpp.rs = dt_tbcore.rs_db;
+    }
+}
+
+
+var jarvis = {
+    src: '',
+    default_sort_by: '',
+    default_sort_order: '',
+
+    init: function() {
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+
+        console.log('* User is using IE:', isIE);
+        if (isIE) {
+            jarvis.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
+            return;
+        }
+        var prj = jarvis.get_url_paramter('prj');
+        var src = jarvis.get_url_paramter('src');
+        var cq = jarvis.get_url_paramter('cq');
+        var version = jarvis.get_url_paramter('version');
+        var sort_by = jarvis.get_url_paramter('sort_by');
+        var sort_od = jarvis.get_url_paramter('sort_od');
+
+        if (src == '') {
+            src = 'cache';
+        }
+
+        if (cq == '') {
+            cq = 'default';
+        }
+
+        if (sort_by == '') {
+            this.default_sort_by = 'NCT';
+        } else {
+            this.default_sort_by = sort_by;
+        }
+
+        if (sort_od == '') {
+            this.default_sort_order = 'desc';
+        } else {
+            this.default_sort_order = sort_od;
+        }
+
+        jarvis.src = src;
+
+        if (jarvis.src == 'db' || jarvis.src == 'cache') {
+
+            // send request to get data for initializing app
+            var url = "[[ url_for('pub.graphdata', keystr='__KEYSTR__', fn='ITABLE.json') ]]";
+            // update with url with the project keystr
+            url = url.replace('__KEYSTR__', prj);
+            
+            $.get(
+                // '/pub/graphdata/'+prj+'/ITABLE.json',
+                url,
+                {
+                    ver: Math.random(), 
+                    src: jarvis.src, 
+                    cq: cq,
+                    version: version
+                },
+                function(data) {
+                    console.log(data);
+
+                    // init the cfg
+                    // update the filters
+                    tb_filter.filters = tb_filter.filters.concat(data.cfg.filters);
+
+                    // update columns
+                    var cols_fixed = [];
+                    var cols_default = [];
+                    for (var i = 0; i < data.cfg.cols.fixed.length; i++) {
+                        cols_fixed.push(data.cfg.cols.fixed[i].toUpperCase());
+                    }
+                    for (var i = 0; i < data.cfg.cols.default.length; i++) {
+                        cols_default.push(data.cfg.cols.default[i].toUpperCase());
+                    }
+                    tb_coltab.cols.fixed = tb_coltab.cols.fixed.concat(cols_fixed);
+                    tb_coltab.cols.default = tb_coltab.cols.default.concat(cols_default);
+
+
+                    // init the modules
+                    dt_tbcore.init(data.rs, data.attrs, data.paper_dict);
+                    console.log('* inited dt_tbcore');
+
+                    tb_filter.init();
+                    console.log('* inited tb_filter');
+
+                    tb_coltab.init();
+                    console.log('* inited tb_coltab');
+
+                    tb_schtab.init();
+                    console.log('* inited tb_schtab');
+
+                    jarvis.update_schtab();
+
+                    // 2023-06-15: sort when init
+                    tb_schtab.vpp.sort_by_col_name(
+                        jarvis.default_sort_by
+                    );
+
+                    // clsoe the start-screen
+                    jarvis.ssmsg('Almost initialized.');
+                    setTimeout('jarvis.ssclose();', 400);
+                }, 'json'
+            );
+            return;
+        }
+
+        // read the config file 
+        if (src == 'xls') {
+            // send request to get data for initializing app
+            var url = "[[ url_for('pub.graphdata', keystr='__KEYSTR__', fn='ITABLE_CFG.json') ]]";
+            // update with url with the project keystr
+            url = url.replace('__KEYSTR__', prj);
+
+            $.get(
+                url,
+                // '/pub/graphdata/' + prj + '/ITABLE_CFG.json',
+                { ver: Math.random()},
+                function(cfg_data) {
+                    // update the filters
+                    tb_filter.filters = tb_filter.filters.concat(cfg_data.filters);
+
+                    // update columns
+                    var cols_fixed = [];
+                    var cols_default = [];
+                    for (var i = 0; i < cfg_data.cols.fixed.length; i++) {
+                        cols_fixed.push(cfg_data.cols.fixed[i].toUpperCase());
+                    }
+                    for (var i = 0; i < cfg_data.cols.default.length; i++) {
+                        cols_default.push(cfg_data.cols.default[i].toUpperCase());
+                    }
+                    tb_coltab.cols.fixed = tb_coltab.cols.fixed.concat(cols_fixed);
+                    tb_coltab.cols.default = tb_coltab.cols.default.concat(cols_default);
+
+                    // send request to get data for initializing app
+                    var url2 = "[[ url_for('pub.graphdata', keystr='__KEYSTR__', fn='ITABLE.json') ]]";
+                    // update with url with the project keystr
+                    url2 = url2.replace('__KEYSTR__', prj);
+
+                    // get detailed table data
+                    $.get(
+                        // '/pub/graphdata/'+prj+'/ITABLE.json',
+                        url2,
+                        {ver: Math.random()},
+                        function(data) {
+                            console.log(data);
+                            dt_tbcore.init(data.rs, data.attrs);
+                            console.log('* inited dt_tbcore');
+
+                            tb_filter.init();
+                            console.log('* inited tb_filter');
+
+                            tb_coltab.init();
+                            console.log('* inited tb_coltab');
+
+                            tb_schtab.init();
+                            console.log('* inited tb_schtab');
+
+                            jarvis.update_schtab();
+
+                            // clsoe the start-screen
+                            jarvis.ssmsg('Almost initialized.');
+                            setTimeout('jarvis.ssclose();', 400);
+                        }, 'json'
+                    );
+
+                }, 'json'
+            );
+
+        }
+            
+    },
+
+    get_url_paramter: function(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    },
+
+    update_schtab: function() {
+        // update sql
+        var cond = tb_filter.get_all_sql_conds();
+        dt_tbcore.sql.conditions = cond;
+
+        // updat rs_db
+        dt_tbcore.update_rs_db();
+
+        // update table
+        tb_schtab.update();
+
+        // update tips
+        $(document).tooltip({
+            position: {
+                my: "left top",
+                at: "right+5 top-5",
+                collision: "none"
+            }
+        });
+    },
+
+    ssmsg: function(msg) {
+        $('#ss-msg').html(msg);
+    },
+
+    ssclose: function() {
+        $('#start-screen').hide();
+    },
+
+    scroll2col: function(elem_id, speed) {
+        var el_tab = document.getElementById('tb_schtab_view');
+        var el_col = document.getElementById(elem_id);
+        if (el_col.offsetLeft > el_tab.scrollLeft && 
+            el_col.offsetLeft < el_tab.scrollLeft + el_tab.offsetWidth) {
+                return;
+        } else {
+            el_tab.scrollLeft = el_col.offsetLeft;
+        }
+    }
+};
+
+$(document).ready(function() {
+    let max_colspan_value = 0;
+    let max_rowspan_value = 0;
+    let smallest_font_size = 12;
+    let largest_font_size = 19;
+    let colspan_array = [];
+    // let trial_name = false;
+
+    jarvis.init();
+
+    filter_btn = document.getElementById('filter-btn-open');
+    filter_btn_close = document.getElementById('filter-close-btn');
+    feature_btn_open = document.getElementById('features-btn-open');
+    feature_btn_close = document.getElementById('feature-btn-cls');
+    zoom_in = document.getElementById('zoom-in-table');
+    zoom_out = document.getElementById('zoom-out-table')
+
+    // feature_btn_close.onclick = function(){
+    //     // document.getElementById('right-panel').style.width = "0px";
+    //     // document.getElementById("tb_schtab").style.marginRight = "0px";
+    //     alert('ghhhhhhhhhhh');
+
+    // }
+    zoom_in.onclick = function(){
+
+        el = document.getElementById('tb_schtab');
+        var style = window.getComputedStyle(el, null).getPropertyValue('font-size');
+        var fontSize = parseFloat(style); 
+        if(fontSize == largest_font_size){
+            return
+        }
+        else{
+            el.style.fontSize = (fontSize + 1) + 'px';
+        }
+
+    }
+
+
+    zoom_out.onclick = function(){
+
+        el = document.getElementById('tb_schtab');
+        var style = window.getComputedStyle(el, null).getPropertyValue('font-size');
+        var fontSize = parseFloat(style); 
+        if(fontSize == smallest_font_size){
+            return
+        }
+        else{
+            el.style.fontSize = (fontSize - 1) + 'px';
+        }
+
+    }
+    feature_btn_open.onclick = function(){
+       panel_width =  document.getElementById('right-panel').style.width
+       if(panel_width=="0px"){
+        document.getElementById('right-panel').style.width = "270px";
+        document.getElementById('right-panel').style.minWidth = "270px";
+        document.getElementById("tb_schtab").style.marginRight = "20px";
+       }
+       else{
+        document.getElementById('right-panel').style.width = "0px";
+        document.getElementById('right-panel').style.minWidth = "0px";
+        document.getElementById("tb_schtab").style.marginRight = "0px";
+
+       }
+    }
+    filter_btn.onclick = function(){
+        panel_width = document.getElementById("left-panel").style.width
+        if(panel_width == "0px"){
+            document.getElementById("left-panel").style.width = "200px";
+            document.getElementById("left-panel").style.minWidth = "214px";
+            document.getElementById("tb_schtab").style.marginLeft = "245x";
+        }
+        else{
+            document.getElementById("left-panel").style.width = "0px";
+            document.getElementById("left-panel").style.minWidth = "0px";
+            document.getElementById("tb_schtab").style.marginLeft = "0px";
+        }
+
+    }
+   
+})
+</script>
+</body>
+</html>

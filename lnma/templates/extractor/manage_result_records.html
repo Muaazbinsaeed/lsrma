@@ -1,0 +1,290 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Manage Result Table
+{% endblock %}
+
+
+{% block section_cq %}
+{% include 'shared_module/_cq_selector_toolbar.html' %}
+{% endblock %}
+
+{% block style %}
+<style>
+
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    .container { 
+        font-family: 'Nunito', sans-serif;
+    }
+
+    input {
+        background: transparent;
+        border: none;
+        text-align: center;
+    }
+
+    .not-found-message {
+        text-align: center;
+        font-size: 2em;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 90vh;
+        margin: 0;
+    }
+
+    .header-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Rows Table */
+    table, th, td {
+        table-layout: fixed;
+        border-collapse: collapse;
+        border: 1px solid #000;
+        text-align: center;
+        overflow-x: auto;
+        padding: 3px 10px;
+        text-wrap: nowrap;
+    }
+
+    #table-rows {
+        font-size: 14px;
+    }
+
+    .empty-cell {
+        background-color: #d7d7d7;
+    }
+
+    .row-btn {
+        position: absolute;
+        top: 18px;
+        right: 20px;
+    }
+
+    h5 {
+        cursor: pointer;
+    }
+
+
+
+        
+</style>
+{% endblock %}
+
+{% block page_name %}
+<i class="fa fa-list"></i>
+Manage Result  Table
+{% endblock %}
+
+{% block content %}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="//cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+<script src="//code.jquery.com/jquery-3.5.1.js"></script>
+<script src="//cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<div class="content">
+    <div id="container" class="container-fluid">
+
+        <div class="row">
+            <div class="col-12">
+                <div class="header-row mt-4">
+                    <div class="header-label">
+                        <h4 class="mr-3">Rows</h4>
+                        <div>
+                            <button title="Preview" class="btn btn-sm btn-primary" style="float: right;" onclick="goToResultTable()">
+                                Live Preview
+                            </button>
+                        </div>
+                    </div>
+                        <div id="table-rows">
+                            <div v-for="(row, rowIndex) in rows" :key="rowIndex" class="mb-4">
+                                <div class="item" @click="toggleTable(rowIndex)">
+                                    <h5>
+                                        <i class="fa fa-caret-right" :class="{ 'fa-caret-down': row.open }"></i>
+                                        {{ Object.keys(row)[0] }}
+                                    </h5>
+                                </div>
+                                <div v-if="row.open" style="overflow-x: auto;">
+                                    <table>
+                                        <table>
+                                            <thead>
+                                              <tr>
+                                                <th v-for="key in seqData" :key="key">
+                                                  {{ key }}
+                                                </th>
+                                              </tr>
+                                            </thead>
+                                            <tbody>
+                                              <tr>
+                                                <td v-for="key in seqData" :key="key">
+                                                    <input
+                                                        type="text"
+                                                        v-model="row[Object.keys(row)[0]][key]"
+                                                        @input="updateCellValue(row, key, $event)"
+                                                        :class = "{ 'empty-cell': row[Object.keys(row)[0]][key] === undefined}"
+                                                        placeholder="Enter value"
+                                                    />
+                                                </td>
+                                              </tr>
+                                            </tbody>
+                                          </table>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <button title="Save Rows" class="btn btn-info" @click="updatedRows()">
+                                    <i class="fa fa-bookmark"></i> Save Rows
+                                </button>
+                            </div>
+                        </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}
+
+{% block active_nav_link %}extractor-manage-result-records{% endblock %}
+
+{% block script %}
+
+<script>
+
+    let tableHeaders = [];
+    // let categoryLabel = [[ comaparator_name|safe ]];
+    // let trialLabel = [[ varaiable_name|safe ]];
+    let resData = '[[ headers_result|safe ]]';
+    let rowResData = '[[ rows_result|safe ]]';
+    let seq_data = '[[ rows_result_seq|safe ]]';
+    let rowResMapping = '[[ rows_headers_mapping|safe ]]';
+    let abbrResMapping = '[[ abbr_list_updated|safe ]]';
+    let save_result_table_url  = "[[ url_for('extractor.manage_result_records') ]]";
+    resData = JSON.parse(resData);
+
+    let rowMappingModified = {};        
+
+    if (
+        !resData || resData === undefined || resData === null ||
+        !rowResData || rowResData === undefined || rowResData === null ||
+        !rowResMapping || rowResMapping === undefined || rowResMapping === null ||
+        Object.keys(resData).length === 0
+        ) {
+            var container = document.getElementById('container');
+            container.innerHTML = '<p class="not-found-message">Data Not Found</p>';
+    } 
+    else {
+
+        let headersData = resData;
+        let rowsData = JSON.parse(rowResData);
+        seq_data = JSON.parse(seq_data);
+
+        var resultTableRows = {
+            vpp_id: "#table-rows",
+            init: function () {
+                this.vpp = new Vue({
+                    el: this.vpp_id,
+                    data: {
+                        rows: rowsData.map(row => ({ ...row, open: false })),
+                        seqData: seq_data,
+                        defaultValue: 'Value not available'
+                    },
+                    methods: {
+                        toggleTable(rowIndex) {
+                            this.rows.forEach((row, index) => {
+                                row.open = index === rowIndex ? !row.open : row.open === true ? true: false;
+                            });
+                        },
+                        updateCellValue(row, key, event) {
+                            let cellValue = event.target.value;
+                            this.$set(row[Object.keys(row)[0]], key, cellValue);
+                        },
+                        updatedRows() {
+                            const result = this.rows.map(item => {
+                                const { open, ...rest } = item;
+                                return rest;
+                            });
+                            console.log(result, " @@@");
+                            var project_id = Cookies.get('project_id');
+                            var cq_abbr = Cookies.get('cq_abbr');
+
+                            $.ajax({
+                                type: 'POST',
+                                dataType: 'json',
+                                url: save_result_table_url,
+                                data: {
+                                    project_id:project_id, 
+                                    cq_abbr:cq_abbr, 
+                                    result_table_rows:JSON.stringify(result)
+                                },
+                                cache: false,
+                                success: function (data) {
+                                    toast(data["msg"]);
+                                   
+                                    //hideLoader();
+                                },
+                                error: function(jqXHR, textStatus, errorThrown) {
+                                    jarvis.toast('Something wrong when saving the extraction.', 'alert');
+                                    console.error(textStatus, errorThrown);
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        };
+        resultTableRows.init();
+
+        function goToResultTable() {
+            const project_id = Cookies.get('project_id');
+            const cq_abbr = Cookies.get('cq_abbr');
+            version = Math.random();
+            var url = `[[ url_for('extractor.result_table', ) ]]?src=db&project_id=${project_id}&cq=${cq_abbr}&ver=${version}`;
+            window.open(url, '_blank', 'noreferrer');
+        }
+
+
+        // let rowData = JSON.parse(rowResData);
+        // let rowMapping = JSON.parse(rowResMapping);
+        // let abbrMapping = JSON.parse(abbrResMapping);
+        // const namesArray = data.map(item => item.name);
+
+        // let subCategoryFlag = false;
+        // var headerCounter = 0;
+        // var rowCounter = 0;
+
+        // var table = document.getElementById("resultTable");
+        // var categories = document.getElementById("categories");
+        // var trialNames = document.getElementById("trialNames");
+        // var variablesNames = document.getElementById("variables");
+        // var trialLabelText = document.getElementById("trialLabel");
+        // var categoryLabelText = document.getElementById("categoryLabel");
+        // var rowManagerText = document.getElementById("row-manager");
+        // var columnManagerText = document.getElementById("column-manager");
+        // var dropDownText = document.getElementById("dropdown-text");
+ 
+
+        // categoryLabelText.innerHTML = categoryLabel;
+        // trialLabelText.innerHTML = trialLabel;
+        // rowManagerText.innerHTML = trialLabel;
+        // columnManagerText.innerHTML = categoryLabel;
+        // dropDownText.innerHTML = categoryLabel;
+    }
+
+    
+    
+</script>
+
+{% endblock %}
+

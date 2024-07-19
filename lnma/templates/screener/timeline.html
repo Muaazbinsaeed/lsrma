@@ -1,0 +1,795 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Study Timeline
+{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css">
+<style>
+</style>
+{% endblock %}
+
+{% block page_name %}
+<i class="fa fa-clock"></i>
+Study Timeline
+{% endblock %}
+
+{% block content %}
+<style>
+    * {
+  margin: 0;
+  padding: 0;
+}
+#chart-container-import {
+  position: relative;
+  height: 40vh;
+  overflow: hidden;
+}
+
+#chart-container-decision {
+  position: relative;
+  height: 40vh;
+  overflow: hidden;
+}
+
+</style>
+
+
+  <!-- <script src="https://fastly.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script> -->
+  <script src="https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+  <div class="filters_tab  container-fluid  ">
+    <link href="https://netdna.bootstrapcdn.com/bootstrap/2.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.2.0/css/datepicker.min.css" rel="stylesheet">
+    
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="https://netdna.bootstrapcdn.com/bootstrap/2.3.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.2.0/js/bootstrap-datepicker.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+    <div class="wrapper input-group  ">
+        
+        <input type="text" class="form-control form-control-lg" name="datepicker"  id="datepicker" style="height: auto;" 
+        placeholder="Select Year" />
+        <script>
+               $("#datepicker").datepicker({
+         format: "yyyy",
+         viewMode: "years", 
+         minViewMode: "years",
+         defaultDate: String(new Date().getFullYear()),
+         autoclose:true
+ 
+        })
+
+        </script>
+        
+
+        <span class="input-group-btn" 
+            style="width:px;"></span>
+
+          &nbsp;&nbsp;&nbsp;
+           <select  class="form-control" id="month-selected" name="" placeholder="Select Month ">
+            <option value="" selected >Select Month</option>
+            <option value=0>January</option>
+            <option value=1>February</option>
+            <option value=2>March</option>
+            <option value=3>April</option>
+            <option value=4>May</option>
+            <option value=5>June</optiony>
+            <option value=6>July</option>
+            <option value=7>August</option>
+            <option value=8>September</option>
+            <option value=9>October</option>
+            <option value=10>November</option>
+            <option value=11>December</option>
+            
+            </select>
+            <span class="input-group-btn" 
+            style="width:5px;"></span>
+            &nbsp;&nbsp;&nbsp;
+
+            
+            
+    </div>
+    
+
+
+
+
+<div id="app_timeline" 
+    class="container-fluid">
+
+    <button type="button" class="btn btn-primary mt-3 d-block ml-auto " v-on:click="update_graph();">Apply Filter</button>
+
+
+    
+    
+       
+
+  
+    <h5  class ="container-fluid">Data Import/Creation</h5>
+    <div id="chart-container-import" class ="container-fluid">
+    
+    </div>
+    <h5 class ="container-fluid">Data Decision</h5>
+    <div id="chart-container-decision" class ="container-fluid">
+    
+    </div>
+
+<div class="row">    
+<div class="col ml-3">
+
+
+<div v-if="timeline != null" class="timeline">
+    
+    <div v-for="t in timeline"
+        v-bind:class="{'time-label':t.type=='date'}">
+
+        <span v-if="t.type=='date'"
+            class="bg-green">
+                {{ t.date }}
+        </span>
+
+        <i v-if="t.type=='event'" class="fa fa-clock bg-green"></i>
+        <div v-if="t.type=='event'" class="timeline-item">
+            <h3 class="timeline-header no-border">
+                <b>{{ get_cate_name(t.cate) }}</b> - 
+                <b>{{ get_ss_name(t.event) }}</b>:  
+                {{ t.pids.length }} 
+                <span v-if="t.pids.length == 1">
+                    paper
+                </span>
+                <span v-else>
+                    papers
+                </span>
+            </h3>
+
+            <!--
+            <div class="card collapsed-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <b>{{ get_cate_name(t.cate) }}</b> - 
+                        <b>{{ get_ss_name(t.event) }}</b>:  
+                        {{ t.pids.length }} 
+                        <span v-if="t.pids.length == 1">
+                            paper
+                        </span>
+                        <span v-else>
+                            papers
+                        </span>
+                    </h3>
+            
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    
+                </div>
+                <div class="card-body" style="display: none;">
+                    The body of the card
+                </div>
+            </div>
+            -->
+        </div>
+
+        
+        
+    </div>
+
+    
+
+</div>
+
+<div v-else>
+    <p>
+        Loading data ...
+    </p>
+
+</div>
+
+
+
+</div>
+<!-- /.col -->
+
+</div>
+<!-- /.row -->
+
+</div>
+<!-- /#app_timeline -->
+
+{% endblock %}
+
+{% block active_nav_link %}screener-timeline{% endblock %}
+
+{% block script %}
+<script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.4.0/clipboard.min.js"></script>
+
+<!-- my scripts -->
+<script>
+
+///////////////////////////////////////////////////////////
+// bind the project information to srv_screener.js
+///////////////////////////////////////////////////////////
+{% include 'js/srv_screener.js' %}
+srv_screener.project = [[ project_json_str|safe ]];
+
+var app_timeline = {
+    vpp: null,
+    vpp_id: '#app_timeline',
+
+    vpp_data: {
+        timeline: null,
+        graph_timeline: null,
+        dates: null
+    },
+
+    vpp_methods: {
+        get_ss_name: function(c) {
+            var ss = srv_screener.get_ss(c);
+
+            if (ss == null) {
+                return '';
+            }
+
+            return ss.name;
+        },
+
+        get_cate_name: function(c) {
+            if (c == 'created') {
+                return 'Import new records';
+
+            } else if (c == 'decision') {
+                return 'Made decision';
+
+            } else {
+                return '';
+            }
+        }
+    
+        ,
+        update_graph: function(){
+            app_timeline.update_graph();
+            app_timeline.draw_graph_import();
+            app_timeline.draw_graph_decision();
+        }
+
+               
+
+    },
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: this.vpp_data,
+            methods: this.vpp_methods
+        });
+    },
+
+    set_timeline: function(data) {
+        var dates = Object.keys(data);
+        global_data = data;
+
+        // sort and desc
+        dates.sort();
+        dates.reverse();
+        new_data = {}
+        a=0
+        for (i=0; i<dates.length; i++)
+        {
+            date = dates[i]
+            if (new Date(date).getFullYear()==2023)
+            {
+                new_data[date] = data[date]
+                
+            }
+            else{
+                break;
+            }
+        }
+        data = new_data;
+        var dates = Object.keys(data);
+
+        // sort and desc
+        dates.sort();
+        dates.reverse();
+        var timeline = [];
+        var graph_timeline = {};
+        
+        // fill the timeline to follow the format of adminlte
+
+        for (let date=0; date < dates.length; date++){
+            console.log("yes");
+
+            date_time_obj = new Date (dates[date]);
+            date_time_obj.getMonth();
+            monthNumber = new Date(dates[date]).getMonth()
+            var date_ = new Date();
+            date_.setMonth(monthNumber ); // Subtract 1 since months are zero-based
+
+            var monthName = date_.toLocaleString('default', { month: 'long' });
+            new_key = monthName + ' ' +String( new Date(dates[date]).getFullYear());
+
+            if (!(new_key in graph_timeline))
+            { 
+                values_ = Object.keys(srv_screener.ss['graphical_import_data']);
+                values_ = values_.concat(Object.keys(srv_screener.ss['graphical_decision_data']));
+                new_dict_ = {}
+                for (i=0;  i<values_.length; i++){
+
+                   new_dict_[values_[i]] = 0;
+                }
+
+                graph_timeline[new_key] = new_dict_;
+
+                
+            }
+            created_list = Object.keys(data[dates[date]]['created']);
+            if (created_list.length >= 1)
+            {
+                for (i =0; i<created_list.length; i++)
+                {
+                    if (created_list[i] in graph_timeline[new_key]){
+                        created_count = graph_timeline[new_key][created_list[i]];
+                        graph_timeline[new_key][created_list[i]] = created_count + data[dates[date]]['created'][created_list[i]].length;
+                    }
+                }
+            }
+            decision_list = Object.keys(data[dates[date]]['decision']);
+            if (decision_list.length >= 1)
+            {
+
+                for (i =0; i<decision_list.length; i++)
+                {  
+                    if(decision_list[i] in  graph_timeline[new_key]){ 
+                        created_count = graph_timeline[new_key][decision_list[i]];
+                        graph_timeline[new_key][decision_list[i]] = created_count + data[dates[date]]['decision'][decision_list[i]].length;
+                    }
+                }
+            }
+           
+        }
+        for (let i = 0; i < dates.length; i++) {
+            const date = dates[i];
+            
+            // add this date
+            timeline.push({
+                date: date,
+                type: 'date'
+            });
+            
+
+            // add the events
+            for (const evt in data[date]['created']) {
+                if (Object.hasOwnProperty.call(data[date]['created'], evt)) {
+                    // get the pids of this event
+                    const pids = data[date]['created'][evt];
+                    
+                    timeline.push({
+                        date: date,
+                        type: 'event',
+                        cate: 'created',
+                        event: evt,
+                        pids: pids
+                    });
+                }
+            }
+
+            for (const evt in data[date]['decision']) {
+                if (Object.hasOwnProperty.call(data[date]['decision'], evt)) {
+                    // get the pids of this event
+                    const pids = data[date]['decision'][evt];
+                    
+                    timeline.push({
+                        date: date,
+                        type: 'event',
+                        cate: 'decision',
+                        event: evt,
+                        pids: pids
+                    });
+                }
+            }
+        }
+        console.log(graph_timeline);
+        // set 
+        this.vpp.$data.dates = dates;
+        this.vpp.$data.timeline = timeline;
+        this.vpp.$data.graph_timeline = graph_timeline;
+        ag = graph_timeline;
+
+    },
+
+    
+    draw_graph_decision: function(data){
+        var dom = document.getElementById('chart-container-decision');
+            var myChart = echarts.init(dom, null, {
+            renderer: 'canvas',
+            useDirtyRect: false
+            });
+            var app = {};
+
+            var option;
+
+
+
+            var x_axis = Object.keys(ag);
+            decision_data = Object.keys(srv_screener.ss['graphical_decision_data']);
+            source_list = []
+            decision_list = ['decision']
+            series_data = []
+            for(i=0; i< decision_data.length; i++){
+                decision_record = decision_data[i];
+                decision_list.push(srv_screener.get_graphical_decision_ss(decision_record).name);
+                series_data.push({
+                    type: "bar"
+                })
+            }
+            source_list.push(decision_list)
+
+            for (const [key, value] of Object.entries(ag)) {
+                source_data = [key]
+                for(const [nested_key, nested_value] of Object.entries(value)){
+                    if (decision_data.includes(nested_key)){
+                    source_data.push(nested_value)
+                }
+
+                }
+                source_list.push(source_data)
+            }
+
+
+            option = {
+            legend: {},
+            tooltip: {},
+            dataset: {
+                source: source_list
+            },
+            xAxis: { type: 'category' },
+            yAxis: {},
+            // Declare several bar series, each will be mapped
+            // to a column of dataset.source by default.
+            series: series_data
+            };
+
+
+            if (option && typeof option === 'object') {
+            myChart.setOption(option);
+            }
+
+            window.addEventListener('resize', myChart.resize);
+
+
+
+    },
+
+
+    draw_graph_import: function(data){
+        var dom = document.getElementById('chart-container-import');
+            var myChart = echarts.init(dom, null, {
+            renderer: 'canvas',
+            useDirtyRect: false
+            });
+            var app = {};
+
+            var option;
+
+
+
+            var x_axis = Object.keys(ag);
+            decision_data = Object.keys(srv_screener.ss['graphical_import_data']);
+            source_list = []
+            decision_list = ['decision']
+            series_data = []
+            for(i=0; i< decision_data.length; i++){
+                decision_record = decision_data[i];
+                decision_list.push(srv_screener.get_graphical_import_ss(decision_record).name);
+                series_data.push({
+                    type: "bar"
+                })
+            }
+            source_list.push(decision_list)
+
+            for (const [key, value] of Object.entries(ag)) {
+                source_data = [key]
+                for(const [nested_key, nested_value] of Object.entries(value)){
+                    source_data.push(nested_value)
+
+                }
+                source_list.push(source_data)
+            }
+
+
+            option = {
+            legend: {},
+            tooltip: {},
+            dataset: {
+                source: source_list
+            },
+            xAxis: { type: 'category' },
+            yAxis: {},
+            // Declare several bar series, each will be mapped
+            // to a column of dataset.source by default.
+            series: series_data
+            };
+
+
+            if (option && typeof option === 'object') {
+            myChart.setOption(option);
+            }
+
+            window.addEventListener('resize', myChart.resize);
+
+
+
+    },
+
+    update_graph: function(){
+
+
+        var data = global_data;
+        var dates = Object.keys(data);
+
+
+        // sort and desc
+        dates.sort();
+        dates.reverse();
+        new_data = {}
+        a=0;
+        var year_filter = parseInt( document.getElementById('datepicker').value)
+        var month_selected = $('#month-selected').find(":selected").text();
+        month_selected = month_selected.trim();
+
+        if( year_filter && $('#month-selected').find(":selected").val()){
+            var daysInMonth = new Date(year_filter, moment().month(month_selected).format("M") , 0).getDate();
+            var month_number = $('#month-selected').find(":selected").val()
+            for (i=0; i<dates.length; i++)
+            {
+                date = dates[i]
+                if (new Date(date).getFullYear()==year_filter && new Date(date).getMonth()==month_number)
+                {
+                    new_data[date] = data[date] 
+                }
+                else{
+                    continue;
+                }
+            }
+           
+            var month_data = new_data;
+            var month_dates = Object.keys(month_data);
+            month_dates.sort();
+            // month_dates.reverse();
+
+            week_dict={};
+            week_index = 1;
+            weekly_data = {};
+            for(day=1; day<=daysInMonth;){
+                start_day = new Date(year_filter, moment().month(month_selected).format("M") - 1, day);
+                week_lower_limit = [year_filter, parseInt(month_number)+1, day].join('-');
+                days_to_add = Math.abs(start_day.getDay() -7)
+                if( (start_day.getDate()+ days_to_add) >=daysInMonth){
+                    week_upper_limit = [year_filter, parseInt(month_number)+1, daysInMonth].join('-');
+                    week_key =   'W'+String(week_index)+'['+week_lower_limit+' - '+week_upper_limit+']'
+                    week_dict[week_key] = [week_lower_limit, week_upper_limit];
+                    break;
+
+                }
+                week_upper_limit = [year_filter, parseInt(month_number)+1, start_day.getDate()+ days_to_add].join('-');
+
+                week_key = 'W'+String(week_index)+'['+week_lower_limit+' _ '+week_upper_limit+']'
+                week_dict[week_key] = [week_lower_limit, week_upper_limit];
+
+                day = new Date([year_filter, parseInt(month_number)+1, start_day.getDate()+ days_to_add+1].join('-')).getDate();
+                week_index = week_index +1;
+            }
+
+            values_ = Object.keys(srv_screener.ss['graphical_import_data']);
+            values_ = values_.concat(Object.keys(srv_screener.ss['graphical_decision_data']));
+
+            for (const [key, value] of Object.entries(week_dict)) {
+                
+                new_dict_ = {}
+                for (i=0;  i<values_.length; i++){
+
+                     new_dict_[values_[i]] = 0;
+                }
+
+                weekly_data[key] = new_dict_;  
+            }
+
+            for (const [key, value] of Object.entries(month_data)) {
+                new_dict_ = {}
+                created_list =Object.keys(month_data[key]['created']);
+                if (created_list.length >= 1)
+                {
+                    for (i =0; i<created_list.length; i++){
+                        for (const [week_key, week_value] of Object.entries(week_dict))
+                        {
+                            if( new Date(key)>= new Date(week_value[0]) && new Date(key)<=new Date(week_value[1]))
+                            {
+                                if (created_list[i] in weekly_data[week_key]){
+                                    created_count = weekly_data[week_key][created_list[i]];
+                                    weekly_data[week_key][created_list[i]] = created_count + month_data[key]['created'][created_list[i]].length;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                month_data[key]['decision']
+                decision_list = Object.keys(month_data[key]['decision']);
+                if (decision_list.length >= 1)
+                {
+                    for (i =0; i<decision_list.length; i++){
+                        for (const [week_key, week_value] of Object.entries(week_dict))
+                        {
+                            if( new Date(key)>= new Date(week_value[0]) && new Date(key)<=new Date(week_value[1]))
+                            {
+                                if (decision_list[i] in weekly_data[week_key]){
+                                    created_count = weekly_data[week_key][decision_list[i]];
+                                    weekly_data[week_key][decision_list[i]] = created_count + month_data[key]['decision'][decision_list[i]].length;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+           
+                
+            ag = weekly_data;
+            return;
+          
+        }
+
+        for (i=0; i<dates.length; i++)
+        {
+            date = dates[i]
+            if (new Date(date).getFullYear()==year_filter)
+            {
+                new_data[date] = data[date]
+                
+            }
+            else{
+                continue;
+            }
+        }
+        data = new_data;
+        var dates = Object.keys(data);
+
+        // sort and desc
+        dates.sort();
+        dates.reverse();
+        var timeline = [];
+        var graph_timeline = {};
+
+        // fill the timeline to follow the format of adminlte
+
+
+
+        for (let date=0; date < dates.length; date++){
+            console.log("yes");
+
+            date_time_obj = new Date (dates[date]);
+            date_time_obj.getMonth();
+            monthNumber = new Date(dates[date]).getMonth()
+            var date_ = new Date();
+            date_.setMonth(monthNumber ); // Subtract 1 since months are zero-based
+
+            var monthName = date_.toLocaleString('default', { month: 'long' });
+            new_key = monthName + ' ' +String( new Date(dates[date]).getFullYear());
+
+            if (!(new_key in graph_timeline))
+            { 
+                values_ = Object.keys(srv_screener.ss['graphical_import_data']);
+                values_ = values_.concat(Object.keys(srv_screener.ss['graphical_decision_data']));
+                new_dict_ = {}
+                for (i=0;  i<values_.length; i++){
+
+                new_dict_[values_[i]] = 0;
+                }
+
+                graph_timeline[new_key] = new_dict_;
+
+                
+            }
+            created_list = Object.keys(data[dates[date]]['created']);
+            if (created_list.length >= 1)
+            {
+                for (i =0; i<created_list.length; i++)
+                {
+                    if (created_list[i] in graph_timeline[new_key]){
+                        created_count = graph_timeline[new_key][created_list[i]];
+                        graph_timeline[new_key][created_list[i]] = created_count + data[dates[date]]['created'][created_list[i]].length;
+                    }
+                }
+            }
+            decision_list = Object.keys(data[dates[date]]['decision']);
+            if (decision_list.length >= 1)
+            {
+
+                for (i =0; i<decision_list.length; i++)
+                {  
+                    if(decision_list[i] in  graph_timeline[new_key]){ 
+                        created_count = graph_timeline[new_key][decision_list[i]];
+                        graph_timeline[new_key][decision_list[i]] = created_count + data[dates[date]]['decision'][decision_list[i]].length;
+                    }
+                }
+            }
+        
+            }
+            ag = graph_timeline;
+            
+
+        },
+
+}
+
+var jarvis = {
+
+    project: [[ project_json_str|safe ]],
+
+
+
+    init: function () {
+    // bind resize event
+    this.bind_resize_event();
+
+    // init the app
+    app_timeline.init();
+
+    $.ajax({
+        url: "[[ url_for('screener.get_timeline') ]]",
+        type: 'get',
+        dataType: 'json',
+        data: { 
+            rnd: Math.random() 
+        },
+        success: function(data)  {
+            console.log(data);
+            app_timeline.set_timeline(data);
+            app_timeline.draw_graph_decision();
+            app_timeline.draw_graph_import();
+        },
+        error: function(data) {
+            toast('System error when getting timeline data, please try later.', 'error');
+        }
+    });
+},
+
+
+    toast: function(msg, type) {
+        toast(msg, type);
+    },
+
+    prompt: function(text, value) {
+        return window.prompt(text, value);
+    },
+
+    confirm: function(text) {
+        return window.confirm(text);
+    },
+
+    bind_resize_event: function() {
+        $(window).on('resize', function(){
+            // pan_ocpapers.resize();
+        });
+    }
+    
+    
+};
+
+$(document).ready(function () {
+
+    let ag={};
+    let global_data ;
+    document.getElementById('datepicker').value = new Date().getFullYear()  
+    jarvis.init();
+
+ 
+    
+});
+</script>
+{% endblock %}

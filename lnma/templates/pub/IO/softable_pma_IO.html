@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
+<title>Summary of Findings: PMA for IO</title>
+
+<link rel="icon" href="/static/img/favicon.png" type="image/png">
+<!-- <script src="https://kit.fontawesome.com/cb45cc91b0.js" crossorigin="anonymous"></script> -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+
+
+<style>
+{% include 'css/box.css' %}
+html, body {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+body {
+    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+a {
+    color: #333333;
+    text-decoration: none;
+}
+#wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+#start-screen {
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#ss-msg {
+    width: 100%;
+    padding: 10px 0;
+    text-align: center;
+}
+
+/* for this page */
+#app_softpma {
+    width: 100%;
+    height: 100%;
+}
+#vw_oclist {
+    width: 300px;
+    padding: 0 5px;
+    height: 100%;
+}
+#vw_oclist_aespanel {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+#tb_sofpma {
+    width: calc(100% - 300px);
+    padding: 0 5px;
+    height: 100%;
+}
+#vw_oclist_plotpanel {
+    height: 100%;
+    overflow-y: auto;
+}
+.oc-name {
+    width:     180px;
+    min-width: 180px;
+    cursor: pointer;
+    padding: 2px 0;
+}
+.oc-type {
+    width: 30px;
+    min-width: 30px;
+    text-align: center;
+    cursor: pointer;
+    padding: 2px 0;
+}
+.oc-type:hover {
+    background-color: #cccccc;
+    font-weight: bold;
+}
+.oc-type-selected {
+    border: 1px dotted #555555;
+    font-weight: bold;
+}
+.oc-cate {
+    flex-direction: column;
+}
+.oc-cate-info {
+    width: 100%;
+    border-bottom: 1px solid transparent;
+}
+.oc-cate-info:hover {
+    border-bottom: 1px solid #555555;
+}
+.oc-cate-info .oc-name {
+    font-weight: bold;
+}
+.oc-cate-info .oc-type {
+    font-weight: bold;
+}
+.oc-items {
+    width: 100%;
+    padding-left: 20px;
+}
+.oc-items-hide {
+    display: none;
+}
+.oc-item {
+    width: 100%;
+    border-left: 1px solid #aaaaaa;
+}
+.oc-item-info {
+    width: calc(100% - 20px);
+    border-bottom: 1px solid transparent;
+}
+.oc-item-info:hover {
+    background-color: #efefef;
+    border-bottom: 1px solid #cccccc;
+}
+.oc-item-info .oc-name {
+    width:       150px;
+    min-width:   150px;
+    padding-left: 10px;
+}
+.oc-plot-img {
+    width: 100%;
+}
+.oc-plot-tab {
+    padding: 4px 15px;
+    border: 0;
+    color: #999999;
+    border-bottom: 1px solid #999999;
+    cursor: pointer;
+}
+.oc-plot-tab:hover {
+    color: #555555;
+    border-bottom: 1px solid #555555;
+}
+.oc-plot-tab-selected {
+    color: #000000;
+    font-weight: bold;
+    border-bottom: 1px solid #000000;
+}
+.oc-plot-tab-page {
+    display: none;
+}
+.oc-plot-tab-page-selected {
+    display: block;
+}
+
+/* for the SoF table */
+.sof-table {
+    width: 100%;
+}
+.sof-table th {
+    text-align: center;
+    background: whitesmoke;
+    padding: 5px 0;
+}
+.sof-table td {
+    text-align: center;
+    line-height: 1.45em;
+    padding: 3px 0;
+    border-bottom: 1px solid #e6e6e6;
+    border-right: 1px solid #e6e6e6;
+    cursor: default;
+}
+.sof-table .col-ae-name {
+    width: 150px;
+    max-width: 180px;
+}
+.sof-table .col-ta-left {
+    text-align: left !important;
+    padding-left: 10px;
+}
+.sof-table .col-flipable {
+    cursor: pointer;
+}
+.sof-table .col-flipable:hover {
+    background: whitesmoke;
+}
+.cie-bene-4 { background: rgb(55, 86, 35); color: white; }
+.cie-bene-3 { background: rgb(169, 208, 142); color: black; }
+.cie-bene-2 { background: rgb(226, 239, 218); color: black; }
+.cie-bene-1 { background: rgb(255, 242, 204); color: black; }
+.cie-harm-4 { background: rgb(150, 0, 0); color: white; }
+.cie-harm-3 { background: rgb(255, 103, 91); color: black; }
+.cie-harm-2 { background: rgb(255, 199, 193); color: black; }
+.cie-harm-1 { background: rgb(255, 242, 204); color: black; }
+.cie-nner-4 { background: rgb(66, 66, 66); color: rgb(255, 255, 255); }
+.cie-nner-3 { background: rgb(128, 128, 128); color: rgb(255, 255, 255); }
+.cie-nner-2 { background: rgb(191, 191, 191); color: black; }
+.cie-nner-1 { background: rgb(255, 242, 204); color: black; }
+
+
+.sfilter {
+    margin-right: 15px;
+}
+.sfilter-name {
+    font-size: 1.1em;
+    padding: 2px 0;
+}
+.sfilter-select {
+    width: 100%;
+}
+</style>
+</head>
+<body>
+<div id="start-screen">
+    <h1>
+        <i class="fa fa-table"></i>
+        Summary of Findings: Pairwise Meta-Analysis
+    </h1>
+    <div id="ss-msg">Loading data and initializing ... <i class="fas fa-spinner fa-pulse"></i></div>
+</div>
+
+<div id="wrapper">
+
+<div id="vw_studyfilter" class="d-flex fx-row">
+    <div v-for="dropdown, dpd_idx in dropdowns"
+        class="sfilter d-flex fx-col mr-3">
+        <div class="sfilter-name">
+            {{ dropdown.display_name }}
+        </div>
+        <div>
+            <select class="sfilter-select"
+                v-bind:value="dropdown.value"
+                v-bind:disabled="is_filter_disabled(dpd_idx)"
+                v-on:change="on_filter_value_change($event, dpd_idx)">
+                <option v-for="opt in dropdown.options" 
+                    v-bind:value="opt.value">
+                    {{ opt.name }}
+                </option>
+            </select>
+        </div>
+    </div>
+
+    <div class="d-flex fx-col mr-3">
+        <div class="sfilter-name">
+            Number of studies
+        </div>
+        <div style="height: 20px; line-height: 20px;">
+            {{ n_papers }}
+        </div>
+    </div>
+</div>
+
+<div id="app_softpma" class="d-flex fx-row">
+
+    <div id="vw_oclist">
+        <div class="box" style="height: 100%;">
+            <div class="box-header">
+                <h4>
+                    <i class="fa fa-search"></i>
+                    Outcome List | 
+                </h4>
+                <!-- <div>
+                    <input type="text" class="box-input" style="background-color: transparent;">
+                </div> -->
+                <div>
+                    <button v-on:click="toggle_all_cates(false)">
+                        <i class="fa fa-expand-alt"></i>
+                        Expand / All
+                    </button>
+                    <button v-on:click="toggle_all_cates(true)">
+                        <i class="fa fa-compress-alt"></i>
+                        Collapse All
+                    </button>
+                </div>
+            </div>
+            <div class="box-body" style="height: calc(100% - 70px);">
+                
+                <div class="d-flex fx-col">
+                    <div class="d-flex fx-row ">
+                        <div class="oc-name" style="font-weight: bold;">
+                            <select v-model="group"
+                                v-on:change="update_oclist()">
+                                <option value="treatment">Treatment Related AEs</option>
+                                <option value="immune">Immune Related AEs</option>
+                            </select>
+                        </div>
+                        <div style="font-weight: bold; width: 90px; text-align: center; border-bottom: 1px solid #555555;">
+                            Grade
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="oc-cate d-flex fx-col">
+                    <div class="oc-cate-info d-flex fx-row">
+                        <div class="oc-name" style="font-weight: bold;">
+                            {{ rs_stat.cnt_aes }} Outcomes
+                        </div>
+                        <div class="oc-type" title="All Grades">
+                            ALL
+                        </div>
+                        <div class="oc-type" title="Grade 3 or Higher">
+                            3+
+                        </div>
+                        <div class="oc-type" title="Grade 5 Only">
+                            5
+                        </div>
+                    </div>
+                </div>
+    
+                <div id="vw_oclist_aespanel">
+                    <div class="oc-cate d-flex fx-col"
+                        v-for="r in rs">
+                        <div class="oc-cate-info d-flex fx-row"
+                            v-on:click="toggle_cate(r.oc_cate)">
+                            <div class="oc-name">
+                                <i class="far fa-folder" v-if="r.is_close"></i>
+                                <i class="far fa-folder-open" v-else></i>
+                                {{ r.oc_cate }}
+                            </div>
+                        </div>
+                        <div class="oc-items d-flex fx-col"
+                            v-bind:class="{'oc-items-hide': r.is_close}">
+                            <div class="oc-item"
+                                v-for="ae in r.aes">
+                                <div class="oc-item-info d-flex fx-row">
+                                    <div class="oc-name">
+                                        <i class="far fa-clipboard"></i>
+                                        {{ ae.oc_name }}
+                                    </div>
+
+                                    <div class="oc-type"
+                                        v-if="ae.cnt_ga<1"
+                                        title="Not enough records">
+                                        -
+                                    </div>
+                                    <div class="oc-type"
+                                        v-else
+                                        v-bind:class="get_bg_color_class_by_oc(ae.oc_abbr, 'GA')"
+                                        v-bind:title="ae.cnt_ga + ' studies'"
+                                        v-bind:oc_abbr="ae.oc_abbr"
+                                        v-bind:oc_group="ae.oc_group"
+                                        v-bind:oc_cate="r.oc_cate"
+                                        v-bind:oc_name="ae.oc_name"
+                                        v-bind:ae_grade="'GA'"
+                                        v-on:click="toggle_oc">
+                                        {{ ae.cnt_ga }}
+                                    </div>
+
+                                    <div class="oc-type"
+                                        v-if="ae.cnt_g3h<1">
+                                        -
+                                    </div>
+                                    <div class="oc-type"
+                                        v-else
+                                        v-bind:class="get_bg_color_class_by_oc(ae.oc_abbr, 'G3H')"
+                                        v-bind:title="ae.cnt_g3h + ' studies'"
+                                        v-bind:oc_abbr="ae.oc_abbr"
+                                        v-bind:oc_group="ae.oc_group"
+                                        v-bind:oc_cate="r.oc_cate"
+                                        v-bind:oc_name="ae.oc_name"
+                                        v-bind:ae_grade="'G3H'"
+                                        v-on:click="toggle_oc">
+                                        {{ ae.cnt_g3h }}
+                                    </div>
+
+                                    <div class="oc-type"
+                                        v-if="ae.cnt_g5n<1">
+                                        -
+                                    </div>
+                                    <div class="oc-type"
+                                        v-else
+                                        v-bind:class="get_bg_color_class_by_oc(ae.oc_abbr, 'G5N')"
+                                        v-bind:title="ae.cnt_g5n + ' studies'"
+                                        v-bind:oc_abbr="ae.oc_abbr"
+                                        v-bind:oc_group="ae.oc_group"
+                                        v-bind:oc_cate="r.oc_cate"
+                                        v-bind:oc_name="ae.oc_name"
+                                        v-bind:ae_grade="'G5N'"
+                                        v-on:click="toggle_oc">
+                                        {{ ae.cnt_g5n }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    
+                </div>
+                
+            </div>
+    
+            <div class="box-footer">
+    
+            </div>
+        </div>
+    </div>
+
+    <div id="tb_sofpma">
+        <div class="box" style="height: 100%;">
+            <div class="box-header">
+                <div class="d-flex fx-row">
+
+
+                    <button class="btn"
+                        v-on:click="remove_all_ocs();">
+                        <i class="far fa-trash-alt"></i>
+                        Remove
+                    </button>
+                </div>
+                <div class="d-flex fx-row">
+                    <div class="box-menu-group d-flex fx-row">
+                        <div>
+                            <i class="fa fa-cog"></i>
+                            Measure of effect: 
+                        </div>
+                        <div>
+                            <select v-model='measure'>
+                                <option value="OR">Odds Ratio (OR)</option>
+                                <option value="RR">Risk Ratio (RR)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="box-menu-group d-flex fx-row">
+                        <div>
+                            <i class="fa fa-cog"></i>
+                            Display risks per: 
+                        </div>
+                        <div>
+                            <select v-model="baseline">
+                                <option value="100">100</option>
+                                <option value="1000">1000</option>
+                                <option value="10000">10,000</option>
+                                <option value="100000">100,000</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="box-menu-group d-flex fx-row">
+                        <div style="margin-right: 15px;">
+                            <span class="cie-bene-2">
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                            </span>&nbsp;
+                            Benefit
+                        </div>
+                        <div style="margin-right: 15px;">
+                            <span class="cie-harm-2">
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                            </span>&nbsp;
+                            Harm
+                        </div>
+                    </div>
+
+                    <!-- <div class="box-menu-group d-flex fx-row">
+                        <div>
+                            <i class="fa fa-cog"></i>
+                            Assumed risk: 
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="radio" checked value="true" id="assumed_risk_internal"
+                                v-model="use_internal_baseline">
+                            <label for="vw_ocplots_input_sm_or">Internal</label>
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="radio" value="false" id="assumed_risk_external"
+                                v-model="use_internal_baseline">
+                            <label for="vw_ocplots_input_sm_rr">External</label>
+                        </div>
+                    </div> -->
+                </div>
+            </div>
+
+            <div class="box-body" style="height: 100%; overflow-y: auto;">
+
+                <table class="sof-table">
+                    <tr>
+                        <th class="col-ae-name" rowspan="2">Outcome</th>
+                        <th rowspan="2">Relative</th>
+                        <th colspan="3">Absolute</th>
+                        <!-- <th rowspan="2">Certainty in <br>Evidence</th> -->
+                        <!-- <th rowspan="2">Importance</th> -->
+                    </tr>
+                    <tr>
+                        <th>Intervention</th>
+                        <th>Control</th>
+                        <th>Risk Difference</th>
+                    </tr>
+                    <tbody v-for="grade in ['GA', 'G3H', 'G5N']">
+                        <tr>
+                            <th class="col-ta-left" colspan="7">
+                                {{ get_grade_label(grade) }}
+                            </th>
+                        </tr>
+
+                        <tr v-for="r, oc_abbr in tbrs[grade]">
+                            <td class="col-ae-name">
+                                {{ r.name }}
+                            </td>
+
+                            <td v-if="r.is_show['sm']" class="col-flipable"
+                                v-bind:class="get_bg_color_class(r)"
+                                v-on:click="flip_cell(grade, r, 'sm')">
+                                {{ measure }} {{ _round2(r.ae.result[measure].random.model.sm) }}<br>
+                                ({{ _round2(r.ae.result[measure].random.model.lower) }} to {{ _round2(r.ae.result[measure].random.model.upper) }})
+                            </td>
+                            <td v-else class="col-ta-left col-flipable"
+                                v-on:click="flip_cell(grade, r, 'sm')">
+                                <b>{{ r.ae.stus.length }}</b> Studies<br>
+                                Events: <b>{{ r.ae.Et }}</b><br>
+                                Participants: <b>{{ r.ae.Nt }}</b>
+                            </td>
+                            
+                            <td>
+                                {{ get_CIR(r).toFixed(0) }} per {{ baseline }}
+                            </td>
+                            <td>
+                                {{ get_ACR(r).toFixed(0) }} per {{ baseline }}
+                            </td>
+                            <td v-if="r.is_show['ARD']" class="col-flipable"
+                                v-on:click="flip_cell(grade, r, 'ARD')">
+                                {{ get_ARD_txt(r) }} per {{ baseline }}
+                            </td>
+                            <td v-else class="col-ta-left col-flipable"
+                                v-on:click="flip_cell(grade, r, 'ARD')">
+                                CI: {{ get_ARD_txt(r, 'lower') }} to 
+                                    {{ get_ARD_txt(r, 'upper') }}<br>
+                                RD(%): {{ get_ARDp_txt(r) }}<br>
+                                ({{ get_ARDp_txt(r, 'lower')}} to {{ get_ARDp_txt(r, 'upper')}})
+                            </td>
+                            <!-- <td>
+                                &nbsp;
+                            </td>
+                            <td>
+                                &nbsp;
+                            </td> -->
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/alasql/0.5.5/alasql.min.js"></script>
+
+<!-- load the scripts for meta analysis -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.1.1/math.min.js"></script>
+<script src="https://ohnlp.github.io/Meta.js/dist/metajs-0.0.3.js"></script>
+<script>
+var isIE = /*@cc_on!@*/false || !!document.documentMode;
+if (isIE) {
+    document.getElementById('ss-msg').innerHTML = 'The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.';
+}
+</script>
+
+<script>
+
+{% include 'js/vw_studyfilter.js' %}
+
+
+var app_softpma = {
+    vpp: null,
+    vpp_id: '#app_softpma',
+    select_mode: 'checkbox', // radio, checkbox
+    pids: [],
+
+    init: function(data) {
+        // bind local data
+        this.data = data;
+
+        // init local db
+        // alasql('create table aes');
+        // alasql('select * into aes from ?', [this.data.rs])
+
+        this.rs = {},
+        this.rs_stat = {
+            cnt_cates: 0,
+            cnt_aes: 0,
+        };
+        
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                group: 'treatment',
+                rs: this.rs,
+                select_mode: this.select_mode,
+                rs_stat: this.rs_stat,
+
+                // the table part
+                measure: 'OR',
+                baseline: 1000,
+                external_risk_calculated: 10,
+                use_internal_baseline: true,
+                tbrs: {
+                    GA: {},
+                    G3H: {},
+                    G5N: {}
+                }
+            },
+            methods: {
+                toggle_oc: function(event) {
+                    var oc_abbr = event.target.getAttribute('oc_abbr');
+                    var oc_group = event.target.getAttribute('oc_group');
+                    var oc_cate = event.target.getAttribute('oc_cate');
+                    var oc_name = event.target.getAttribute('oc_name');
+                    var ae_grade = event.target.getAttribute('ae_grade');
+
+                    // add effect
+                    if (this.select_mode == 'checkbox') {
+                        $(event.target).toggleClass('oc-type-selected');
+                    } else {
+                        $('.oc-type').removeClass('oc-type-selected');
+                        $(event.target).addClass('oc-type-selected');
+                    }
+
+                    // call the worker to update everything related
+                    // jarvis will do this task accordingly
+                    jarvis.toggle_oc(oc_abbr, oc_group, oc_cate, oc_name, ae_grade);
+                },
+
+                remove_all_ocs: function() {
+                    for (const ae_grade in this.tbrs) {
+                        if (Object.hasOwnProperty.call(this.tbrs, ae_grade)) {
+                            this.tbrs[ae_grade] = {};
+                        }
+                    }
+                    
+                    this.$forceUpdate();
+
+                    // update the UI
+                    $('.oc-type-selected').removeClass('oc-type-selected');
+                },
+
+                get_grade_label: function(g) {
+                    return jarvis.texts[g];
+                },
+
+                toggle_cate: function(cate) {
+                    this.rs[cate].is_close = !this.rs[cate].is_close;
+                },
+
+                toggle_all_cates: function(flag) {
+                    for (var key in this.rs) {
+                        this.rs[key].is_close = flag;
+                    }
+                },
+
+                clear: function() {
+                    $('.oc-type').removeClass('oc-type-selected');
+                    jarvis.clear_all_ae();
+                },
+
+                update_oclist: function() {
+                    app_softpma.update();
+
+                    this.clear();
+                },
+
+                // for table
+                get_ACR: function(r) {
+                    if (this.use_internal_baseline) {
+                        return r.ae.Ec / r.ae.Nc * this.baseline;
+                    } else {
+                        return external_risk_calculated;
+                    }
+                },
+
+                get_obj: function(r, obj, fixed_or_random) {
+                    // get the obj of this record
+                    // obj could be
+                    // sm, lower, upper
+                    if (typeof(obj)=='undefined') {
+                        obj = 'sm';
+                    }
+                    if (typeof(fixed_or_random)=='undefined') {
+                        fixed_or_random = 'random';
+                    }
+                    return r.ae.result[this.measure][fixed_or_random].model[obj];
+                },
+
+                get_CIR: function(r, obj) {
+                    // get the obj of this CIR
+                    // obj could be
+                    // sm, lower, upper
+                    // calculate the CIR based on measure
+                    if (this.measure == 'OR') {
+                        var a = this.get_ACR(r) / this.baseline * this.get_obj(r, obj);
+                        var b = 1 - this.get_ACR(r) / this.baseline;
+                        var c = a + b;
+                        var d = a / c;
+                        var e = d * this.baseline;
+                        return e;
+                    } else if (this.measure == 'RR') {
+                        var a = this.get_ACR(r) * this.get_obj(r, obj);
+                        return a;
+                    }
+                },
+
+                get_ARD: function(r, obj) {
+                    // get the obj of this CIR
+                    // obj could be
+                    // sm, lower, upper
+                    if (this.measure == 'OR') {
+                        var a = (1 - this.get_obj(r, obj)) * this.get_ACR(r) / this.baseline;
+                        var b = 1 - this.get_ACR(r) / this.baseline;
+                        var c = a + b;
+                        var d = a / c;
+                        var e = d * this.baseline;
+                        return e;
+                    } else if (this.measure == 'RR') {
+                        var a = this.get_ACR(r) * (1 - this.get_obj(r, obj));
+                        return a;
+                    }
+                },
+
+                get_ARD_txt: function(r, obj) {
+                    var ARD = this.get_ARD(r, obj);
+                    var txt = ' less';
+                    if (ARD < 0) {
+                        txt = ' more';
+                    }
+                    return Math.abs(ARD).toFixed(0) + txt;
+                },
+
+                get_ARDp_txt: function(r, obj) {
+                    var ARDp = 100 * this.get_ARD(r, obj) / this.baseline;
+                    var txt = ' less';
+                    if (ARDp < 0) {
+                        txt = ' more';
+                    }
+                    return Math.abs(ARDp).toFixed(1) + '%' + txt;
+                },
+
+                get_bg_color_class_by_oc: function(oc_abbr, grade) {
+                    var r = {
+                        ae: app_softpma.data.oc_dict[oc_abbr].results[grade]
+                    };
+                    return this.get_bg_color_class(r);
+                },
+
+                get_bg_color_class: function(r) {
+                    var fixed_or_random = 'random';
+                    var sm = r.ae.result[this.measure][fixed_or_random].model['sm'];
+                    var lower = r.ae.result[this.measure][fixed_or_random].model['lower'];
+                    var upper = r.ae.result[this.measure][fixed_or_random].model['upper'];
+                    var cls =  this.calc_bg_color_class(sm, lower, upper);
+                    console.log('* ae class:', cls);
+
+                    return cls;
+                },
+
+                calc_bg_color_class: function(sm, lower, upper) {
+                    var cie = 2;
+                    if (lower < 1 && upper > 1) {
+                        cie = 2;
+                    } else {
+                        cie = 3;
+                    }
+                    if (sm < 1) {
+                        return 'cie-bene-' + cie;
+                        // return '';
+                    } else if (sm > 1) {
+                        return 'cie-harm-' + cie;
+                    } else {
+                        return 'cie-nner-' + cie;
+                    }
+                },
+
+                get_grade_label: function(g) {
+                    return jarvis.texts[g];
+                },
+
+                _round2: function(v) {
+                    return (Math.round(v * 100) / 100).toFixed(2);
+                },
+
+                flip_cell: function(ae_grade, r, cell) {
+                    // first, find this ae in rs
+                    if (this.tbrs[ae_grade].hasOwnProperty(r.abbr)) {
+                        // flip this cell!
+                        this.tbrs[ae_grade][r.abbr].is_show[cell] = 
+                            !this.tbrs[ae_grade][r.abbr].is_show[cell];
+                    } else {
+                        // how can it be ???
+                    }
+                    this.$forceUpdate();
+                }
+            }
+        });
+
+        this.update([]);
+    },
+
+    get_pid_condition: function() {
+        var conditions = '';
+        // so first condition is the pid
+        if (this.pids.length == 0) {
+            conditions += 'pid is not null ';
+        } else {
+            var cond = this.pids.map(function(v) { return '"' + v + '"'}).join(',');
+            conditions += 'pid in (' + cond + ') ';
+        }
+
+        // second condition is the group
+        var group = this.vpp.$data.group;
+        conditions += '\n';
+        conditions += 'and oc_group = "'+group+'" ';
+
+        return conditions;
+    },
+
+    update: function(pids) {
+        // for update the group
+        if (typeof(pids) == 'undefined') {
+
+        } else {
+            // update the pid
+            this.pids = pids;
+        }
+        
+        var sql = 'select oc_cate, oc_name, oc_abbr, ' +
+            '  count(case when has_GA = true then pid else null end) as cnt_ga, ' +
+            '  count(case when has_G3H = true then pid else null end) as cnt_g3h, ' +
+            '  count(case when has_G5N = true then pid else null end) as cnt_g5n ' +
+            'from aes ' + 
+            'where ' +
+            this.get_pid_condition() + ' ' + 
+            'group by oc_cate, oc_name, oc_abbr ' + 
+            'order by oc_cate asc, oc_name asc';
+        console.log(sql);
+        // init the result
+        var raw_rs = alasql(sql);
+        var rs = {};
+        var rs_stat = {
+            cnt_cates: 0,
+            cnt_aes: 0,
+        };
+
+        // create the rs for display
+        for (var i = 0; i < raw_rs.length; i++) {
+            var r = raw_rs[i];
+            if (rs.hasOwnProperty(r.oc_cate)) {
+                //
+            } else {
+                rs[r.oc_cate] = {
+                    oc_cate: r.oc_cate,
+                    is_close: false,
+                    aes: []
+                }
+                rs_stat.cnt_cates += 1;
+            }
+            // put this ae into cate
+            rs[r.oc_cate]['aes'].push({
+                oc_name: r.oc_name,
+                oc_abbr: r.oc_abbr,
+                oc_group: this.vpp.$data.group,
+                cnt_ga: r.cnt_ga,
+                cnt_g3h: r.cnt_g3h,
+                cnt_g5n: r.cnt_g5n
+            });
+            rs_stat.cnt_aes += 1;
+        }
+        // bind results 
+        this.raw_rs = raw_rs;
+        this.rs = rs;
+        this.rs_stat = rs_stat;
+
+        // update vpp data
+        this.vpp.rs = this.rs;
+        this.vpp.rs_stat = this.rs_stat;
+
+        // update tips
+        $(document).tooltip({
+            position: {
+                my: "left top",
+                at: "right+5 top-5",
+                collision: "none"
+            }
+        });
+    },
+
+    toggle_oc: function(abbr, group, oc_cate, oc_name, ae_grade) {
+        // first, find this ae in rs
+        if (this.vpp.tbrs[ae_grade].hasOwnProperty(abbr)) {
+            // if exists, remove
+            delete this.vpp.tbrs[ae_grade][abbr];
+
+        } else {
+            // if not, add this oc of ae_grade
+            var ae = this.data.oc_dict[abbr]['results'][ae_grade];
+            if (ae.stus.length == 0) {
+                // this means no studies in this ae + grade 
+                return;
+            }
+            
+            // build the r for display
+            var r = {
+                // basic info for display
+                abbr: abbr,
+                group: group,
+                oc_cate: oc_cate,
+                name: oc_name,
+                // bind the original AE
+                ae: ae,
+                // for display setting
+                is_show: {
+                    // show sm / study info
+                    sm: true,
+                    // show ARD / ARD CI
+                    ARD: true
+                }
+            }
+
+            // add this to list
+            this.vpp.tbrs[ae_grade][abbr] = r;
+        }
+
+        // have to force update the view
+        this.vpp.$forceUpdate();
+    },
+
+    clear_all: function() {
+        for (var key in this.vpp.tbrs) {
+            if (this.vpp.tbrs.hasOwnProperty(key)) {
+                this.vpp.tbrs[key] = {};
+            }
+        }
+        this.vpp.$forceUpdate();
+    }
+};
+
+
+var jarvis = {
+
+    texts: {
+        "GA": "All Grade",
+        "G34": "Grade 3/4",
+        "G3H": "Grade 3 or higher",
+        "G5N": "Grade 5 only"
+    },
+
+    init: function() {
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+
+        console.log('* User is using IE:', isIE);
+        if (isIE) {
+            jarvis.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
+            return;
+        }
+
+        // OK, 
+        var prj = jarvis.get_url_paramter('prj');
+        prj = 'IO';
+
+        // get the src
+        var src = jarvis.get_url_paramter('src');
+        if (src == null || src == '') {
+            src = 'db';
+        }
+
+        var cq = jarvis.get_url_paramter('cq');
+        if (cq == '') {
+            cq = 'default';
+        }
+
+        // $.get(
+        //     '/pub/graphdata/'+prj+'/SOFTABLE_PMA.json',
+        //     {rnd: Math.random(), src: src, cq: cq},
+        //     function(data) {
+        //         app_softpma.init(data);
+
+        //         jarvis.ssmsg('Almost initialized.');
+        //         setTimeout('jarvis.ssclose();', 400);
+        //     }
+        // );
+
+        $.when(
+            $.get(
+                '/pub/graphdata/' + prj + '/ITABLE.json',
+                {rnd: Math.random(), src: src, cq: cq}
+            ),
+            $.get(
+                '/pub/graphdata/'+prj+'/SOFTABLE_PMA.json',
+                {rnd: Math.random(), src: src, cq: cq},
+            )
+        ).done(function(r1, r2) {
+            var data1 = r1[0];
+            var data2 = r2[0];
+
+            jarvis.data1 = data1;
+            jarvis.data2 = data2;
+
+            // init the table
+            console.log(data1);
+            console.log(data2);
+
+            // init the local db for the papers
+            alasql('create table papers');
+            alasql('select * into papers from ?', [data1.rs]);
+            
+            // init the local db for the outcome / AE records
+            alasql('create table aes');
+            alasql('select * into aes from ?', [data2.rs])
+
+            // init the filter with ITABLE data
+            vw_studyfilter.init(data1);
+
+            app_softpma.init(data2);
+
+            // ok, remove the 
+            jarvis.ssmsg('Almost initialized.');
+            setTimeout('jarvis.ssclose();', 400);
+        });
+
+        
+    },
+
+    update_plots_by_pmids: function(pmids) {
+        //vw_oclist.update(pmids);
+    },
+
+    get_url_paramter: function(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    },
+
+    toggle_oc: function(abbr, group, oc_cate, oc_name, ae_grade) {
+        console.log('* toggle_oc [' + abbr + ']' + group + ' | ' + oc_cate + ', ' + oc_name + ', ' + ae_grade);
+        app_softpma.toggle_oc(abbr, group, oc_cate, oc_name, ae_grade);
+    },
+
+    clear_all_ae: function() {
+        app_softpma.clear_all();
+    },
+
+    ssmsg: function(msg) {
+        $('#ss-msg').html(msg);
+    },
+
+    ssclose: function() {
+        $('#start-screen').hide();
+    }
+};
+
+$(document).ready(function() {
+    jarvis.init();
+})
+</script>
+</body>

@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
+<title>Summary of Findings: Network Meta-Analysis</title>
+
+<link rel="icon" href="/static/img/favicon.png" type="image/png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+{% include 'css/box.css' %}
+{% include 'css/start_screen.css' %}
+html, body {
+    width: 100%;
+    /* height: 100%; */
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+body {
+    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+a {
+    color: #333333;
+    text-decoration: none;
+}
+p {
+    margin-bottom: 0.2rem;
+}
+#wrapper {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+}
+
+/* for this page */
+#app_softnma {
+    width: 100%;
+    height: 100%;
+}
+
+/* for the simple oclist */
+
+#vw_simple_oclist {
+    width: 200px;
+    min-width: 200px;
+    padding: 0 5px;
+    height: 100%;
+}
+.ae-item {
+    display: flex;
+    align-items: center;
+    width: calc(100% - 10px);
+    height: 50px;
+    border: 1px solid #dddddd;
+    margin: 0 0 10px;
+    padding: 0 0 0 10px;
+    cursor: pointer;
+}
+.ae-item:hover {
+    background: whitesmoke;
+    font-weight: bold;
+}
+.ae-item-selected {
+    background: #ececec;
+    font-weight: bold;
+}
+
+/* for the NMA table */
+
+#tb_simple_sofnma {
+    width: 100%;
+}
+
+/* for the SoF table */
+.sof-table {
+    width: 100%;
+}
+.sof-table th {
+    text-align: center;
+    background: whitesmoke;
+    padding: 5px 0;
+}
+.sof-table td {
+    text-align: center;
+    line-height: 1.45em;
+    padding: 3px 0;
+    border-bottom: 1px solid #e6e6e6;
+    border-right: 1px solid #e6e6e6;
+}
+.sof-table .col-ae-name {
+    width: 150px;
+    max-width: 200px;
+    cursor: pointer;
+}
+.sof-table .col-ae-name:hover {
+    background: whitesmoke;
+}
+.sof-table .col-treat {
+    width: 100px;
+    max-width: 150px;
+}
+.sof-table .col-comarator {
+    background: #ffface;
+}
+.sof-table .col-ta-left {
+    text-align: left !important;
+    padding-left: 10px;
+}
+.sof-table .col-flipable {
+    cursor: pointer;
+}
+.sof-table .col-flipable:hover {
+    background: whitesmoke;
+}
+.cie-cell {
+    text-align: left;
+    padding: 1px 5px;
+    width: 48%;
+}
+.cie-cell td {
+    text-align: left;
+    padding: 1px 5px;
+}
+.cell-cell {
+    background: white;
+    cursor: pointer;
+}
+.cell-treat:hover {
+    /* background: #efefef; */
+}
+
+#tb_simple_sofnma_detail {
+    position: absolute;
+    margin: 10px auto;
+    padding: 10px;
+    width: 500px;
+    /* height: 400px; */
+    background: white;
+    border: 1px solid #9e9e9e;
+    box-shadow: 5px 5px 5px #c7c7c7;
+}
+
+.cie-bene-4 { background: rgb(55, 86, 35); color: white; }
+.cie-bene-3 { background: rgb(169, 208, 142); color: black; }
+.cie-bene-2 { background: rgb(226, 239, 218); color: black; }
+.cie-bene-1 { background: rgb(255, 242, 204); color: black; }
+.cie-harm-4 { background: rgb(150, 0, 0); color: white; }
+.cie-harm-3 { background: rgb(255, 103, 91); color: black; }
+.cie-harm-2 { background: rgb(255, 199, 193); color: black; }
+.cie-harm-1 { background: rgb(255, 242, 204); color: black; }
+.cie-nner-2 { background: rgb(191, 191, 191); color: black; }
+.cie-nner-1 { background: rgb(255, 242, 204); color: black; }
+
+.cie-risk_of_bias-0 { background: rgb(222, 222, 222);}
+.cie-inconsistency-0 { background: rgb(222, 222, 222);}
+.cie-incoherence-0 { background: rgb(222, 222, 222);}
+.cie-indirectness-0 { background: rgb(222, 222, 222);}
+.cie-imprecision-0 { background: rgb(222, 222, 222);}
+.cie-publication_bias-0 { background: rgb(222, 222, 222);}
+.cie-intransitivit-0 { background: rgb(222, 222, 222);}
+
+.cie-risk_of_bias-1 { background: rgb(255, 255, 255);}
+.cie-inconsistency-1 { background: rgb(255, 255, 255);}
+.cie-incoherence-1 { background: rgb(255, 255, 255);}
+.cie-indirectness-1 { background: rgb(255, 255, 255);}
+.cie-imprecision-1 { background: rgb(255, 255, 255);}
+.cie-publication_bias-1 { background: rgb(255, 255, 255);}
+.cie-intransitivit-1 { background: rgb(255, 255, 255);}
+
+.cie-risk_of_bias-2 { background: rgb(255, 220, 220);}
+.cie-inconsistency-2 { background: rgb(255, 220, 220);}
+.cie-incoherence-2 { background: rgb(255, 220, 220);}
+.cie-indirectness-2 { background: rgb(255, 220, 220);}
+.cie-imprecision-2 { background: rgb(255, 220, 220);}
+.cie-publication_bias-2 { background: rgb(255, 220, 220);}
+.cie-intransitivit-2 { background: rgb(255, 220, 220);}
+
+.cie-risk_of_bias-3 { background: rgb(255, 120, 120);}
+.cie-inconsistency-3 { background: rgb(255, 120, 120);}
+.cie-incoherence-3 { background: rgb(255, 120, 120);}
+.cie-indirectness-3 { background: rgb(255, 120, 120);}
+.cie-imprecision-3 { background: rgb(255, 120, 120);}
+.cie-publication_bias-3 { background: rgb(255, 120, 120);}
+.cie-intransitivit-3 { background: rgb(255, 120, 120);}
+
+.cie-risk_of_bias-4 { background: rgb(255, 120, 120);}
+.cie-inconsistency-4 { background: rgb(255, 120, 120);}
+.cie-incoherence-4 { background: rgb(255, 120, 120);}
+.cie-indirectness-4 { background: rgb(255, 120, 120);}
+.cie-imprecision-4 { background: rgb(255, 120, 120);}
+.cie-publication_bias-4 { background: rgb(255, 120, 120);}
+.cie-intransitivit-4 { background: rgb(255, 120, 120);}
+
+.legend-table td { padding: 5px 10px; font-size: 14px; }
+
+.dlg-sm h4 { margin: 5px 0; }
+.dlg-sm p { margin: 0; }
+.dlg-sm hr { border: 0; border-bottom: 1px solid #ececec; }
+
+.red { color: red; }
+.grey { color: grey; }
+</style>
+</head>
+<body>
+<div id="start-screen">
+    <h1>
+        <i class="fa fa-table"></i>
+        Summary of Findings: Network Meta-Analysis
+    </h1>
+    <div id="ss-msg">Loading data and initializing ...</div>
+</div>
+
+<div id="color_guide" style="display: none;" title="Color guide">
+    {% include 'pub/_shared/_table_color_guide_nma.html' %}
+</div>
+<!-- /div#legend -->
+
+<div id="wrapper">
+
+<div id="app_softnma" class="d-flex fx-row">
+
+    <div id="tb_simple_sofnma">
+        <div class="box" 
+            style="">
+            <div class="box-header">
+                
+                <div class="d-flex fx-row">
+
+                    <div class="box-menu-group d-flex fx-row">
+                        <div class="red">
+                            <i class="fa fa-cog"></i>
+                            <b>Comparator: </b>
+                        </div>
+                        <div>
+                            <select v-model='comparator'>
+                                <option v-for="treat in treat_list"
+                                    v-bind:value="treat">
+                                    {{  to_fullname(treat) }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="box-menu-group d-flex fx-row">
+                        <div>
+                            <i class="fa fa-cog"></i>
+                            Show survival data: 
+                        </div>
+                        <div>
+                            <select v-model="show_survival">
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="box-menu-group d-flex fx-row">
+                        <div>
+                            <i class="fa fa-cog"></i>
+                            Display risks per: 
+                        </div>
+                        <div>
+                            <select v-model="baseline">
+                                <option value="100">100</option>
+                                <option value="1000">1000</option>
+                                <option value="10000">10,000</option>
+                                <option value="100000">100,000</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="box-menu-group d-flex fx-row">
+                        <div class="box-menu-link" 
+                            onclick="jarvis.show_color_guide();">
+                            <i class="fa fa-paint-brush"></i>
+                            Color guide
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box-body" 
+                style="height: 100%;">
+
+                <table class="sof-table">
+                    <tr>
+                        <th class="col-ae-name">Outcome</th>
+                        <th class="col-treat">
+                            Comparator: <br>
+                            <b class="red">
+                                {{  to_fullname(comparator) }}
+                            </b>
+                        </th>
+                        <th class="col-treat" 
+                            v-for="treat in treat_list" 
+                            v-if="treat != comparator">
+                            {{  to_fullname(treat) }}
+                        </th>
+                    </tr>
+                    <tr v-for="r, r_idx in rs">
+                        <td class="col-ae-name">
+                            {{ r.oc_full_name }}<br>
+                            <span class="grey">( {{ r.oc_measure }} )</span>
+                        </td>
+                        
+                        <td class="col-comparator">
+                            <span v-if="show_survival == 'yes'">
+                                {{ get_SRVC_txt(r, comparator) }} <br>
+                                <b>{{ get_rank_txt(r, comparator) }}</b>
+                            </span>
+                            <span v-else>
+                                {{ get_ACR_txt(r, comparator) }} <br>
+                                <b>{{ get_rank_txt(r, comparator) }}</b>
+                            </span>
+                        </td>
+
+                        <td class="cell-treat"
+                            v-for="treat in treat_list" 
+                            v-if="treat != comparator"
+                            v-bind:class="get_cell_color(r, comparator, treat)"
+                            v-on:click="show_detail(r_idx, treat)">
+                            <span v-if="show_survival == 'yes'">
+                                {{ get_SRVD_txt(r, comparator, treat, 'sm') }}<br>
+                            </span>
+                            <span v-else>
+                                {{ get_ARD_txt(r, comparator, treat, 'sm') }}<br>
+                            </span>
+                            <b>{{ get_rank_txt(r, treat) }}</b>
+                        </td>
+                    </tr>
+                </table>
+
+            </div>
+
+        </div>
+
+        
+    </div>
+    <!-- /#tb_simple_sofnma -->
+
+    <div id="tb_simple_sofnma_detail" 
+        v-if="detail.r_idx != null && detail.treat_name != null"
+        v-show="detail.is_show == 'yes'"
+        class="box">
+        <div class="box-header box-header-grey d-flex fx-row fx-jc-space-between">
+            <h4>    
+                <i class="fa fa-table"></i>
+                <b class="txt-lg">{{ rs[detail.r_idx].oc_full_name }}</b>
+            </h4>
+            <div>
+                <button v-on:click="detail.is_show = 'no'">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div class="box-body">
+
+            <div class="d-flex fx-row">
+                <p>
+                    Treatment: <b class="txt-lg">{{ to_fullname(detail.treat_name) }}</b>, 
+                    Comparator: <b class="txt-lg">{{  to_fullname(comparator) }}</b>
+                </p>
+            </div>
+            <div class="d-flex fx-row">
+                <div style="width: 50%;">
+                    <h5>Summary of data</h5>
+                    <p>
+                        Randomized controlled trials: 
+                        <span class="txt-lg txt-fb">
+                            {{ get_n_stus_txt(rs[detail.r_idx], detail.treat_name) }}
+                        </span>
+                    </p>
+
+                    <div v-if="rs[detail.r_idx].oc_data_type == 'raw'">
+                        <p>
+                            Number of events in arm: 
+                            <span class="txt-lg txt-fb">
+                                {{ get_treat_attr_txt(rs[detail.r_idx], detail.treat_name, 'event') }}
+                            </span>
+                        </p>
+                        <p>
+                            Total participants in arm: 
+                            <span class="txt-lg txt-fb">
+                                {{ get_treat_attr_txt(rs[detail.r_idx], detail.treat_name, 'total') }}
+                            </span>
+                        </p>
+                    </div>
+
+                    <div v-else-if="get_SRVC(rs[detail.r_idx], comparator) != null">
+                        <p>
+                            Survival in comparator: 
+                            <span class="txt-lg txt-fb">
+                                {{ get_SRVC_txt(rs[detail.r_idx], comparator) }}
+                            </span>
+                        </p>
+                        <p>
+                            Survival in intervention:
+                            <span class="txt-lg txt-fb">
+                                {{ get_SRVI_txt(rs[detail.r_idx], comparator, detail.treat_name, 'sm') }}
+                            </span>
+                            <br>
+                            (
+                            {{ get_SRVI_txt(rs[detail.r_idx], comparator, detail.treat_name, 'up') }} 
+                            to 
+                            {{ get_SRVI_txt(rs[detail.r_idx], comparator, detail.treat_name, 'lw') }}
+                            )
+                        </p>
+                        <p>
+                            Survival difference:
+                            <span class="txt-lg txt-fb">
+                                {{ get_SRVD_txt(rs[detail.r_idx], comparator, detail.treat_name, 'sm') }} 
+                            </span>
+                            <br>
+                            (
+                            {{ get_SRVD_txt(rs[detail.r_idx], comparator, detail.treat_name, 'up') }}
+                            to 
+                            {{ get_SRVD_txt(rs[detail.r_idx], comparator, detail.treat_name, 'lw') }}
+                            )
+                        </p>
+                    </div>
+
+                    <div v-else>
+                        &nbsp;
+                    </div>
+                </div>
+
+                <div style="width: 50%;">
+                    <h5>Summary of measure: {{ rs[detail.r_idx].oc_measure }}</h5>
+                    <p>
+                        Relative effect: 
+                        <span class="txt-lg txt-fb">
+                            {{ get_effect_txt(rs[detail.r_idx], comparator, detail.treat_name, 'sm') }} 
+                        </span>
+                        (
+                        {{ get_effect_txt(rs[detail.r_idx], comparator, detail.treat_name, 'lw') }}
+                        to 
+                        {{ get_effect_txt(rs[detail.r_idx], comparator, detail.treat_name, 'up') }}
+                        )
+                    </p>
+                    <p>
+                        Absolute risk: 
+                        <span class="txt-lg txt-fb">
+                            {{ get_CIR_txt(rs[detail.r_idx], comparator, detail.treat_name, 'sm') }}
+                        </span>
+                        <br>
+                        (
+                        {{ get_CIR_txt(rs[detail.r_idx], comparator, detail.treat_name, 'lw') }} 
+                        to 
+                        {{ get_CIR_txt(rs[detail.r_idx], comparator, detail.treat_name, 'up') }}
+                        )
+                    </p>
+                    <p>
+                        Absolute risk difference: 
+                        <span class="txt-lg txt-fb">
+                            {{ get_ARD_txt(rs[detail.r_idx], comparator, detail.treat_name, 'sm') }}
+                        </span>
+                        <br>
+                        (
+                        {{ get_ARD_txt(rs[detail.r_idx], comparator, detail.treat_name, 'lw') }} 
+                        to 
+                        {{ get_ARD_txt(rs[detail.r_idx], comparator, detail.treat_name, 'up') }}
+                        )
+                    </p>
+                    <p>
+                        Absolute risk percentage:
+                        <span class="txt-lg txt-fb">
+                            {{ get_ARDp_txt(rs[detail.r_idx], comparator, detail.treat_name, 'sm') }}
+                        </span>
+                        <br>
+                        (
+                        {{ get_ARDp_txt(rs[detail.r_idx], comparator, detail.treat_name, 'lw') }} 
+                        to 
+                        {{ get_ARDp_txt(rs[detail.r_idx], comparator, detail.treat_name, 'up') }}
+                        )
+                    </p>
+                </div>
+            </div>
+
+            <hr>
+
+            <div>
+                <p>
+                    Certainty in Evidence: 
+                    <b class="txt-lg" 
+                        style="padding: 0 5px;"
+                        v-bind:class="get_cell_color(rs[detail.r_idx], comparator, detail.treat_name)">
+                        {{ get_detail_cie_txt('cie') }}
+                    </b>
+                </p>
+                <div class="cie-table d-flex flex-row flex-wrap">
+                    <div class="cie-cell d-flex fx-row">
+                        <div class="px-2">Risk of bias:</div>
+                        <div class="px-2 fst-italic"
+                            v-bind:class="get_cie_item_cell_color(rs[detail.r_idx], comparator, detail.treat_name, 'risk_of_bias')">
+                            {{ get_detail_cie_txt('risk_of_bias') }}
+                        </div>
+                    </div>
+                    <div class="cie-cell d-flex fx-row">
+                        <div class="px-2">Inconsistency:</div>
+                        <div class="px-2 fst-italic"
+                            v-bind:class="get_cie_item_cell_color(rs[detail.r_idx], comparator, detail.treat_name, 'inconsistency')">
+                            {{ get_detail_cie_txt('inconsistency') }}
+                        </div>
+                    </div>
+                    <div class="cie-cell d-flex fx-row">
+                        <div class="px-2">Indirectness:</div>
+                        <div class="px-2 fst-italic"
+                            v-bind:class="get_cie_item_cell_color(rs[detail.r_idx], comparator, detail.treat_name, 'indirectness')">
+                            {{ get_detail_cie_txt('indirectness') }}
+                        </div>
+                    </div>
+                    <div class="cie-cell d-flex fx-row">
+                        <div class="px-2">Imprecision:</div>
+                        <div class="px-2 fst-italic"
+                            v-bind:class="get_cie_item_cell_color(rs[detail.r_idx], comparator, detail.treat_name, 'imprecision')">
+                            {{ get_detail_cie_txt('imprecision') }}
+                        </div>
+                    </div>
+                    <div class="cie-cell d-flex fx-row">
+                        <div class="px-2">Publication Bias:</div>
+                        <div class="px-2 fst-italic"
+                            v-bind:class="get_cie_item_cell_color(rs[detail.r_idx], comparator, detail.treat_name, 'publication_bias')">
+                            {{ get_detail_cie_txt('publication_bias') }}
+                        </div>
+                    </div>
+                    <div class="cie-cell d-flex fx-row">
+                        <div class="px-2">Intransitivity:</div>
+                        <div class="px-2 fst-italic"
+                            v-bind:class="get_cie_item_cell_color(rs[detail.r_idx], comparator, detail.treat_name, 'intransitivity')">
+                            {{ get_detail_cie_txt('intransitivity') }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <!-- /#tb_simple_sofnma_detail -->
+
+</div>
+<!-- /#app_softnma -->
+
+</div>
+
+<!-- jquery -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<!-- jquery UI -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<!-- vue.js  -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"></script>
+<!-- AlaSQL for SQL query -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/alasql/0.5.5/alasql.min.js"></script>
+<!-- papaparse for CSV -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.1/papaparse.min.js"></script>
+
+<script>
+var isIE = /*@cc_on!@*/false || !!document.documentMode;
+if (isIE) {
+    document.getElementById('ss-msg').innerHTML = 'The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.';
+}
+</script>
+
+<script>
+
+var app_softnma = {
+    vpp: null,
+    vpp_id: '#app_softnma',
+    default_comparator: null,
+
+    vpp_methods: {
+        /**
+         * Get the effect of a measure of outcome
+         * @param {any} oc_name
+         * @param {any} c comparator
+         * @param {any} t treatment
+         * @param {any} obj sm/lw/up
+         * @returns {any}
+         */
+        get_effect: function(r, c, t, obj) {
+            if (!r.oc.lgtable.hasOwnProperty(c)) { 
+                // this oc doesn't have this c
+                return null;
+            }
+
+            if (!r.oc.lgtable[c].hasOwnProperty(t)) { 
+                // this oc doesn't have this t
+                return null;
+            }
+
+            return r.oc.lgtable[c][t][obj];
+        },
+
+        get_effect_txt: function(r, c, t, obj) {
+            var e = this.get_effect(r, c, t, obj);
+
+            if (e == null) {
+                return 'NA';
+            }
+
+            // make sure the `e` is a float value
+            e = parseFloat('' + e);
+
+            return e.toFixed(2);
+        },
+
+        /***********************************************
+         * Rank Related
+         ***********************************************/
+        get_rank: function(r, t) {
+            if (r.oc.rktable.hasOwnProperty(t)) {
+                return r.oc.rktable[t].rank;
+            } else {
+                // this treat is not available in this study
+                return null;
+            }
+        },
+
+        get_rank_txt: function(r, t) {
+            var rank = this.get_rank(r, t);
+            if (rank == null) {
+                return 'NA';
+            } else {
+                return 'Rank ' + rank;
+            }
+        },
+
+        /***********************************************
+         * ACR, CIR, ARD, ARDp Related
+         ***********************************************/
+        get_ACR: function(r, t) {
+            // the t is a treat
+            // t may be missing in this r
+            if (!r.oc.trtable.hasOwnProperty(t)) {
+                // this treat is not available in this study
+                return null;
+            }
+
+            if (r.oc.trtable[t].which_ACR.use_which_val == 'internal') {
+                if (r.oc.trtable[t].has_internal_val) {
+
+                    if (r.oc_data_type == 'raw') {
+                        return r.oc.trtable[t].event / r.oc.trtable[t].total; 
+                    } else {
+                        return r.oc.trtable[t].internal_val / 1000;
+                    }
+
+                } else {
+                    return 0.1;
+                }
+
+            } else {
+
+                return r.oc.trtable[t].which_ACR.external_val / this.baseline;
+            }
+
+        },
+
+        get_ACR_txt: function(r, t) {
+            var ACR = this.get_ACR(r, t);
+            if (ACR == null) {
+                // it means no available data for this treat
+                return 'NA';
+                
+            } else {
+                if (r.oc.trtable[t].which_ACR.use_which_val == 'internal') {
+                    return Math.round(ACR * this.baseline) + 
+                        ' per ' + 
+                        this.baseline;
+                } else {
+                    return Math.round(ACR * this.baseline) + 
+                        ' per ' + 
+                        this.baseline +
+                        ' (E)';
+                }
+            }
+        },
+
+        get_CIR: function(r, c, t, obj) {
+            // calculate the CIR based on measure
+            // r is the oc r object
+            // obj: sm, lw, up
+            // c is comparator, t is treatment
+            var ACR = this.get_ACR(r, c);
+            if (ACR == null) {
+                // if ACR is not available, no need to calcuate others
+                return null;
+            }
+
+            // get an available measure for this oc
+            var measure = r.oc_measure;
+
+            // v is the value of the sm/lw/up of this measure
+            if (!r.oc.lgtable.hasOwnProperty(t)) {
+                // this t is not available for this oc
+                return null;
+            }
+            var v = r.oc.lgtable[c][t][obj];
+
+            if (measure == 'OR') {
+                var a = ACR * v;
+                var b = 1 - ACR;
+                var c = a + b;
+                var d = a / c;
+                return d;
+
+            } else if (measure == 'RR') {
+                var a = ACR * v;
+                return a;
+                
+            } else if (measure == 'HR') {
+                var a = 1 - ACR;
+                var b = Math.log(a);
+                var c = b * v;
+                var d = Math.exp(c);
+                var e = 1 - d;
+                return e;
+            }
+        },
+
+        get_CIR_txt: function(r, c, t, obj) {
+            var CIR = this.get_CIR(r, c, t, obj);
+            if (CIR == null) {
+                // it means no available data for this treat
+                return 'NA';
+            } else {
+                return Math.round(CIR * this.baseline) + 
+                    ' per ' + 
+                    this.baseline;
+            }
+        },
+
+        get_ARD: function(r, c, t, obj) {
+            // calculate the ARD based on measure
+            // r is the oc_r
+            // obj: sm, lw, up
+            // c is comparator, t is treatment
+
+            var ACR = this.get_ACR(r, c);
+            if (ACR == null) {
+                // if ACR is not available, no need to calcuate others
+                return null;
+            }
+            var CIR = this.get_CIR(r, c, t, obj);
+            if (CIR == null) {
+                // if CIR is not available, no need to calcuate others
+                return null;
+            }
+
+            // get an available measure for this oc
+            var measure = r.oc_measure;
+            
+            // v is the value of the sm/lw/up of this measure
+            var v = r.oc.lgtable[c][t][obj];
+
+            if (measure == 'OR') {
+                var ARD = ACR - CIR;
+                return ARD;
+
+            } else if (measure == 'RR') {
+                var a = ACR * (1 - v);
+                return a;
+
+            } else if (measure == 'HR') {
+                var ARD = ACR - CIR;
+                return ARD;
+            }
+        },
+
+        get_ARD_txt: function(r, c, t, obj) {
+            var ARD = this.get_ARD(r, c, t, obj);
+            if (ARD == null) {
+                return 'NA';
+            }
+            var txt = ' fewer';
+            if (ARD < 0) {
+                txt = ' more';
+            }
+            return Math.abs(Math.round(ARD * this.baseline)) + txt;
+        },
+
+        get_ARDp: function(r, c, t, obj) {
+            var ARD = this.get_ARD(r, c, t, obj);
+            if (ARD == null) {
+                return null;
+            }
+            var ARDp = 100 * ARD;
+            return ARDp;
+        },
+
+        get_ARDp_txt: function(r, c, t, obj) {
+            var ARDp = this.get_ARDp(r, c, t, obj);
+            if (ARDp == null) {
+                return 'NA';
+            }
+            var txt = ' fewer';
+            if (ARDp < 0) {
+                txt = ' more';
+            }
+            return Math.abs(ARDp).toFixed(1) + '%' + txt;
+        },
+
+        /***********************************************
+         * Survival Related
+         ***********************************************/
+
+        // get survival in control
+        get_SRVC: function(r, c) {
+            if (!r.oc.trtable.hasOwnProperty(c)) {
+                // this comparator is not available in this oc
+                return null;
+            }
+            if (!r.oc.trtable[c].has_survival_data) {
+                // this oc doesn't have survival data
+                return null;
+            }
+            var SRVC = r.oc.trtable[c].survival_in_control;
+            return SRVC;
+        },
+
+        get_SRVC_txt: function(r, c) {
+            var SRVC = this.get_SRVC(r, c);
+            if (SRVC == null) {
+                return 'NA';
+            }
+            return SRVC.toFixed(1) + ' (mo)';
+        },
+
+        get_SRVI: function(r, c, t, obj) {
+            var SRVC = this.get_SRVC(r, c);
+            if (SRVC == null) {
+                // this comparator doesn't have survival data
+                return null;
+            }
+            // currently, only HR has survival data
+            var measure = 'HR';
+            
+            // v is the value of the sm/lw/up of this measure
+            var v = r.oc.lgtable[c][t][obj];
+
+            // get the survival in 
+            var SRVI = (1 / v) * SRVC;
+
+            return SRVI;
+        },
+
+        get_SRVI_txt: function(r, c, t, obj) {
+            var SRVI = this.get_SRVI(r, c, t, obj);
+            if (SRVI == null) {
+                return 'NA';
+            }
+            return SRVI.toFixed(1) + ' (mo)';
+        },
+
+        get_SRVD: function(r, c, t, obj) {
+            var SRVC = this.get_SRVC(r, c);
+            var SRVI = this.get_SRVI(r, c, t, obj);
+            
+            if (SRVC == null) { return null; }
+            if (SRVI == null) { return null; }
+
+            var SRVD = SRVC - SRVI;
+            return SRVD;
+        },
+
+        get_SRVD_txt: function(r, c, t, obj) {
+            var SRVD = this.get_SRVD(r, c, t, obj);
+            if (SRVD == null) {
+                return 'NA';
+            }
+            var txt = '';
+            if (SRVD < 0) {
+                txt = ' more';
+            } else if (SRVD > 0) {
+                txt = ' fewer';
+            } else {
+                txt = '';
+            }
+            return Math.abs(SRVD).toFixed(1) + ' (mo)' + txt;
+        },
+
+        /***********************************************
+         * Detail Information Related
+         ***********************************************/
+
+        show_detail: function(r_idx, treat_name) {
+            this.detail.r_idx = r_idx;
+            this.detail.treat_name = treat_name;
+
+            // enable display
+            this.detail.is_show = 'yes';
+
+            // // init the jquery UI draggable
+            // $('#tb_simple_sofnma_detail').draggable({
+            //     handle: 'div.box-header'
+            // });
+        },
+
+        get_treat: function(r, treat_name) {
+            if (r.oc.trtable.hasOwnProperty(treat_name)) {
+                return r.oc.trtable[treat_name];
+            } else {
+                return null;
+            }
+        },
+
+        get_treat_attr_txt: function(r, treat_name, attr) {
+            var t = this.get_treat(r, treat_name);
+
+            if (t == null) { 
+                return 'NA';
+            } else {
+                
+                if (t.hasOwnProperty(attr)) {
+                    return t[attr];
+                } else {
+                    return 'NA';
+                }
+            }
+        },
+
+        get_n_stus_txt: function(r, treat_name) {
+            var t = this.get_treat(r, treat_name);
+
+            if (t == null) { 
+                return 'NA';
+            } else {
+                return t.n_stus;
+            }
+        },
+
+        /**
+         * Get the current detail cie
+         * 
+         * item: the cie item name
+         */
+        get_detail_cie_txt: function(item) {
+            return this.get_cie_txt(
+                this.rs[this.detail.r_idx],
+                this.comparator,
+                this.detail.treat_name,
+                item
+            );
+        },
+
+        /**
+         * Get the Certainty in Evidence
+         * 
+         * r: oc record
+         * c: comparator
+         * t: treatment
+         * i: cie item name, such as risk_of_bias, indirectness
+         */
+        get_cie: function(r, c, t, i) {
+            if (r.oc.cetable.hasOwnProperty(c)) {
+                if (r.oc.cetable[c].hasOwnProperty(t)) {
+                    if (r.oc.cetable[c][t].hasOwnProperty(i)) {
+                        // ok, let's try to get the final 
+                        return r.oc.cetable[c][t][i];
+
+                    } else {
+                        // which means for this pair of c-t
+                        // the specific cie item is not available
+                        // or not specificed
+                        return null;
+                    }
+
+                } else {
+                    // which means this treatment is not available 
+                    // in this outcome for this comparator
+                    return null;
+                }
+            } else {
+                // which means this comparator is not available
+                // in this outcome
+                return null;
+            }
+        },
+
+        /**
+         * Get the Certainty in Evidence text
+         * 
+         * r: oc record
+         * c: comparator
+         * t: treatment
+         * i: cie item name, such as risk_of_bias, indirectness
+         */
+        get_cie_txt: function(r, c, t, i) {
+            var cie = this.get_cie(r, c, t, i);
+
+            if (cie == null) {
+                return 'None';
+
+            } else {
+                return this._cie2txt(
+                    i,
+                    cie
+                );
+            }
+        },
+
+        /**
+         * Get the CiE text
+         * 
+         * For the given item, return the text
+         */
+        _cie2txt: function(item, value) {
+            var item_code = '';
+
+            if (item == 'cie') {
+                item_code = 'CIE_TOT_' + value;
+
+            } else if (item == 'pub_bia' ||
+                       item == 'publication_bias') {
+                item_code = 'PUB_BIA_' + value;
+
+            } else if (item == 'importance') {
+                item_code = 'IMPORTANCE_' + value;
+
+            } else {
+                item_code = 'CIE_VAL_' + value;
+            }
+
+            if (this.code_texts.hasOwnProperty(item_code)) {
+                return this.code_texts[item_code];
+
+            } else {
+                return 'NA';
+            }
+        },
+
+        /**
+         * Get the cell color based on c and t
+         * 
+         * The CIE information should be exists in cetable
+         */
+        get_cell_color: function(r, c, t) {
+            // get the sm value CIR
+            var CIR = this.get_CIR(r, c, t, 'sm');
+            if (CIR == null) {
+                // no value for this cell, just blank
+                return '';
+            }
+
+            // v is the value of the sm of this measure
+            var v = r.oc.lgtable[c][t]['sm'];
+
+            if (this.show_survival == 'yes') {
+                var SRVI = this.get_SRVI(r, c, t, 'sm');
+                if (SRVI == null) {
+                    // no survival data for this c or t
+                    return '';
+                }
+            }
+
+            // get the cie for this c-t pair
+            // var cie = r.oc.cetable[c][t].cie;
+            var cie = this.get_cie(r, c, t, 'cie');
+
+            if (cie == null) {
+                // maybe not found in the data
+                return '';
+            }
+            
+            if (r.oc.extract.meta.which_is_better == 'lower') {
+                if (v < 1) {
+                    return 'cie-bene-' + cie;
+                } else if ( v > 1) {
+                    return 'cie-harm-' + cie;
+                } else {
+                    return 'cie-nner-' + cie;
+                }
+            } else {
+                if (v > 1) {
+                    return 'cie-bene-' + cie;
+                } else if ( v < 1) {
+                    return 'cie-harm-' + cie;
+                } else {
+                    return 'cie-nner-' + cie;
+                }
+            }
+        },
+
+
+        /**
+         * Get the Certainty in Evidence Item cell color
+         * 
+         * r: oc record
+         * c: comparator
+         * t: treatment
+         * i: cie item name, such as risk_of_bias, indirectness
+         */
+        get_cie_item_cell_color: function(r, c, t, i) {
+            var cie = this.get_cie(r, c, t, i);
+
+            if (cie == null) {
+                return '';
+            } else {
+                return 'cie-' + i + '-' + cie;
+            }
+        },
+
+        to_fullname: function(s) {
+            if (jarvis.hasOwnProperty('to_fullname')) {
+                return jarvis.to_fullname(s);
+            } else {
+                return s;
+            }
+        }
+    },
+
+    init: function(data) {
+        // pre-processing
+        var rs = [];
+
+        for (const abbr in data.oc_dict) {
+            if (Object.hasOwnProperty.call(data.oc_dict, abbr)) {
+                const oc = data.oc_dict[abbr];
+                // we need to convert this oc to a format for vpp
+                var r = this.conv_oc2r(oc);
+                rs.push(r);
+            }
+        }
+
+        // sort by a shared function
+        rs.sort(jarvis.compare_oc_names);
+
+        // set the app_softnma.default_comparator
+        if (this.default_comparator == null) {
+            // which means no value given
+            // set the first treat
+            this.default_comparator = data.treat_list[0];
+        }
+
+        var treat_list = data.treat_list;
+        treat_list = jarvis.sort_by_list(
+            treat_list,
+            jarvis.treat_orders
+        );
+
+        // init the vpp
+        this.vpp = new Vue({
+            el: this.vpp_id,
+
+            data: {
+                baseline: 1000,
+                show_survival: 'no',
+                detail: {
+                    is_show: 'no',
+                    r_idx: null,
+                    treat_name: null
+                },
+                comparator: this.default_comparator,
+                
+                oc_dict: data.oc_dict,
+                treat_list: treat_list,
+                rs: rs,
+
+                // for display
+                code_texts: {
+                    'OR': 'Odds Ratio (OR)',
+                    'RR': 'Risk Ratio (RR)',
+                    'HR': 'Hazard Ratio (HR)',
+
+                    'CIE_TOT_4': 'High',
+                    'CIE_TOT_3': 'Moderate',
+                    'CIE_TOT_2': 'Low',
+                    'CIE_TOT_1': 'Very Low',
+
+                    'CIE_VAL_4': 'Very serious',
+                    'CIE_VAL_3': 'Very serious',
+                    'CIE_VAL_2': 'Serious',
+                    'CIE_VAL_1': 'Not serious',
+
+                    'PUB_BIA_2': 'Strongly suspected',
+                    'PUB_BIA_1': 'Undetected',
+                    'PUB_BIA_0': 'Not applicable',
+
+                    'IMPORTANCE_2': 'Critical',
+                    'IMPORTANCE_1': 'Important',
+                    'IMPORTANCE_0': 'NA',
+                },
+            },
+
+            methods: this.vpp_methods,
+
+            mounted: function() {
+                // the last thing is to notify that the height may changed
+                if (parent.hasOwnProperty('resize_iframes')) {
+                    // which means this is iframed
+                    parent.resize_iframes();
+                    console.log('* softable nma sent resize request to parent window');
+                }
+            },
+
+            updated: function() {
+                if (this.detail.is_show == 'yes') {
+                    // init the jquery UI draggable
+                    $('#tb_simple_sofnma_detail').draggable({
+                        handle: 'div.box-header'
+                    });
+                }
+            }
+        });
+    },
+
+    pre_processing: function(data) {
+
+    },
+
+    conv_oc2r: function(oc) {
+        // add which_ACR to oc.trtable
+        for (const t in oc.trtable) {
+            if (Object.hasOwnProperty.call(oc.trtable, t)) {
+                oc.trtable[t]['which_ACR'] = {
+                    // decide which value to use
+                    use_which_val: oc.trtable[t].has_internal_val?'internal':'external',
+                    // the external value
+                    external_val: 0,
+                    // decide which internal to use
+                    // use avg always.
+                    use_internal_avg: true,
+                    use_internal_min: false,
+                    use_internal_max: false
+                }
+                
+            }
+        }
+        // create a record
+        var r = {
+            // bind the oc itself
+            oc: oc,
+
+            // abbr
+            oc_name: oc.extract.abbr,
+
+            // name for quick access
+            oc_full_name: oc.extract.meta.full_name,
+
+            // measure for quick access
+            oc_measure: oc.extract.meta.measure_of_effect,
+
+            // input_format / datatype for quick access
+            oc_data_type: oc.extract.data_type,
+
+            // for display setting
+            is_show: {
+                // show sm, study info
+                sm: true,
+                // show ARD, or ARD CI
+                ARD: true,
+                // show CIR, or CIR CI
+                CIR: true
+            }
+        }
+
+        return r;
+    }
+};
+
+
+var jarvis = {
+    // the main sof table data
+    data: null,
+
+    // the cie patch data
+    data_cie: null,
+
+    cie_cols: [
+        "risk_of_bias",
+        "inconsistency",
+        "incoherence",
+        "indirectness",
+        "imprecision",
+        "publication_bias",
+        "intransitivity"
+    ],
+
+    // use cie patch or not
+    is_certainty_patch: true,
+
+    init: function() {
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+
+        console.log('* User is using IE:', isIE);
+        if (isIE) {
+            jarvis.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
+            return;
+        }
+
+        // where to get the data
+        var src = jarvis.get_url_paramter('src');
+        if (src == '') {
+            src = 'cache';
+        }
+
+        // OK, let's get the project key first
+        var prj = jarvis.get_url_paramter('prj');
+        if (prj == null || prj == '') {
+            jarvis.ssmsg('Project information error.')
+            return;
+        }
+
+        // get the cq_abbr for this project
+        var cq = jarvis.get_url_paramter('cq');
+        if (cq == null || cq == '') {
+            cq = 'default';
+        }
+
+        // get the analysis group, by default just show the primary
+        var gp = jarvis.get_url_paramter('gp');
+        if (gp == '') {
+            gp = 'primary';
+        }
+
+        // get the Certainty patch
+        var cp = jarvis.get_url_paramter('cp');
+        if (cp == '') {
+            cp = 'yes';
+        }
+        jarvis.is_certainty_patch = cp == 'yes';
+
+        // set default_comparator
+        var dc = jarvis.get_url_paramter('dc');
+        if (dc == '') {
+            app_softnma.default_comparator = null;
+        } else {
+            app_softnma.default_comparator = dc;
+        }
+
+        // set the sorting
+        var od = jarvis.get_url_paramter('od');
+        if (od == '') {
+            jarvis.oc_orders = [];
+        } else {
+            od = od.toLocaleLowerCase();
+            jarvis.oc_orders = od.split(';');
+        }
+
+        // set the sorting for treat
+        var trod = jarvis.get_url_paramter('trod');
+        if (trod == '') {
+            jarvis.treat_orders = [];
+        } else {
+            // trod = trod.toLocaleLowerCase();
+            jarvis.treat_orders = trod.split(';');
+        }
+
+        jarvis.ssmsg('Loading data ...');
+
+        // send request to get data for initializing app
+        var url = "[[ url_for('pub.graphdata', keystr='__KEYSTR__', fn='SOFTABLE_NMA.json') ]]";
+        // update with url with the project keystr
+        url = url.replace('__KEYSTR__', prj);
+
+        $.get(
+            url,
+            // '/pub/graphdata/' + prj + '/SOFTABLE_NMA.json',
+            {
+                src: src,
+                cq: cq,
+                gp: gp,
+                ver: Math.random()
+            },
+            function(data) {
+                // simple init
+                jarvis.init_app(data);
+            
+                // init with patch
+                // jarvis.init_app_with_patch(data);
+
+            }, 'json'
+        );
+
+    },
+
+    init_app: function(data) {
+        // simple bind
+        jarvis.data = data;
+
+        // then, init the app
+        app_softnma.init(data);
+
+        // ok, remove the start screen
+        jarvis.ssmsg('Almost initialized.');
+        setTimeout('jarvis.ssclose();', 400);
+    },
+
+    init_app_with_patch: function(data) {
+        // create a mapping for later use
+        // from oc_full_name
+        // to oc_abbr
+        data['ocfn2abbr'] = {}
+        for (const oc_abbr in data.oc_dict) {
+            if (Object.hasOwnProperty.call(data.oc_dict, oc_abbr)) {
+                const oc = data.oc_dict[oc_abbr];
+                // get the full name
+                var ocfn = oc.extract.meta.full_name;
+                // update the mapping
+                data.ocfn2abbr[ocfn] = oc_abbr;
+            }
+        }
+
+        // put this data as main data
+        jarvis.data = data;
+
+        if (jarvis.is_certainty_patch) {
+            // now try to get the cie patch
+            $.ajax({
+                type: 'GET',
+                dataType: 'text',
+                url: '/pub/graphdata/' + prj + '/CIE.csv',
+                data: {
+                    src: 'cache',
+                    cq: cq,
+                    gp: gp,
+                    ver: Math.random()
+                },
+                cache: false,
+                success: function(data) {
+                    // OK, we the patch data here
+                    jarvis.add_cetable_patch(data);
+
+                    // then, init the app
+                    app_softnma.init(jarvis.data);
+
+                    // ok, remove the start screen
+                    jarvis.ssmsg('Almost initialized.');
+                    setTimeout('jarvis.ssclose();', 400);
+
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error(textStatus, errorThrown);
+                    // we know that this is correct if not found
+                    // the patch data is just optional
+                    // init the app now
+                    // init the NMA table with jarvis.data
+                    app_softnma.init(jarvis.data);
+
+                    // ok, remove the start screen
+                    jarvis.ssmsg('Almost initialized.');
+                    setTimeout('jarvis.ssclose();', 400);
+                }
+            });
+
+        } else {
+            // no need to apply patch, just init
+            app_softnma.init(jarvis.data);
+
+            // ok, remove the start screen
+            jarvis.ssmsg('Almost initialized.');
+            setTimeout('jarvis.ssclose();', 400);
+        }
+    },
+
+    calc_nma_cie: function(c) {
+        // the `c` contains the following:
+        // category: "default"
+        // name: "Disease free survival"
+        // comparator: "Pembro"
+        // treatment: "Placebo"
+        // risk_of_bias: "1"
+        // imprecision: "1"
+        // incoherence: "0"
+        // inconsistency: "1"
+        // indirectness: "1"
+        // publication_bias: "0"
+        // intransitivity: "1"
+
+        var cie = 4;
+
+        // calculate cie!
+        for (let i = 0; i < jarvis.cie_cols.length; i++) {
+            const col = jarvis.cie_cols[i];
+            var val = c[col];
+
+            if (val == 0) {
+                // which means this is not applicable
+
+            } else if (val == 1) {
+                // nothing, this is good
+
+            } else if (val == 2) {
+                // downgrade 1
+                cie -= 1;
+
+            } else if (val == 3) {
+                // downgrade 2
+                cie -= 2;
+
+            } else if (val == 4) {
+                // downgrade 3
+                cie -= 3;
+
+            } else {
+                // what???
+
+            }
+        }
+
+        // final check the cie, in some cases
+        // the cie may below 0
+        if (cie <= 0) {
+            // just set the cie to 1 which is the lowest
+            cie = 1;
+        }
+
+        return cie;
+    },
+
+    add_cetable_patch: function(data) {
+        // console.log(data);
+        jarvis.data_cie = data;
+
+        // first, convert the text to json
+        var j = Papa.parse(data, {
+            header: true
+        });
+
+        console.log(j['data']);
+
+        // now parse and patch the cetable
+        for (let i = 0; i < j['data'].length; i++) {
+            var c = j['data'][i];
+            
+            if (!c.hasOwnProperty('name')) {
+                // wrong item for this row
+                continue;
+            }
+            // get the oc full name
+            var ocfn = c.name;
+
+            // try to update the cie if not provided
+            if (!c.hasOwnProperty('cie')) {
+                // update the cie
+                var cie = jarvis.calc_nma_cie(c);
+                c.cie = cie;
+            }
+
+            // get the oc abbr
+            if (!jarvis.data.ocfn2abbr.hasOwnProperty(ocfn)) {
+                // ??? it's possible that this oc doesn't exists
+                console.log('* not found [' + ocfn + '] in softable NMA');
+                continue;
+            }
+
+            // get the abbr
+            var abbr = jarvis.data.ocfn2abbr[ocfn];
+
+            // try to locate the ce table item by comparator
+            if (!jarvis.data.oc_dict[abbr].cetable.hasOwnProperty(c.comparator)) {
+                // no such comparator? add it
+                jarvis.data.oc_dict[abbr].cetable[c.comparator] = {};
+            }
+
+            // try to locate this treatment
+            if (!jarvis.data.oc_dict[abbr].cetable[c.comparator].hasOwnProperty(c.treatment)) {
+                // no such treatment? add it 
+                jarvis.data.oc_dict[abbr].cetable[c.comparator][c.treatment] = {};
+            }
+
+            // update the following infomation
+            var cols = jarvis.cie_cols.concat(['cie']);
+            for (let col_idx = 0; col_idx < cols.length; col_idx++) {
+                const col = cols[col_idx];
+                
+                if (!c.hasOwnProperty(col)) {
+                    // no such col in this row???
+                    continue;
+                }
+
+                // get the value
+                var val = c[col];
+
+                // convert whatever to int number
+                val = parseInt('' + val);
+
+                // overwrite the cetable
+                jarvis.data.oc_dict[abbr].cetable[c.comparator][c.treatment][col] = val;
+            }
+        }
+    },
+
+    get_url_paramter: function(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    },
+
+    ssmsg: function(msg) {
+        $('#ss-msg').html(msg);
+    },
+
+    ssclose: function() {
+        $('#start-screen').hide();
+    },
+
+    show_color_guide: function() {
+        $('#color_guide').dialog({
+            width: 680
+        });
+    }
+};
+
+// include the jarvis extensions
+{% include 'js/jarvis_ext_compare_oc_names.js' %}
+
+// include the jarvis extension for full name
+{% include 'js/jarvis_ext_fullnames.js' %}
+
+$(document).ready(function() {
+    jarvis.init();
+})
+</script>
+</body>

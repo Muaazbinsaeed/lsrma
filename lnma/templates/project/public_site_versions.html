@@ -1,0 +1,174 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Public Website
+{% endblock %}
+
+{% block style %}
+{% endblock %}
+
+
+{% block section_cq %}
+{% include 'shared_module/_cq_selector_toolbar.html' %}
+{% endblock %}
+
+{% block page_name %}
+<i class="far fa-folder"></i>
+Public Website
+{% endblock %}
+{% block content %}
+  <style>
+    #versions ul {
+      list-style-type: none;
+      display: flex;
+      padding: 0;
+    }
+
+    #versions li {
+      margin-right: 20px;
+      text-align: center;
+    }
+
+    #versions .folder {
+      font-size: 50px;
+      color: cadetblue;
+      display: block;
+      margin-bottom: 5px;
+    }
+    .folder-list {
+        margin: 10px 40px
+    }
+    .folder-list ul li{
+        padding: 10px 20px;
+    }
+  </style>
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+</head>
+<body>
+
+<div id="versions">
+    <div class="d-flex justify-content-between px-5 py-3">
+        <h4>Website Version Manager</h4>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createVersion">Create New Version</button>
+    </div>
+    <div class="folder-list">
+        <ul>
+            <li v-for="name in names" :key="name">
+              <i class="fas fa-folder folder"></i>
+              <div class="d-flex align-items-center">
+                <div style="margin-right: 5px;">{{ name }}</div>
+                <button title="Delete Version" class="btn btn-sm btn-outline-danger" @click="deleteVersionAlert(name)">
+                  <i class="fa fa-trash"></i>
+                </button>
+              </div>
+            </li>
+        </ul>
+    </div>
+
+    <div class="modal fade" id="createVersion" tabindex="-1" aria-labelledby="createVersionLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="createVersionLabel">Modal title</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="inputField mb-3">Version Name:</label>
+              <div class="input-group mb-3">
+                <input v-model="versionName" type="text" class="form-control" id="inputField" aria-label="Default" aria-describedby="inputGroup-sizing-default" placeholder="Enter something...">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" @click="saveVersion">Save changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+
+
+</body>
+
+{% endblock %}
+
+{% block active_nav_link %}project-public-version{% endblock %}
+
+{% block script %}
+
+<script>
+   let resData = '[[ versions_list|safe ]]';
+   let version_url  = "[[ url_for('project.webiste_versioning') ]]"
+   resData = JSON.parse(resData);
+   debugger;
+    new Vue({
+      el: '#versions',
+      data: {
+        names: resData,
+        versionName: ''
+      },
+      methods : {
+        saveVersion() {
+          $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            url: version_url,
+            data: {
+              versionName: this.versionName
+            },
+            cache: false,
+            success: function (data) {
+              $('#createVersion').modal('hide')
+              toast('Version added succesfully');
+              location.reload();
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+            }
+          });
+        },
+        deleteVersion(versionName) {
+          $.ajax({
+              type: 'POST',
+              dataType: 'json',
+              url: version_url,
+              data: {
+                  delete_version: versionName
+              },
+              cache: false,
+              success: function (data) {
+                  if (data.success) {
+                      toast('Version deleted successfully');
+                      location.reload();
+                  } else {
+                      console.error('Deletion failed');
+                  }
+              },
+              error: function (jqXHR, textStatus, errorThrown) {
+                  console.error('AJAX request failed');
+              }
+          });
+        },
+        deleteVersionAlert: function(name) {
+            swal({
+                    title: "Are you sure?",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                })
+                .then((yes) => {
+                if (yes) {
+                    this.deleteVersion(name);
+                    //toast('Version is deleted');
+                }
+            });
+        },
+      }
+    });
+  </script>
+
+{% endblock %}

@@ -1,0 +1,426 @@
+{% extends '_layout_bs.html' %}
+
+{% block title %}
+PWMA CoE Analysis API Demo
+{% endblock %}
+
+{% block style %}
+<style>
+.code {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #eeeeee;
+    font-size: 13px;
+}
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-5">
+            <h2>RPLT PWMA CoE Analysis API Demo</h2>
+            <p>
+                RPLT PWMA CoE Analysis API Test for <span class="code">/rplt/PWMA_COE</span>. <br>
+                The return URL is the relative path to root, please add to absolute path in your own code. The server supports cross-domain access and HTTP header "Access-Control-Allow-Origin" has been added, so this service can be accessed from any server.
+                The usage of this web API in JavaScript is also available in the source code of this page for reference. <br>
+                There are only four parameters:
+            </p>
+            <div>
+                <h3>
+                    RAW Format
+                </h3>
+                <div class="form-group row">
+                    <label for="rs_raw" class="col-sm-3 col-form-label">
+                        rs
+                    </label>
+                    <div class="col-sm-9">
+                        <textarea class="form-control code" id="rs_raw" rows="5" style="font-size: 9px;"></textarea>
+                        <small id="rsHelp" class="form-text text-muted">
+                            Records
+                        </small>
+                    </div>
+ 
+                </div>
+
+                <div class="form-group row">
+                    <label for="cfg_raw" class="col-sm-3 col-form-label">
+                        cfg
+                    </label>
+                    <div class="col-sm-9">
+                        <textarea class="form-control code" id="cfg_raw" rows="5" style="font-size: 9px;"></textarea>
+                        <small id="cfgHelp" class="form-text text-muted">
+                            Config
+                        </small>
+                    </div>
+                </div>
+
+                <h3>
+                    PRE format
+                </h3>
+                <div class="form-group row">
+                    <label for="rs_pre" class="col-sm-3 col-form-label">
+                        rs
+                    </label>
+                    <div class="col-sm-9">
+                        <textarea class="form-control code" id="rs_pre" rows="5" style="font-size: 9px;"></textarea>
+                        <small id="rsHelp" class="form-text text-muted">
+                            Records
+                        </small>
+                    </div>
+ 
+                </div>
+
+                <div class="form-group row">
+                    <label for="cfg_pre" class="col-sm-3 col-form-label">
+                        cfg
+                    </label>
+                    <div class="col-sm-9">
+                        <textarea class="form-control code" id="cfg_pre" rows="5" style="font-size: 9px;"></textarea>
+                        <small id="cfgHelp" class="form-text text-muted">
+                            Config
+                        </small>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="form-group row">
+                    <label for="apikey" class="col-sm-3 col-form-label">apikey
+                    </label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="apikey" value="[[ config['settings'].API_SYSTEM_APIKEYS[0] ]]">
+                        <small id="apikeyHelp" class="form-text text-muted">
+                            For the security of this service, API Key is required for authentication.
+                        </small>
+                    </div>
+ 
+                </div>
+                
+                <div class="form-group row">
+                    <div class="col-sm-5">
+                        <button onclick="get_data('raw');" class="btn btn-primary">
+                            Submit for RAW
+                        </button>
+                    </div>
+                    <div class="col-sm-5">
+                        <button onclick="get_data('pre');" class="btn btn-primary">
+                            Submit for PRE
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-7" style="padding-top: 20px;">
+            
+            <h4>Server Response: </h4>
+            <pre id="resp" style="width: 100%; max-height: 500px;" class="code">
+
+            </pre>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+
+var rs_samples = {
+    "raw": [
+        { study: 'Raskob et al', year: 2017, Et: 41, Nt: 522, Ec: 59, Nc: 524, pid: '1234', rob: 'L', ind: 'V' },
+        { study: 'Young et al', year: 2018, Et: 8, Nt: 203, Ec: 18, Nc: 203, pid: '2345', rob: 'L', ind: 'V' },
+        { study: 'McBane et al', year: 2019, Et: 1, Nt: 145, Ec: 9, Nc: 142, pid: '3456', rob: 'L', ind: 'V' },
+        { study: 'Don et al', year: 2020, Et: 32, Nt: 576, Ec: 46, Nc: 579, pid: '4567', rob: 'M', ind: 'V' },
+        { study: 'Kim et al', year: 2021, Et: 18, Nt: 276, Ec: 26, Nc: 279, pid: '5678', rob: 'L', ind: 'V' },
+        { study: 'Aaskob et al', year: 2017, Et: 45, Nt: 512, Ec: 55, Nc: 524, pid: '6789', rob: 'L', ind: 'M' },
+        { study: 'Boung et al', year: 2018, Et: 18, Nt: 213, Ec: 18, Nc: 202, pid: '7890', rob: 'L', ind: 'N' },
+        { study: 'DcBane et al', year: 2019, Et: 2, Nt: 125, Ec: 9, Nc: 141, pid: '8901', rob: 'L', ind: 'V' },
+        { study: 'Eon et al', year: 2020, Et: 30, Nt: 546, Ec: 43, Nc: 573, pid: '9012', rob: 'L', ind: 'M' },
+        { study: 'Fim et al', year: 2021, Et: 15, Nt: 306, Ec: 25, Nc: 272, pid: '9123', rob: 'L', ind: 'V' },
+    ],
+    "pre": [
+    {
+        "TE": 0.8,
+        "lowerci": 0.67,
+        "upperci": 0.97,
+        "survival_in_treatment": 17.5,
+        "survival_in_control": 15.6,
+        "Et": 217,
+        "Nt": 338,
+        "Ec": 235,
+        "Nc": 336,
+        "rob": "L",
+        "pid": "15470214",
+        "arm_idx": 0,
+        "study": "Petrylak, Daniel P. et al 2004",
+        "treatment": "Treatment",
+        "control": "Control",
+        "ind": "M",
+        "year": 2004
+    },
+    {
+        "TE": 0.58,
+        "lowerci": 0.39,
+        "upperci": 0.88,
+        "survival_in_treatment": 25.9,
+        "survival_in_control": 21.4,
+        "Et": null,
+        "Nt": 82,
+        "Ec": 25,
+        "Nc": 45,
+        "rob": "L",
+        "pid": "16809734",
+        "arm_idx": 0,
+        "study": "Small, Eric J. et al 2006",
+        "treatment": "Treatment",
+        "control": "Control",
+        "ind": "M",
+        "year": 2006
+    },
+    {
+        "TE": 0.97,
+        "lowerci": 0.81,
+        "upperci": 1.17,
+        "survival_in_treatment": 20.5,
+        "survival_in_control": 20.3,
+        "Et": null,
+        "Nt": 408,
+        "Ec": 286,
+        "Nc": 401,
+        "rob": "L",
+        "pid": "17886253",
+        "arm_idx": 0,
+        "study": "Carducci, Michael A. et al 2007",
+        "treatment": "Treatment",
+        "control": "Control",
+        "ind": "M",
+        "year": 2007
+    },
+    {
+        "TE": 1.67,
+        "lowerci": 0.77,
+        "upperci": 3.64,
+        "survival_in_treatment": 20.9,
+        "survival_in_control": null,
+        "Et": 18,
+        "Nt": 57,
+        "Ec": 15,
+        "Nc": 59,
+        "rob": "L",
+        "pid": "17908974",
+        "arm_idx": 0,
+        "study": "Mathew, Paul et al 2007",
+        "treatment": "Treatment",
+        "control": "Control",
+        "ind": "M",
+        "year": 2007
+    },
+    {
+        "TE": 0.79,
+        "lowerci": 0.67,
+        "upperci": 0.93,
+        "survival_in_treatment": 19.2,
+        "survival_in_control": 16.3,
+        "Et": 285,
+        "Nt": 335,
+        "Ec": 297,
+        "Nc": 337,
+        "rob": "L",
+        "pid": "18182665",
+        "arm_idx": 0,
+        "study": "Berthold, Dominik R. et al 2008",
+        "treatment": "Treatment",
+        "control": "Control",
+        "ind": "V",
+        "year": 2008
+    },
+    {
+        "TE": 0.87,
+        "lowerci": 0.74,
+        "upperci": 1.02,
+        "survival_in_treatment": 17.8,
+        "survival_in_control": 16.3,
+        "Et": 285,
+        "Nt": 334,
+        "Ec": 297,
+        "Nc": 337,
+        "rob": "L",
+        "pid": "18182665",
+        "arm_idx": 1,
+        "study": "Berthold, Dominik R. et al 2008",
+        "treatment": "Treatment",
+        "control": "Control",
+        "ind": "V",
+        "year": 2008
+    },
+    {
+        "TE": 0.79,
+        "lowerci": 0.48,
+        "upperci": 1.28,
+        "survival_in_treatment": 19,
+        "survival_in_control": 15.7,
+        "Et": null,
+        "Nt": 65,
+        "Ec": 18,
+        "Nc": 33,
+        "rob": "L",
+        "pid": "19536890",
+        "arm_idx": 0,
+        "study": "Higano, Celestia S. et al 2009",
+        "treatment": "Treatment",
+        "control": "Control",
+        "ind": "M",
+        "year": 2009
+    },
+    {
+        "TE": 0.98,
+        "lowerci": 0.84,
+        "upperci": 1.15,
+        "survival_in_treatment": 14.1,
+        "survival_in_control": 14.1,
+        "Et": 474,
+        "Nt": 635,
+        "Ec": 239,
+        "Nc": 315,
+        "rob": "L",
+        "pid": "19805692",
+        "arm_idx": 0,
+        "study": "Sternberg, Cora N. et al 2009",
+        "treatment": "Treatment",
+        "control": "Control",
+        "ind": "M",
+        "year": 2009
+    },
+    {
+        "TE": 0.78,
+        "lowerci": 0.61,
+        "upperci": 0.98,
+        "survival_in_treatment": 25.8,
+        "survival_in_control": 21.7,
+        "Et": 210,
+        "Nt": 341,
+        "Ec": 121,
+        "Nc": 171,
+        "rob": "L",
+        "pid": "20818862",
+        "arm_idx": 0,
+        "study": "Kantoff, Philip W. et al 2010",
+        "treatment": "Treatment",
+        "control": "Control",
+        "ind": "M",
+        "year": 2010
+    },
+    {
+        "TE": 0.7,
+        "lowerci": 0.59,
+        "upperci": 0.83,
+        "survival_in_treatment": 15.1,
+        "survival_in_control": 12.7,
+        "Et": 234,
+        "Nt": 378,
+        "Ec": 279,
+        "Nc": 377,
+        "rob": "L",
+        "pid": "20888992",
+        "arm_idx": 0,
+        "study": "de Bono et al 2010",
+        "treatment": "Treatment",
+        "control": "Control",
+        "ind": "V",
+        "year": 2010
+    }
+]
+}
+
+
+var cfg_samples = {
+    'raw': {
+        "input_format": "PRIM_CAT_RAW",
+        "measure_of_effect": "RR",
+        "fixed_or_random": "random",
+        "which_is_better": "lower",
+
+        "pooling_method": "Inverse",
+        "tau_estimation_method": "DL",
+        "hakn_adjustment": "FALSE",
+        "smd_estimation_method": "Hedges",
+        "prediction_interval": "FALSE",
+        "sensitivity_analysis": "no",
+        "cumulative_meta_analysis": "no",
+        "cumulative_meta_analysis_sortby": "year",
+
+        "external_val": 0,
+        "has_internal_val": false,
+        "survival_in_control": 0,
+        "internal_val_ec": 0,
+        "internal_val_et": 0,
+
+        // for imprecision
+        "imp_t": ""
+    },
+
+    "pre": {
+        "input_format": "PRIM_CAT_PRE",
+        "measure_of_effect": "HR",
+        "fixed_or_random": "random",
+        "which_is_better": "lower",
+
+        "pooling_method": "Inverse",
+        "tau_estimation_method": "DL",
+        "hakn_adjustment": "FALSE",
+        "smd_estimation_method": "Hedges",
+        "prediction_interval": "FALSE",
+        "sensitivity_analysis": "no",
+        "cumulative_meta_analysis": "no",
+        "cumulative_meta_analysis_sortby": "year",
+
+        "external_val": 0,
+        "has_internal_val": false,
+        "survival_in_control": 0,
+        "internal_val_ec": 0,
+        "internal_val_et": 0,
+
+        // for imprecision
+        "imp_t": ""
+    }
+}
+
+
+var is_subg_analysis = true;
+
+$('#rs_raw').html(JSON.stringify(rs_samples.raw));
+$('#cfg_raw').html(JSON.stringify(cfg_samples.raw));
+
+$('#rs_pre').html(JSON.stringify(rs_samples.pre));
+$('#cfg_pre').html(JSON.stringify(cfg_samples.pre));
+
+function get_data(data_type) {
+
+    var data = {
+        rs: rs_samples[data_type],
+        cfg: cfg_samples[data_type],
+    };
+    console.log(data);
+
+    // clear the response area
+    $('#resp').html('Waiting for response ....');
+
+    var base = '';
+    axios.post(
+        '/rplt/PWMA_COE', data, {
+            headers: {
+                'x-token': $('#apikey').val()
+            }
+        }
+    )
+    .then(function(res) {
+        console.log('* get return', res);
+        $('#resp').html(JSON.stringify(res, null, 2));
+    })
+}
+// show the JSON content of rs in textarea
+</script>
+{% endblock %}

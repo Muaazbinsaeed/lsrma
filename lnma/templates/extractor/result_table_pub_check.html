@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    
+    <title>Result Table</title>
+    
+    <link rel="icon" href="/static/img/favicon.png" type="image/png">
+    <script src="https://kit.fontawesome.com/cb45cc91b0.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+    <link rel="stylesheet" href="//cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <script src="//code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="//cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+
+    <style>
+
+        .not-found-message {
+            text-align: center;
+            font-size: 2em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 90vh;
+            margin: 0;
+        }
+    
+        button {
+            background:#e0e0e0;
+            border:none;
+            outline:0;
+            padding: 8px 15px;
+            border-radius: 5px;
+        }
+    
+        input {
+            margin-right: 5px;
+        }
+    
+        label {
+            font-size: 12px !important;
+            font-weight: lighter !important;
+            margin-bottom: 10px;
+            word-wrap: break-word;
+        }
+    
+        /* left-panel Toggle */
+    
+        .left-panel {
+            background:#fff;
+            box-shadow:0 2px 8px rgba(0,0,0,0.2);
+            transition:all 0.3s ease-out;
+            height: 80vh;
+            width: 10%;
+            padding: 10px;
+            border-radius: 10px;
+            position:fixed;
+            left: 15px;
+            overflow-y: auto;
+        }
+    
+        .left-panel-show {
+            left: -360px;
+        }
+        .empty-cell-color{
+            background-color:rgb(224, 55, 55); 
+        }
+    
+    
+        /* right-panel Toggle */
+    
+        .right-panel {
+            background:#fff;
+            box-shadow:0 2px 8px rgba(0,0,0,0.2);
+            transition:all 0.3s ease-out;
+            height: 80vh;
+            width: 20%;
+            padding: 10px;
+            border-radius: 10px;
+            position:fixed;
+            right: 10px;
+            overflow-y: auto;
+        }
+    
+        .right-panel-show {
+            right: -440px;
+        }
+    
+        .tile {
+            display: none;
+            width: 250px;
+            border-radius: 10px;
+            background-color: #1c6491;
+            color: #fff;
+            text-align: center;
+            cursor: pointer;
+        }
+    
+        table {
+            width: 100%;
+            text-align: center;
+            font-size: 12px !important;
+            font-weight: lighter !important;
+        }
+    
+        .table-responsive {
+            width: 66.7%;
+            margin-left: 11.5%;
+            transition: all 0.3s ease-out;
+        }
+    
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 8px;
+        }
+    
+        #trialNames {
+            word-wrap: break-word;
+        }
+        #trialNames p {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+    
+        .selected-options {
+            font-weight: bold;
+        }
+    
+        .multiselect {
+            display: inline-block;
+            position: relative;
+        }
+    
+        .select-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px 20px;
+            margin-left: 10px;
+            border: 1px solid #334f73;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            z-index: 1;
+            right: 0;
+        }
+    
+        .dropdown-content label {
+            display: block;
+            padding: 10px;
+            cursor: pointer;
+        }
+    
+        .selected-options {
+            margin-top: 10px;
+        }
+
+        .toggle-button {
+            display: block;
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+            margin-left: 12px;
+        }
+
+        .toggle-button input {
+            display: none;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            border-radius: 34px;
+            height: 15px;
+            width: 30px;
+            background-color: #ccc;
+            transition: 0.4s;
+            top: 2px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 12px;
+            width: 12px;
+            left: 2px;
+            bottom: 2px;
+            border-radius: 50%;
+            background-color: #fff;
+            transition: 0.4s;
+        }
+
+        input:checked + .slider {
+            background-color: #007bff;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(14px);
+        }
+
+        /* accordion */
+        .accordion-content {
+            display: none;
+        }
+        .accordion-header {
+            cursor: pointer;
+            position: relative;
+            display: block;
+        }
+            
+    </style>
+</head>
+<body>
+<div class="content">
+    <div id="table-container" class="container-fluid">
+
+        <div class="row mt-2">
+            <div class="col-12">
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="row-toggle-btn" id="row-toggle-btn">
+                        <span id="row-manager"></span> Manager
+                    </button>
+
+                    <button type="button" class="toggle" id="toggle">
+                        <span id="column-manager"></span> Manager
+                    </button>
+            </div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="d-flex">
+
+                    <div>
+                         <div class="left-panel" id='left-panel'>
+                            <h4 id="trialLabel"></h4>
+                            <div id="variables">
+                    
+                            </div>
+                          </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table id="resultTable">
+                        </table>
+                    </div>
+                    <div>
+                         <div class="right-panel" id='right-panel'>
+                            <div class="trials">
+                                <div class="multiselect">
+                                    <div class="d-flex align-items-center">
+                                        
+                                        <div class="select-box" onclick="toggleDropdown()" style="visibility: hidden;">
+                                            <div>Select <span id="dropdown-text"></span></div>
+                                            <div>&#9660;</div>
+                                            checkbox     </div>
+                                    </div>                                    
+
+
+                                    <div class="dropdown-content" id="dropdown">
+                                        <label><input class="category-chck" type="checkbox" value="all">All</label>
+                                    </div>
+                                </div>
+                                <hr style="border-top: 3px solid rgba(0,0,0,.1);">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <label class="toggle-button mb-0"><input id="show-all" class="category-chck" type="checkbox" value="all"><span class="slider round"></span><span style="margin-left: 36px; font-size: 14px;" id="categoryLabel">Show All</span></label>
+                                    <button id="show-collapsed-items" class="btn btn-primary">Show All</button>
+                                    <button id="hide-collapsed-items" class="btn btn-primary d-none">Hide All</button>
+                                </div>
+                                <div id="trialNames"></div>
+                                <hr style="border-top: 3px solid rgba(0,0,0,.1);">
+                            </div>
+                          </div>
+                    </div>
+                </div>
+            </div>
+        </div> 
+    </div>
+</div>
+<script>
+    console.log("&&&&&&&&")
+    console.log(
+     localStorage.getItem('cate_attrs_relations'),
+     localStorage.getItem('parent_nested_realtion'),
+     localStorage.getItem('comaparator_name'),
+     localStorage.getItem('varaiable_name'),
+     localStorage.getItem('abbr_list_updated'),
+     localStorage.getItem('result_table_records'),
+    )
+    let tableHeaders = [];
+    let categoryLabel = localStorage.getItem('comaparator_name');
+    let trialLabel = localStorage.getItem('varaiable_name');
+    let resData = localStorage.getItem('cate_attrs_relations');
+    let rowResData =localStorage.getItem('result_table_records');
+    let seq_data = localStorage.getItem('result_table_records_seq');
+    let rowResMapping = localStorage.getItem('parent_nested_realtion');
+    let abbrResMapping =  localStorage.getItem('abbr_list_updated');
+
+    let rowMappingModified = {};
+    let rowHistory = [];
+
+
+        
+
+    if (
+        !resData || resData === undefined || resData === null || Object.keys(resData).length === 0 ||
+        !rowResData || rowResData === undefined || rowResData === null ||
+        !rowResMapping || rowResMapping === undefined || rowResMapping === null
+        ) {
+            var tableContainer = document.getElementById('table-container');
+            tableContainer.innerHTML = '<p class="not-found-message">Data Not Found</p>';
+    } 
+    else {
+        let data = JSON.parse(resData);
+        let rowData = JSON.parse(rowResData);
+        let rowMapping = JSON.parse(rowResMapping);
+        let abbrMapping = JSON.parse(abbrResMapping);
+
+        //creating the category dropdown
+        const namesArray = data.map(item => item.name);
+        const dropdownContainer = document.getElementById("dropdown");
+
+        namesArray.forEach(name => {
+            const label = document.createElement("label");
+            const input = document.createElement("input");
+
+            input.type = "checkbox";
+            input.value = name;
+            input.className = "category-chck";
+
+            label.appendChild(input);
+            label.appendChild(document.createTextNode(` ${name}`));
+
+            dropdownContainer.appendChild(label);
+        });
+
+        let subCategoryFlag = false;
+        var headerCounter = 0;
+        var rowCounter = 0;
+
+        var table = document.getElementById("resultTable");
+        var categories = document.getElementById("categories");
+        var trialNames = document.getElementById("trialNames");
+        var variablesNames = document.getElementById("variables");
+        var trialLabelText = document.getElementById("trialLabel");
+        var categoryLabelText = document.getElementById("categoryLabel");
+        var rowManagerText = document.getElementById("row-manager");
+        var columnManagerText = document.getElementById("column-manager");
+        var dropDownText = document.getElementById("dropdown-text");
+ 
+
+        categoryLabelText.innerHTML = categoryLabel;
+        trialLabelText.innerHTML = trialLabel;
+        rowManagerText.innerHTML = trialLabel;
+        columnManagerText.innerHTML = categoryLabel;
+        dropDownText.innerHTML = categoryLabel;
+
+        var colors = ["#81BDC7", "#80BDE9", "#B5BCCE", "#B8A4E9", "#81BDC7", "#80BDE9", "#B5BCCE", "#B8A4E9","#81BDC7", "#80BDE9", "#B5BCCE", "#B8A4E9", "#81BDC7", "#80BDE9", "#B5BCCE", "#B8A4E9"];
+
+        var thead = document.createElement("thead");
+        table.appendChild(thead);
+
+        var row1 = document.createElement("tr");
+        var row2 = document.createElement("tr");
+        var row3 = document.createElement("tr");
+        thead.appendChild(row1);
+        thead.appendChild(row2);
+        thead.appendChild(row3);
+
+        var comparatorHeader = document.createElement("th");
+        comparatorHeader.textContent = categoryLabel;
+
+        data.forEach(function (item){
+            for (var key in item) {
+                item["attrs"].forEach(function (subItem) {
+                    for (var subItemKey in subItem) {
+                        if(item['attrs'][0]['sub_categories'].length > 0) {
+                            subCategoryFlag = true;
+                            return;
+                        }
+                    }
+                });
+            }
+        })
+
+        comparatorHeader.rowSpan = subCategoryFlag ? 3 : 2;
+        row1.appendChild(comparatorHeader);
+
+        var colorIndex = 0;
+
+    var headerIds = [];
+
+    data.forEach(function (item) {
+
+            var th1 = document.createElement("th");
+            th1.textContent = item['name'];
+            th1.style.textWrap = 'nowrap';
+            th1.setAttribute("data-column", item['abbr']);
+            th1.id = item['abbr']
+            var totalColSpan = 0;
+
+            item["attrs"].forEach(function (subItem) {
+                    if (subItem.sub_categories.length > 0) {
+                        totalColSpan += subItem.sub_categories.length;
+                    } else {
+                        totalColSpan += 1;
+                    }
+                
+            });
+
+            th1.colSpan = totalColSpan;
+            th1.style.backgroundColor = colors[colorIndex % colors.length];
+            th1.style.display = "table-cell"
+            colorIndex++;
+            tableHeaders.push(item['name']);
+
+            row1.appendChild(th1);
+
+            item['attrs'].forEach(function (sub, index) {
+                    var subHeader = document.createElement("th");
+                    subHeader.textContent = sub['name'];
+                    subHeader.style.textWrap = 'nowrap';
+                    subHeader.setAttribute("data-column", item['abbr']);
+
+                    subHeader.id = sub['abbr'];
+                    subHeader.value = sub['abbr'];
+                    subHeader.style.display = "table-cell"
+
+                    if (sub.sub_categories.length > 0) {
+                        subHeader.colSpan = sub.sub_categories.length;
+                    } else {
+                        subHeader.rowSpan = sub.sub_categories.length;
+                    }
+                    subHeader.style.backgroundColor = colors[colorIndex - 1];
+                    row2.appendChild(subHeader);
+
+                    if (sub.sub_categories.length > 0) {
+                        sub.sub_categories.forEach(function (subCat) {
+
+                            var subNestedHeader = document.createElement("th");
+                            subNestedHeader.textContent = subCat.name;
+                            subNestedHeader.id = subCat.abbr;
+                            subNestedHeader.style.textWrap = 'nowrap';
+                            subNestedHeader.setAttribute("data-column", item['abbr']);
+                            subNestedHeader.setAttribute("data-column1", sub['abbr']);
+                            subNestedHeader.style.display = "table-cell"
+
+                            subNestedHeader.style.backgroundColor = colors[colorIndex - 1];
+                            row3.appendChild(subNestedHeader);
+                        })
+                    }
+                    headerIds.push(sub['abbr']);
+                    headerCounter++;
+                
+            });
+    
+    });
+
+    var tbody = document.createElement("tbody");
+    table.appendChild(tbody);
+    seq_data = JSON.parse(seq_data)
+
+    rowData.forEach(function (category, index) {
+        for (var key in category) {
+            var tbodyRow = document.createElement("tr");
+            tbody.appendChild(tbodyRow);
+
+            var categoryCell = document.createElement("td");
+            categoryCell.textContent = key;
+            categoryCell.style.fontWeight = 'bold';
+            categoryCell.style.textWrap = 'nowrap';
+            categoryCell.setAttribute("data-column2", key);
+            tbodyRow.appendChild(categoryCell);
+
+            var checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.id = key;
+            checkbox.setAttribute("class", "variable-toggle");
+
+            checkbox.checked = true;
+
+            var label = document.createElement("label");
+            label.htmlFor = key;
+            label.appendChild(document.createTextNode(key));
+
+            variablesNames.appendChild(checkbox);
+            variablesNames.appendChild(label);
+
+            var lineBreak = document.createElement("br");
+            variablesNames.appendChild(lineBreak);
+            
+            var data = category[key];
+
+            rowHistory.push({[key]: true});
+
+            var dataIndex = 0;
+            seq_data.forEach(dataKey => {
+                abbrMapping[dataIndex];
+                var valueCell = document.createElement("td");
+                
+                valueCell.textContent = data[dataKey];
+                var rowId = dataKey.replace(/\W/g, '');
+                var parent_id = dataKey.split('|')[0].replace(/\W/g, '')
+                valueCell.id = abbrMapping[dataIndex][2];
+                if (!data[dataKey]){
+                    valueCell.setAttribute("class", 'empty-cell-color');
+                }
+                valueCell.setAttribute("data-column", abbrMapping[dataIndex][0]);
+                valueCell.setAttribute("data-column1", abbrMapping[dataIndex][1]);
+                valueCell.setAttribute("data-column2", key);
+                tbodyRow.appendChild(valueCell);
+                dataIndex++;
+            });
+        }
+    });
+
+
+    function trialNamesList(value) {
+        table.style.width = 'fit-content';
+        trialNames.innerHTML = "";
+        var selectedKey = value;
+        let selectedObjects = [];
+
+        var valuesArray = value.split(',').map(function(item) { return item.trim(); }).filter(Boolean);
+
+        if(valuesArray[0] !== 'all') {
+            selectedObjects = valuesArray.map(function(key) {
+                return data.find(function (item) {
+                    return item.name === key;
+                });
+            });
+        }
+
+        if(valuesArray[0] !== 'all') {
+            document.querySelectorAll('#resultTable th, #resultTable td').forEach(cell => {
+                cell.style.display = 'none';
+            });
+        }
+
+        document.querySelectorAll('#resultTable th:not([data-column]), #resultTable td:not([data-column])').forEach(cell => {
+            cell.style.display = 'table-cell';
+        });
+
+        selectedObjects.forEach(function(selectedObject) {
+            var collapseContent = document.createElement("div");
+            collapseContent.className = "accordion-content";
+            var parentName = document.createElement("a");
+            parentName.innerHTML = selectedObject.name+':';
+            parentName.className = "accordion-header";
+            parentName.style.fontSize = '14px';
+            parentName.style.textDecoration = 'underline';
+            
+            trialNames.appendChild(parentName);
+            
+
+            var label = document.createElement('label');
+            var input = document.createElement('input');
+            var slider = document.createElement('span');
+            var labelText = document.createElement('span');
+
+            // Set attributes and classes
+            label.className = 'toggle-button';
+            input.type = 'checkbox';
+            input.id = selectedObject['abbr'];
+            input.checked = true;
+            slider.className = 'slider round';
+            labelText.style.marginLeft = '36px';
+            labelText.style.fontSize = '14px';
+            labelText.textContent = 'Check All';
+
+            input.addEventListener("click", function() {
+                checkAllTrialWise(input.id, input.checked)
+            });
+
+            label.appendChild(input);
+            label.appendChild(slider);
+            label.appendChild(labelText);
+            collapseContent.appendChild(label);
+
+
+            if (selectedObjects.length > 0) {
+                var filteredArray = [];
+                            selectedObject['attrs'].forEach(function (item) {
+                                    var checkbox = document.createElement("input");
+                                    checkbox.type = "checkbox";
+                                    checkbox.style.marginLeft = '20px';
+
+                                    checkbox.id = item.abbr;
+                                    checkbox.setAttribute("data-column", selectedObject['abbr']);
+                                    checkbox.setAttribute("class", "trial-toggle");
+                                    
+                                   
+                                    checkbox.checked = true;
+
+                                    var label = document.createElement("label");
+                                    label.htmlFor = item.name;
+                                    label.appendChild(document.createTextNode(item.name));
+
+                                    collapseContent.appendChild(checkbox);
+                                    collapseContent.appendChild(label);
+
+                                    var lineBreak = document.createElement("br");
+                                    collapseContent.appendChild(lineBreak);
+
+                                    item.sub_categories.forEach(function (childs){
+                                        var checkbox = document.createElement("input");
+                                        checkbox.type = "checkbox";
+                                        checkbox.id = childs.abbr;
+                                        checkbox.setAttribute("data-column", selectedObject['abbr']);
+                                        checkbox.setAttribute("data-column1", item['abbr']);
+                                        checkbox.setAttribute("class", "trial-toggle");
+                                        checkbox.checked = true;
+                                        checkbox.style.marginLeft = '40px';
+
+                                        var label = document.createElement("label");
+                                        label.htmlFor = childs.name;
+                                        label.appendChild(document.createTextNode(childs.name));
+
+                                        collapseContent.appendChild(checkbox);
+                                        collapseContent.appendChild(label);
+
+                                        var lineBreak = document.createElement("br");
+                                        collapseContent.appendChild(lineBreak);
+                                                
+                                    });
+                                    trialNames.appendChild(collapseContent);
+                            });
+
+                            filteredArray = tableHeaders.filter(th => th !== selectedObject.name);
+                            document.querySelectorAll('#resultTable th').forEach(cell => {
+                                if (cell.getAttribute('data-column') === selectedObject.abbr) {
+                                    cell.style.display = 'table-cell';
+                                } 
+                            });
+                            document.querySelectorAll('#resultTable td').forEach(cell => {
+                                if (cell.getAttribute('data-column') === selectedObject.abbr) {
+                                    cell.style.display = 'table-cell';
+                                } 
+                            });
+                        var trialCheckboxes = document.querySelectorAll('input[type=checkbox].trial-toggle');
+
+                    for (var i = 0; i < trialCheckboxes.length; i++) {
+                        trialCheckboxes[i].addEventListener('change', hideTrialColumn);
+                    }
+            }
+
+        });
+
+        if(valuesArray[0] === 'all') {
+
+            data.forEach(function (item) {
+                var collapseContent = document.createElement("div");
+                collapseContent.className = "accordion-content";
+                var parentName = document.createElement("a");
+                parentName.innerHTML = item.name+':';
+                parentName.className = "accordion-header";
+                parentName.style.fontSize = '14px';
+                parentName.style.textDecoration = 'underline';
+
+                var label = document.createElement('label');
+                var input = document.createElement('input');
+                var slider = document.createElement('span');
+                var labelText = document.createElement('span');
+
+                // Set attributes and classes
+                label.className = 'toggle-button';
+                input.type = 'checkbox';
+                input.id = item['abbr'];
+                input.checked = true;
+                slider.className = 'slider round';
+                labelText.style.marginLeft = '36px';
+                labelText.style.fontSize = '14px';
+                labelText.textContent = 'Check All';
+
+                input.addEventListener("click", function() {
+                    checkAllTrialWise(input.id, input.checked)
+                });
+                
+                trialNames.appendChild(parentName);
+
+                label.appendChild(input);
+                label.appendChild(slider);
+                label.appendChild(labelText);
+                collapseContent.appendChild(label);
+
+                item['attrs'].forEach(function (sub) {
+                        var checkbox = document.createElement("input");
+                        checkbox.type = "checkbox";
+                        checkbox.style.marginLeft = '20px';
+
+                        checkbox.id = sub.abbr;
+                        checkbox.setAttribute("data-column", item['abbr']);
+                        checkbox.setAttribute("class", "trial-toggle");
+                       
+                        checkbox.checked = true;
+
+                        var label = document.createElement("label");
+                        label.htmlFor = sub.name;
+                        label.appendChild(document.createTextNode(sub.name));
+
+                        collapseContent.appendChild(checkbox);
+                        collapseContent.appendChild(label);
+
+                        var lineBreak = document.createElement("br");
+                        collapseContent.appendChild(lineBreak);
+
+                        sub.sub_categories.forEach(function (childs){
+                            var checkbox = document.createElement("input");
+                            checkbox.type = "checkbox";
+                            checkbox.id = childs.abbr;
+                            checkbox.setAttribute("data-column", item['abbr']);
+                            checkbox.setAttribute("data-column1", sub['abbr']);
+                            checkbox.setAttribute("class", "trial-toggle");
+                            console.log("@@@  " + item['abbr'] + item['name'])
+                            checkbox.checked = true;
+                            checkbox.style.marginLeft = '40px';
+
+                            var label = document.createElement("label");
+                            label.htmlFor = childs.name;
+                            label.appendChild(document.createTextNode(childs.name));
+
+                            collapseContent.appendChild(checkbox);
+                            collapseContent.appendChild(label);
+
+                            var lineBreak = document.createElement("br");
+                            collapseContent.appendChild(lineBreak);
+                                    
+                        });
+                        });
+                        trialNames.appendChild(collapseContent);
+                    });
+
+                    var trialCheckboxes = document.querySelectorAll('input[type=checkbox].trial-toggle');
+
+                    for (var i = 0; i < trialCheckboxes.length; i++) {
+                        trialCheckboxes[i].addEventListener('change', hideTrialColumn);
+                    }
+
+                    var trialNestedCheckboxes = document.querySelectorAll('input[type=checkbox].trial-toggle');
+
+                    for (var i = 0; i < trialCheckboxes.length; i++) {
+                        trialCheckboxes[i].addEventListener('change', hideTrialColumn);
+                    }
+            }
+        $("#show-collapsed-items").click(function () {
+            $(this).toggleClass('d-none');
+            $(this).next().toggleClass('d-none');
+            let collapseContentElements = document.getElementsByClassName("accordion-header");
+            for (let i = 0; i < collapseContentElements.length; i++) {
+                let collapseElement = collapseContentElements.item(i);
+                collapseElement.className = "accordion-header active";
+                $(collapseElement).next().show();
+            }
+        })
+        $("#hide-collapsed-items").click(function () {
+            $(this).toggleClass('d-none');
+            $(this).prev().toggleClass('d-none');
+            let collapseContentElements = document.getElementsByClassName("accordion-header");
+            for (let i = 0; i < collapseContentElements.length; i++) {
+                let collapseElement = collapseContentElements.item(i);
+                collapseElement.className = "accordion-header";
+                $(collapseElement).next().hide();
+            }
+        })
+        $(".accordion-header").click(function () {
+            $(this)
+            .toggleClass("active")
+            .next(".accordion-content")
+            .slideToggle()
+            .parent()
+            .siblings()
+            .find(".accordion-content")
+            .slideUp()
+            .prev()
+            .removeClass("active");
+        });
+    }
+
+    window.onload = trialNamesList('all');
+    }
+
+    function checkAllTrialWise(id, state) {
+        if(state) {
+            var checkboxes = document.querySelectorAll('input[data-column="' + id + '"]');
+            for (let index = 0; index < checkboxes.length; index++) {
+                const trialCheckboxValue = checkboxes[index].id;
+                const trialState = true;
+                const checkBoxState = true;
+                const parentHeader = checkboxes[index].dataset.column;
+                const nestedDataColumn = checkboxes[index].dataset.column1;
+                if(nestedDataColumn && !checkboxes[index].checked) {
+                    hideNestedColumns(trialCheckboxValue,checkBoxState,nestedDataColumn,parentHeader, trialState)
+                    checkboxes[index].checked = true;
+                }
+                if(!checkboxes[index].checked) {
+                    hideChildColumns(trialCheckboxValue,checkBoxState,nestedDataColumn,parentHeader, trialState)
+                    checkboxes[index].checked = true;
+                }
+            }
+        }
+        else {
+            var checkboxes = document.querySelectorAll('input[data-column="' + id + '"]');
+            for (let index = 0; index < checkboxes.length; index++) {
+                const trialCheckboxValue = checkboxes[index].id;
+                const trialState = false;
+                const checkBoxState = false;
+                const parentHeader = checkboxes[index].dataset.column;
+                const nestedDataColumn = checkboxes[index].dataset.column1;
+                checkboxes[index].checked = false;
+                hideChildColumns(trialCheckboxValue,checkBoxState,nestedDataColumn,parentHeader, trialState)   
+            }
+
+            var checkboxShowAllToUncheck = document.getElementById('show-all');
+            checkboxShowAllToUncheck.checked = false;
+
+        }
+    }
+
+    function toggleDropdown() {
+        var dropdown = document.getElementById("dropdown");
+        dropdown.style.display = (dropdown.style.display === "block") ? "none" : "block";
+    }
+
+    function updateSelectedOptions(event) {
+        var categoryCheckboxValue = event.target.value;
+        var categoryCheckboxState = event.target.checked;
+
+        if(categoryCheckboxValue === 'all') {
+            if(categoryCheckboxState){
+                    categoryCheckboxes.forEach(function (catCheck){
+                    catCheck.checked = true;
+                });
+                showCompleteTable(categoryCheckboxValue);
+                return;
+            }
+        }
+        else {
+            showCompleteTable(categoryCheckboxValue);
+        }
+
+        if (categoryCheckboxValue === 'all' && event.target.checked) {
+            categoryCheckboxes.forEach(function (catCheck){
+                catCheck.checked = true;
+            });
+        }
+        else if(categoryCheckboxValue === 'all' && !event.target.checked) {
+            categoryCheckboxes.forEach(function (catCheck){
+                catCheck.checked = false;
+            });
+        } else {
+            if (!event.target.checked) {
+                document.querySelector('input[value="all"]').checked = false;
+            }
+        }
+        var selectedOptions = document.querySelectorAll('input[type=checkbox].category-chck:checked');
+        var selectedOptionsText = "";
+        for (var i = 0; i < selectedOptions.length; i++) {
+            if (selectedOptions[i].value !== 'all') {
+                selectedOptionsText += selectedOptions[i].value + ", ";
+            }
+        }
+        trialNamesList(selectedOptionsText);
+    }
+
+    //Loop to get all category checkboxes
+    var categoryCheckboxes = document.querySelectorAll('input[type=checkbox].category-chck');
+
+    for (var i = 0; i < categoryCheckboxes.length; i++) {
+        categoryCheckboxes[i].addEventListener('change', updateSelectedOptions);
+        categoryCheckboxes[i].checked = true;
+    }
+
+    
+    function toggleTableRows(event) {
+        var variableCheckboxValue = event.target.id;
+        var variableCheckboxState = event.target.checked;
+
+        if(variableCheckboxState) {
+
+            document.querySelectorAll('#resultTable td').forEach(cell => {
+                if (cell.getAttribute('data-column2') === variableCheckboxValue) {
+
+                    document.querySelectorAll('#resultTable th').forEach(headCell => {
+                        if(headCell.style.display === 'table-cell'){
+                            let dataColumn = headCell.getAttribute('data-column');
+                            if(dataColumn === cell.getAttribute('data-column')) {
+                                if(cell.getAttribute('data-column1') === headCell.getAttribute('id')) {
+                                    cell.style.display = 'table-cell';
+                                }
+                                
+                            }
+                        }
+                    });
+
+                    rowHistory.forEach(rowKey => {
+                        for (var key in rowKey) {
+                            if (key === variableCheckboxValue) {
+                                rowKey[key] = true;
+                            }
+                        }
+                    });
+                } 
+            });
+        } else {
+            document.querySelectorAll('#resultTable td').forEach(cell => {
+                if (cell.getAttribute('data-column2') === variableCheckboxValue) {
+                    cell.style.display = 'none';
+                    rowHistory.forEach(rowKey => {
+                        for (var key in rowKey) {
+                            if (key === variableCheckboxValue) {
+                                rowKey[key] = false;
+                            }
+                        }
+                    });
+                } 
+            });
+        }
+    }
+    
+    
+    //Loop to get all variable names checkboxes
+    var variableCheckboxes = document.querySelectorAll('input[type=checkbox].variable-toggle');
+
+    for (var i = 0; i < variableCheckboxes.length; i++) {
+        variableCheckboxes[i].addEventListener('change', toggleTableRows);
+    }
+
+
+    function hideTrialColumn(event) {
+        const trialCheckboxValue = event.target.id;
+        const checkBoxState = event.target;
+        const parentHeader = event.target.dataset.column;
+        const nestedDataColumn = event.target.dataset.column1;
+        const trialState = false;
+
+        var allCheckBoxes = document.querySelectorAll('input[type=checkbox].trial-toggle');
+
+
+        allCheckBoxes.forEach(function(checkbox) {
+            if (!checkbox.checked) {
+                var checkboxToUncheck = document.getElementById('show-all');
+                checkboxToUncheck.checked = false;
+            }
+        });
+
+
+
+        if(!nestedDataColumn) {
+            hideChildColumns(trialCheckboxValue,checkBoxState,nestedDataColumn,parentHeader, trialState)
+        } else {
+            hideNestedColumns(trialCheckboxValue,checkBoxState,nestedDataColumn,parentHeader, trialState)
+        }
+
+    }
+
+
+    function hideChildColumns(trialCheckboxValue,checkBoxState,nestedDataColumn,parentHeader,trialState) {
+
+        if (checkBoxState.checked || trialState) {
+
+                // To Do Rows Addition
+
+                // trailCheckboxValue = intermediate parent leaf value
+                document.querySelectorAll('#resultTable td').forEach(cell => {
+                    if (cell.getAttribute('data-column1') === trialCheckboxValue) {
+                        rowHistory.forEach(rowKey => {
+                            for(var key in rowKey) {
+                                if(rowKey[key] === true) {
+                                    cell.style.display = 'table-cell';
+                                }
+                            }
+                        });
+                    } 
+                });
+
+                // check if the nested childs exists
+                columnChildCount = document.querySelectorAll('input[data-column1="' + trialCheckboxValue + '"]');
+
+
+                // Hiding the child leaf nested
+                document.querySelectorAll('#resultTable th, #resultTable td').forEach(cell => {
+                    if ( cell.getAttribute('data-column1') && cell.getAttribute('data-column1') === trialCheckboxValue) {
+                        cell.style.display = 'table-cell';
+                    } 
+                });
+
+
+                // trialCheckBoxValue = intermediate parent with nested childs e.g KeyNote | Treatment
+                document.querySelectorAll('#resultTable th, #resultTable td').forEach(cell => {
+                    if (cell.getAttribute('id') && cell.getAttribute('id') === trialCheckboxValue) {
+                        cell.style.display = 'table-cell';
+                    } 
+                });
+
+
+
+                if(columnChildCount) {
+                    columnChildLength = columnChildCount.length;
+
+                    if (columnChildCount.length > 1) {
+                        for (var i = 0; i < columnChildCount.length; i++) {
+                            columnChildCount[i].checked = true;
+                            columnChildCount[i].checked = true;
+                            columnChildCount[i].disabled = false;
+                            columnChildCount[i].disabled = false;
+                        }
+                    }
+
+                    document.querySelectorAll('#resultTable th, #resultTable td').forEach(cell => {
+                        if (cell.getAttribute('id') && cell.getAttribute('id') === parentHeader) {
+                            if(cell.colSpan === 1) {
+
+                                // special case for intermediate parents which do not have any nested relationship
+                                if(columnChildLength) {
+                                    cell.colSpan = cell.colSpan +   (columnChildLength) - 1;
+                                }
+                                else {
+                                    if(cell.style.display !== 'none') {
+                                        cell.colSpan = cell.colSpan + 1;
+                                    }
+                                }
+                                cell.style.display = 'table-cell';
+                            } else {
+                                    if(columnChildCount.length > 1) {
+                                        cell.colSpan = cell.colSpan +   (columnChildLength);
+                                    }
+                                    else {
+                                        cell.style.display = 'table-cell';
+                                        cell.colSpan = cell.colSpan + 1;
+                                    };
+                            }
+                        } 
+                    });
+
+                    //Intermediate header to its original colSpan based on childs length
+                    //trialCheckBox = intermediate header id
+                    document.querySelectorAll('#resultTable th').forEach(cell => {
+                        if (cell.getAttribute('id') === trialCheckboxValue) {
+                            cell.colSpan = columnChildLength;
+                        } 
+                    });
+
+                } else {
+                        document.querySelectorAll('#resultTable th, #resultTable td').forEach(cell => {
+                            if (cell.getAttribute('id') && cell.getAttribute('id') === parentHeader) {
+                                if(cell.colSpan === 1) {
+                                    cell.colSpan = cell.colSpan + 1;
+                                    cell.style.display = 'table-cell';
+                                } else {
+                                    cell.colSpan = cell.colSpan + 1;
+                                }
+                            } 
+                        });
+                }
+
+                // Hiding uncheck rows
+                        rowHistory.forEach(rowKey => {
+                            for(var key in rowKey) {
+                                if(rowKey[key] === false) {
+                                    let uncheckedRow = key;
+                                    document.querySelectorAll('#resultTable td').forEach(cell => {
+                                        if(cell.getAttribute('data-column2') === uncheckedRow) {
+                                            cell.style.display = 'none';
+                                        }
+                                    })
+                                }
+                            }
+                        });
+
+        } else {
+
+            //count to check how many childs are checked
+            var nestedCheckedCount = 0;
+            const allKeyCheck = document.querySelectorAll('input[id="' + parentHeader + '"]');
+            allKeyCheck.forEach(element => {
+                element.checked = false;
+            });
+
+                // To Do Rows Removal
+                
+                
+                // trailCheckboxValue = intermediate parent leaf value
+                document.querySelectorAll('#resultTable td').forEach(cell => {
+                    if (cell.getAttribute('data-column1') === trialCheckboxValue) {
+                        rowHistory.forEach(rowKey => {
+                            for(var key in rowKey) {
+                                if(rowKey[key] === true) {
+                                    cell.style.display = 'none';
+                                }
+                            }
+                        });
+                    } 
+                });
+
+                // check if the nested childs exists
+                columnChildCount = document.querySelectorAll('input[data-column1="' + trialCheckboxValue + '"]');
+
+
+                // Hiding the child leaf nested
+                document.querySelectorAll('#resultTable th, #resultTable td').forEach(cell => {
+                    if ( cell.getAttribute('data-column1') && cell.getAttribute('data-column1') === trialCheckboxValue) {
+                        cell.style.display = 'none';
+                    } 
+                });
+
+
+                // trialCheckBoxValue = intermediate parent with nested childs e.g KeyNote | Treatment
+                document.querySelectorAll('#resultTable th, #resultTable td').forEach(cell => {
+                    if (cell.getAttribute('id') && cell.getAttribute('id') === trialCheckboxValue) {
+                        cell.style.display = 'none';
+                    } 
+                });
+
+
+
+                if(columnChildCount) {
+
+                    //loop to get count of checked childs
+                    columnChildCount.forEach(function (inputElement) {
+                        if (inputElement.checked) {
+                            nestedCheckedCount++;
+                        }
+                    });
+
+                    columnChildLength = columnChildCount.length;
+                    if (columnChildCount.length > 1) {
+                        for (var i = 0; i < columnChildCount.length; i++) {
+                            columnChildCount[i].checked = false;
+                            columnChildCount[i].checked = false;
+                            columnChildCount[i].disabled = true;
+                            columnChildCount[i].disabled = true;
+                        }
+                    }
+
+                    document.querySelectorAll('#resultTable th, #resultTable td').forEach(cell => {
+                        if (cell.getAttribute('id') && cell.getAttribute('id') === parentHeader) {
+
+                            if(cell.colSpan === 1) {
+                                    cell.style.display = 'none';
+                            } else {
+                                    if(columnChildCount.length > 1) {
+                                        cell.colSpan = cell.colSpan - (nestedCheckedCount);
+                                        if(cell.colSpan === 1) {
+                                            cell.style.display = 'none';
+                                        }
+                                    }
+                                    else {
+                                        cell.colSpan = cell.colSpan - 1;
+                                    };
+                            }
+                        } 
+                    });
+                } else {
+                    document.querySelectorAll('#resultTable th, #resultTable td').forEach(cell => {
+                        if (cell.getAttribute('id') && cell.getAttribute('id') === parentHeader) {
+
+                            if(cell.colSpan === 1) {
+                                    cell.style.display = 'none';
+                                } else {
+                                    cell.colSpan = cell.colSpan - 1;
+                                }
+
+                        } 
+                    });
+
+                }
+
+            }
+
+    }
+    
+    function hideNestedColumns(trialCheckboxValue,checkBoxState,nestedDataColumn,parentHeader, trialState) {
+
+        if(checkBoxState.checked || trialState) {
+
+
+
+                //Rows data display
+
+                document.querySelectorAll('#resultTable td').forEach(cell => {
+                    if (cell.getAttribute('data-column1') === trialCheckboxValue) {
+                        rowHistory.forEach(rowKey => {
+                            for(var key in rowKey) {
+                                if(rowKey[key] === true) {
+                                    cell.style.display = 'table-cell';
+                                }
+                            }
+                        });
+                    } 
+                });
+
+
+                // Hiding the leaf children & trialCheckBoxValue is equal to leaf node abbr e.g Treatment
+                document.querySelectorAll('#resultTable th, #resultTable td').forEach(cell => {
+                    if (cell.getAttribute('id') && cell.getAttribute('id') === trialCheckboxValue) {
+                        cell.style.display = 'table-cell';
+                    } 
+                });
+
+                // nestedDataColumn = intermediate parent
+                document.querySelectorAll('#resultTable th, #resultTable td').forEach(cell => {
+                    if (cell.getAttribute('id') && cell.getAttribute('id') === nestedDataColumn) {
+                        if(cell.style.display === 'none') {
+                            cell.colSpan = 1;
+                            cell.style.display = 'table-cell';
+                            return;
+                        }
+                        if(cell.colSpan === 1) {
+                                cellCheckbox = document.querySelectorAll('input[id="' + nestedDataColumn + '"]');
+                                cellCheckbox[0].checked = true;
+                        }
+                        cell.colSpan = cell.colSpan + 1;
+                        cell.style.display = 'table-cell';
+                    } 
+                });
+
+                // parentHeader = grand parent
+                document.querySelectorAll('#resultTable th, #resultTable td').forEach(cell => {
+                    if (cell.getAttribute('id') && cell.getAttribute('id') === parentHeader) {
+                        cell.style.display = 'table-cell';
+                        cell.colSpan = cell.colSpan + 1;
+                    } 
+                });       
+                
+            }
+            else {
+
+                // Rows data removal
+                document.querySelectorAll('#resultTable td').forEach(cell => {
+                    if (cell.getAttribute('data-column1') === trialCheckboxValue) {
+                        rowHistory.forEach(rowKey => {
+                            for(var key in rowKey) {
+                                if(rowKey[key] === true) {
+                                    cell.style.display = 'none';
+                                }
+                            }
+                        });
+                    } 
+                });
+
+
+                // Hiding the leaf children & trialCheckBoxValue is equal to leaf node abbr e.g Treatment
+                document.querySelectorAll('#resultTable th, #resultTable td').forEach(cell => {
+                    if (cell.getAttribute('id') && cell.getAttribute('id') === trialCheckboxValue) {
+                        cell.style.display = 'none';
+                    } 
+                });
+
+                // nestedDataColumn = intermediate parent
+                document.querySelectorAll('#resultTable th, #resultTable td').forEach(cell => {
+                    if (cell.getAttribute('id') && cell.getAttribute('id') === nestedDataColumn) {
+                        if(cell.colSpan === 1) {
+                                cellCheckbox = document.querySelectorAll('input[id="' + nestedDataColumn + '"]');
+                                cellCheckbox[0].checked = false;
+                                cell.style.display = 'none';
+                                cell.colSpan = -1
+                        } else {
+                            cell.colSpan = cell.colSpan - 1;
+                        }
+                    } 
+                });
+
+                // parentHeader = grand parent
+                document.querySelectorAll('#resultTable th, #resultTable td').forEach(cell => {
+                    if (cell.getAttribute('id') && cell.getAttribute('id') === parentHeader) {
+                        if(cell.colSpan === 1) {
+                                cell.style.display = 'none';
+                            } else {
+                                cell.colSpan = cell.colSpan - 1;
+                        };
+                    } 
+                });       
+            }
+    }
+
+
+
+    function showCompleteTable(value) {
+
+        let data = JSON.parse(resData);
+        let rowData = JSON.parse(rowResData);
+        let rowMapping = JSON.parse(rowResMapping);
+        let abbrMapping = JSON.parse(abbrResMapping);
+        let subCategoryFlag = false;
+        var headerCounter = 0;
+        var rowCounter = 0;
+        rowHistory = [];
+
+        var table = document.getElementById("resultTable");
+        table.innerHTML = '';
+        variablesNames.innerHTML = '';
+        var categories = document.getElementById("categories");
+        var trialNames = document.getElementById("trialNames");
+        var trialLabelText = document.getElementById("trialLabel");
+        var categoryLabelText = document.getElementById("categoryLabel");
+ 
+
+        categoryLabelText.innerHTML = categoryLabel;
+        trialLabelText.innerHTML = trialLabel;
+
+        var colors = ["#81BDC7", "#80BDE9", "#B5BCCE", "#B8A4E9"];
+
+        var thead = document.createElement("thead");
+        table.appendChild(thead);
+
+        var row1 = document.createElement("tr");
+        var row2 = document.createElement("tr");
+        var row3 = document.createElement("tr");
+        thead.appendChild(row1);
+        thead.appendChild(row2);
+        thead.appendChild(row3);
+
+        var comparatorHeader = document.createElement("th");
+        comparatorHeader.textContent = categoryLabel;
+
+        data.forEach(function (item){
+            for (var key in item) {
+                item["attrs"].forEach(function (subItem) {
+                    for (var subItemKey in subItem) {
+                        if(item['attrs'][0]['sub_categories'].length > 0) {
+                            subCategoryFlag = true;
+                            return;
+                        }
+                    }
+                });                                     
+            }
+        })
+
+        comparatorHeader.rowSpan = subCategoryFlag ? 3 : 2;
+        row1.appendChild(comparatorHeader);
+
+        var colorIndex = 0;
+
+        var headerIds = [];
+
+        data.forEach(function (item) {
+
+        var th1 = document.createElement("th");
+        th1.textContent = item['name'];
+        th1.style.textWrap = "nowrap"
+        th1.setAttribute("data-column", item['abbr']);
+        th1.id = item['abbr']
+        th1.style.display = "table-cell"
+        var totalColSpan = 0;
+
+        item["attrs"].forEach(function (subItem) {
+                if (subItem.sub_categories.length > 0) {
+                    totalColSpan += subItem.sub_categories.length;
+                } else {
+                    totalColSpan += 1;
+                }
+            
+        });
+
+        th1.colSpan = totalColSpan;
+        th1.style.backgroundColor = colors[colorIndex % colors.length];
+        colorIndex++;
+        tableHeaders.push(item['name']);
+
+        row1.appendChild(th1);
+
+        item['attrs'].forEach(function (sub, index) {
+                var subHeader = document.createElement("th");
+                subHeader.textContent = sub['name'];
+                subHeader.style.textWrap = "nowrap"
+                subHeader.setAttribute("data-column", item['abbr']);
+
+                subHeader.id = sub['abbr'];
+                subHeader.value = sub['abbr'];
+                subHeader.style.display = "table-cell"
+
+                if (sub.sub_categories.length > 0) {
+                    subHeader.colSpan = sub.sub_categories.length;
+                } else {
+                    subHeader.rowSpan = sub.sub_categories.length;
+                }
+                subHeader.style.backgroundColor = colors[colorIndex - 1];
+                row2.appendChild(subHeader);
+
+                if (sub.sub_categories.length > 0) {
+                    sub.sub_categories.forEach(function (subCat) {
+
+                        var subNestedHeader = document.createElement("th");
+                        subNestedHeader.textContent = subCat.name;
+                        subNestedHeader.id = subCat.abbr;
+                        subHeader.style.textWrap = "nowrap";
+                        subNestedHeader.style.display = "table-cell"
+                        subNestedHeader.setAttribute("data-column", item['abbr']);
+                        subNestedHeader.setAttribute("data-column1", sub['abbr']);
+
+                        subNestedHeader.style.backgroundColor = colors[colorIndex - 1];
+                        row3.appendChild(subNestedHeader);
+                    })
+                }
+                headerIds.push(sub['abbr']);
+                headerCounter++;
+            
+            });
+
+        });
+
+        var tbody = document.createElement("tbody");
+        table.appendChild(tbody);
+
+        var tbody = document.createElement("tbody");
+        table.appendChild(tbody);
+
+
+        rowData.forEach(function (category, index) {
+        for (var key in category) {
+            var tbodyRow = document.createElement("tr");
+            tbody.appendChild(tbodyRow);
+
+            var categoryCell = document.createElement("td");
+            categoryCell.textContent = key;
+            categoryCell.style.fontWeight = 'bold';
+            categoryCell.setAttribute("data-column2", key);
+            tbodyRow.appendChild(categoryCell);
+
+            var checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.id = key;
+            checkbox.setAttribute("class", "variable-toggle");
+
+            checkbox.checked = true;
+
+            var label = document.createElement("label");
+            label.htmlFor = key;
+            label.appendChild(document.createTextNode(key));
+
+            variablesNames.appendChild(checkbox);
+            variablesNames.appendChild(label);
+
+            var lineBreak = document.createElement("br");
+            variablesNames.appendChild(lineBreak);
+
+            rowHistory.push({[key]: true});
+            
+            var data = category[key];
+            var dataIndex = 0;
+            seq_data.forEach(dataKey => {
+                abbrMapping[dataIndex];
+                var valueCell = document.createElement("td");
+                valueCell.textContent = data[dataKey];
+                var rowId = dataKey.replace(/\W/g, '');
+                var parent_id = dataKey.split('|')[0].replace(/\W/g, '')
+                valueCell.id = abbrMapping[dataIndex][2];
+                if (!data[dataKey]){
+                    valueCell.setAttribute("class", 'empty-cell-color');
+                }
+                valueCell.setAttribute("data-column", abbrMapping[dataIndex][0]);
+                valueCell.setAttribute("data-column1", abbrMapping[dataIndex][1]);
+                valueCell.setAttribute("data-column2", key);
+                tbodyRow.appendChild(valueCell);
+                dataIndex++;
+            });
+        }
+    });
+
+        //Loop to get all variable names checkboxes
+        var variableCheckboxes = document.querySelectorAll('input[type=checkbox].variable-toggle');
+
+        for (var i = 0; i < variableCheckboxes.length; i++) {
+            variableCheckboxes[i].addEventListener('change', toggleTableRows);
+        }
+        trialNamesList(value);
+    }
+
+
+
+    // Toggle left Panel
+    var leftFilterBtn = document.querySelector('.row-toggle-btn');
+    var leftbtnst = true;
+    leftFilterBtn.onclick = function() {
+        if(leftbtnst == true) {
+            document.getElementById('left-panel').classList.add('left-panel-show');
+            document.querySelector('.table-responsive').style.marginLeft = '0px';
+            if(btnst === true) {
+                document.querySelector('.table-responsive').style.width = '78%';
+            }
+            leftbtnst = false;
+        }else if(leftbtnst == false) {
+            document.getElementById('left-panel').classList.remove('left-panel-show');
+            document.querySelector('.table-responsive').style.marginLeft = '11.5%';
+            if(btnst === true) {
+                document.querySelector('.table-responsive').style.width = '66.7%';
+            }
+            leftbtnst = true;
+        }
+    }
+
+    // Toggle Right Panel
+    var btn = document.querySelector('.toggle');
+    var btnst = true;
+    btn.onclick = function() {
+        if(btnst == true) {
+            document.getElementById('right-panel').classList.add('right-panel-show');
+            document.querySelector('.table-responsive').style.width = '100%';
+            btnst = false;
+        }else if(btnst == false) {
+            document.getElementById('right-panel').classList.remove('right-panel-show');
+            document.querySelector('.table-responsive').style.width = leftbtnst ? '66.7%' : '78%';
+            btnst = true;
+        }
+    }
+    
+</script>
+
+</body>
+</html>
+

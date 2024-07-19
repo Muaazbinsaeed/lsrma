@@ -1,0 +1,2921 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Manage Outcomes
+{% endblock %}
+
+{% block section_cq %}
+{% include 'shared_module/_cq_selector_toolbar.html' %}
+{% endblock %}
+
+{% block page_name %}
+
+<!-- Example single danger button -->
+<div class="btn-group">
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" 
+        data-toggle="dropdown" href="javascript:void(0);" 
+        role="button" 
+        aria-haspopup="true" 
+        aria-expanded="false">
+        <i class="fa fa-list"></i>
+        Manage Outcomes
+    </a>
+    <div class="dropdown-menu">
+        <a class="dropdown-item" 
+            href="javascript:void(0);"
+            onclick="pan_outcomes.toggle_import_extract_panel();">
+            <i class="fa fa-file-import"></i>
+            Import an outcome
+        </a>
+
+        <!-- <a class="dropdown-item" href="#">Another action</a>
+        <a class="dropdown-item" href="#">Something else here</a>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="#">Separated link</a> -->
+    </div>
+</li>
+{% endblock %}
+
+{% block active_nav_link %}extractor-manage-outcomes{% endblock %}
+
+{% block style %}
+<style>
+html {
+    overflow-x: hidden;
+}
+/* badge */
+.badge-ckl {
+    color: #fff;
+    background-color: #b88d17;
+}
+
+#main {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    margin: 0 0 0 10px;
+    overflow: hidden;
+}
+#pan_outcomes {
+    height: 100%;
+    width: 400px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+.cate-line {
+    cursor: pointer;
+}
+.cate-extract-line {
+    border-left: 1px solid black;
+    padding: 0 0 0 10px;
+    margin: 0 0 0 10px;
+}
+.cate-extract-line:hover {
+    background-color: aquamarine;
+}
+.cate-extract-line-clicked {
+    background-color: aquamarine;
+}
+.cate-extract-name {
+    width: 250px;
+    min-width: 250px;
+    max-width: 250px;
+}
+.cate-extract-name:hover {
+    cursor: pointer;
+}
+.cate-extract-col {
+    min-width: 60px;
+    /* width: 100px; */
+    max-width: 200px;
+    font-size: .9em;
+    padding: 0 .5em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn-xs {
+    padding: .05rem .5rem;
+    font-size: .8rem;
+    line-height: 1.2;
+    border-radius: .2rem;
+}
+
+#config_outcome {
+    min-width: 1100px;
+    width: calc(100% - 500px);
+    height: 100%;
+    position: absolute;
+    right: 5000px;
+    background-color: #ffffff;
+    padding: 5px;
+}
+.paper-table-row:hover {
+    background-color: #d6d6d6;
+}
+.paper-table-body-td {
+    padding-left: 3px !important;
+    border-left: 1px solid #a7a7a7;
+}
+.paper-table-body-td-author {
+    width: 190px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.paper-table-body-cell {
+    display: block;
+    max-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.paper-table-header-th {
+    background-color: whitesmoke;
+    border-left: 1px solid rgb(211, 211, 211);
+    border-right: 1px solid rgb(211, 211, 211);    
+}
+
+.n-arms-hr {
+    margin: 1px 0 !important;
+}
+.txt-col-stype-o {
+    background: goldenrod;
+}
+.txt-col-stype-f {
+    background: greenyellow;
+}
+.txt-col-stype-n {
+    background: grey;
+}
+
+.paper-table-row-fade {
+    opacity: 0.25;
+}
+.paper-table-row-emph {
+    opacity: 1 !important;
+    background-color: beige;
+}
+
+.badge-w-2em {
+    width: 2em;
+}
+.input-outcome-filter {
+    width: 120px;
+    font-size: 14px;
+}
+.display-empty {
+    display: none;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div id="main">
+
+<div id="pan_outcomes" class="panel-container">
+
+    <div id="pan_outcomes_import_extract" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">
+                  <i class="fa fa-file-import"></i>
+                  Import an outcome
+              </h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    Select the exported JSON format outcome file
+                </p>
+                <input type="file" name="" id="pan_outcomes_import_extract_input">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary">
+                  <i class="fa fa-file-import"></i>
+                  Import
+              </button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                  Close
+                </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <div v-for="oc_type in project.settings.outcomes_enabled">
+        
+    <h5>
+        {{ oc_type.toLocaleUpperCase() }} Outcomes
+
+        <button class="btn btn-default btn-xs"
+            v-on:click="close_all_cates(oc_type, event)">
+            <i class="fa fa-close"></i>
+            Fold
+        </button>
+
+        <input type="text" class="input-outcome-filter" placeholder="Outcome name"
+            v-model="outcome_keyword">
+        <button class="btn btn-default btn-xs text-primary"
+            title="Clear input box"
+            v-on:click="outcome_keyword = ''">
+            <i class="fa fa-times"></i>
+        </button>
+    </h5>
+    <a href="https://workspace.network-meta-analysis.com/extractor/get_extracts_bulk?project_id=4ef6f39e-0fba-11ee-b680-000d3a9afec0&cq_abbr=default&rnd=0.17141262479527275" download>
+       Download Bulk Outcomes
+      </a>
+    <div v-for="group in project.settings.outcome[oc_type].analysis_groups"
+        class="panel-box">
+        <div class="d-flex flex-row">
+            <div class="mr-1">
+                {{ group.name }}
+            </div>
+
+            <div>
+                <button class="btn btn-default btn-xs text-primary"
+                    v-on:click="create_extract(oc_type, 'default', group.abbr, 'default')">
+                    <i class="fa fa-plus"></i>
+                    Add outcome to default category
+                </button>
+            </div>
+
+        </div>
+
+        <outcome-list 
+            v-if="extract_tree!=null && extract_tree.hasOwnProperty(oc_type) && extract_tree[oc_type].groups.hasOwnProperty(group.abbr)"
+            v-bind:force_update="force_update"
+            v-bind:oc_type="oc_type"
+            v-bind:working_abbr="working_abbr"
+            v-bind:keyword="outcome_keyword"
+            v-bind:cate_ocs="extract_tree[oc_type].groups[group.abbr].cates"
+            v-bind:group="group.abbr">
+        </outcome-list>
+
+        <hr>
+    </div>
+    </div>
+
+
+</div>
+<!-- /#pan_outcomes -->
+
+<div id="config_outcome">
+    <div style="position: absolute; top: 0; left: -40px; width: 40px; height: 40px; background-color: white;">
+        <div style="font-size: large; width: 40px; height: 40px; line-height: 40px; text-align: center; cursor: pointer;"
+            onclick="$('#config_outcome').css('right', 5000)">
+            <i class="fa fa-close"></i>
+        </div>
+    </div>
+
+
+    <div id="pan_ocpapers" 
+    class="panel-container" 
+    style="height: 100%; overflow-y: auto;"
+    v-if="extract != null">
+    <div class="panel-info">
+        <div class="oc-attr d-flex flex-row">
+            <span style="font-size: 1.2em;" class="mr-2">
+                <b>
+                    [
+                        {{ _lbl(extract.oc_type) }} |
+                        {{ extract.meta.full_name }}
+                    ]
+                </b> 
+                Settings
+            </span>
+
+            <div class="btn-group mr-2" role="group" aria-label="Extract information">
+                <button v-on:click="update_extract();"
+                    class="btn btn-default btn-sm">
+                    <i class="fa fa-save"></i>
+                    Save all settings
+                </button>
+            </div>
+
+            <div class="btn-group mr-2" role="group" aria-label="Extract information">
+                <button v-on:click="goto_extract_by_outcome(extract)"
+                    type="button" class="btn btn-default btn-sm">
+                    <i class="fa fa-edit"></i>
+                    Extract data
+                </button>
+            </div>
+
+            <div class="btn-group mr-2" role="group" aria-label="Analyze outcome">
+                <button v-on:click="goto_analysis_v2(extract)"
+                    type="button" class="btn btn-default btn-sm">
+                    <i class="fa fa-chart-bar"></i>
+                    Analyze this outcome
+                </button>
+            </div>
+
+            <div class="btn-group mr-2" role="group" aria-label="Collpase conf">
+                <button v-on:click="collapse_settings()"
+                    type="button" class="btn btn-default btn-sm">
+                    <i class="fa fa-list"></i>
+                    Collapse/Expand Settings
+                </button>
+            </div>
+
+            <!-- Example single danger button -->
+            <div class="btn-group mr-2">
+                <button type="button" 
+                    class="btn btn-default btn-sm dropdown-toggle" 
+                    data-toggle="dropdown" 
+                    aria-haspopup="true" 
+                    aria-expanded="false">
+                    <i class="fa fa-file-export"></i>
+                    Export
+                </button>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="javascript:void(0);"
+                        v-on:click="export_extract_json(extract)"
+                        title="Export this outcome settings and extracted data as a file">
+                        <i class="fa fa-file-export"></i>
+                        As JSON
+                    </a>
+                    <a class="dropdown-item" href="javascript:void(0);"
+                        v-on:click="export_extract_csv(extract, download_csv=true)"
+                        title="Export this outcome settings and extracted data as a file">
+                        <i class="fa fa-file-export"></i>
+                        As CSV
+                    </a>
+                    <!-- <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">
+                        Separated link
+                    </a> -->
+                    
+                    <!-- <a class="dropdown-item" href="#">Another action</a>
+                    <a class="dropdown-item" href="#">Something else here</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">Separated link</a> -->
+                </div>
+            </div>
+
+            <div class="btn-group mr-2" role="group" aria-label="Delete outcome">
+                <button v-on:click="delete_extract(extract)"
+                    type="button" class="btn btn-danger btn-sm">
+                    Delete this outcome
+                </button>
+            </div>
+
+            
+
+            <div style="color: white;">
+                {{ extract.abbr }}
+            </div>
+
+        </div>
+
+    </div>
+
+    <div v-bind:class="{hide: !show_settings}">
+
+        <div class="card border-dark mt-2 mb-2 ml-2 mr-2" >
+            
+            <div class="card-body text-dark">
+                <h5 class="card-title">Basic Settings</h5>
+
+                <div class="Collapse_one"> 
+                    <p class="card-text">The basic settings for this outcome.</p>
+                <div class="row">
+
+                    <div v-if="extract.meta.group != 'subgroup'" 
+                        class="form-group col-md-4">
+                        <label for="input_analysis_group">Analysis Group</label>
+
+                        <select v-model="extract.meta.group"
+                            class="form-control" id="input_analysis_group">
+                            <option v-for="group in project.settings.outcome[extract.oc_type].analysis_groups"
+                                v-bind:value="group.abbr">
+                                {{ group.name }}
+                            </option>
+                        </select>
+
+                        <small id="input_analysis_group_help" class="form-text text-muted">
+                            The group for this outcome, <i>Primary Analysis</i>, <i>Sensitivity Analysis,</i> or other?
+                        </small>
+                    </div>
+
+                    <div v-else
+                        class="form-group col-md-4">
+                        <label for="input_analysis_group">Analysis Group</label>
+
+                        <select v-model="extract.meta.group" disabled
+                            class="form-control" id="input_analysis_group">
+                            
+                            <option v-for="group in project.settings.outcome[extract.oc_type].analysis_groups"
+                                v-bind:value="group.abbr">
+                                {{ group.name }}
+                            </option>
+                        </select>
+
+                        <small id="input_analysis_group_help" class="form-text text-muted">
+                            The group for this outcome, <i>Primary Analysis</i>, <i>Sensitivity Analysis,</i> or other?
+                        </small>
+                    </div>
+
+                    <div class="form-group col-md-4">
+                        <label for="input_category">Outcome Category</label>
+                        <input v-model="extract.meta.category"
+                            class="form-control" 
+                            id="input_category" aria-describedby="input_category_help">
+                        <small id="input_category_help" class="form-text text-muted">
+                            The category of this outcome.
+                        </small>
+                    </div>
+
+                    <div class="form-group col-md-4">
+                        <label for="input_full_name">Outcome Full Name</label>
+                        <input v-model="extract.meta.full_name.split('|')[0]"
+                            class="form-control" 
+                            id="input_full_name" aria-describedby="input_full_name_help">
+                        <small id="input_full_name_help" class="form-text text-muted">
+                            The full name of this outcome, such as <i>Overall Survival</i>, <i>Cough</i>.
+                        </small>
+                    </div>
+
+                    <div v-if="extract.meta.group == 'subgroup'"
+                        class="form-group col-md-12">
+                        <label for="input_subgroups">
+                            Subgroups
+                            <button class="btn btn-sm btn-primary"
+                                title="Add a new sub group"
+                                v-on:click="on_click_add_sub_group">
+                                <i class="fa fa-plus"></i>
+                            </button>
+                        </label>
+                        <small id="input_subgroups_help" class="form-text text-muted">
+                            The category of this outcome.
+                        </small>
+                        <div class="row">
+
+                            <div v-for="subg, subg_idx in extract.meta.sub_groups"
+                                class="col-md-3">
+                                <input type="text" 
+                                    class="form-control" 
+                                    v-model="extract.meta.sub_groups[subg_idx]">
+                                <button v-if="subg_idx != 0" 
+                                    v-on:click="on_click_remove_sub_group(subg_idx)"
+                                    class="btn btn-sm">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row">
+
+                    <div class="form-group col-md-4">
+                        <label for="input_input_format">Data Type / Input Format</label>
+
+                        <select v-if="extract.meta.oc_type == 'pwma'"
+                            v-model="extract.meta.input_format"
+                            v-on:change="on_change_input_format($event)"
+                            class="form-control" id="input_input_format" 
+                            aria-describedby="input_input_format_help">
+                            <option value="PRIM_CAT_PRE">Categorical Precalculated Data</option>
+                            <option value="PRIM_CAT_RAW">Categorical Raw Data</option>
+                            <option value="PRIM_CATIRR_RAW">Categorical Raw (Incidence Rate Ratios) Data</option>
+                            <option value="PRIM_CONTD_PRE">Continuous Precalculated Data</option>
+                            <option value="PRIM_CONTD_RAW">Continuous Raw Data</option>
+                            <option value="PRIM_CAT_RAW_G5">Categorical Raw Data of Grades (for IO project use only)</option>
+                            <option value="PRIM_INC_RAW">Incidence Base Analysis</option>
+                        </select>
+                        <select v-if="extract.meta.oc_type == 'nma'"
+                            v-model="extract.meta.input_format"
+                            v-on:change="on_change_input_format($event)"
+                            class="form-control" id="input_input_format" 
+                            aria-describedby="input_input_format_help">
+                            <option value="NMA_RAW_ET">Raw Data (event, total)</option>
+                            <option value="NMA_PRE_SMLU">Precalculated Data (SM, lower, upper)</option>
+                        </select>
+
+                        <small id="input_input_format_help" class="form-text text-muted">
+                            The format of the input data to the analyzer.
+                        </small>
+                    </div>
+
+                    <div v-if="extract.meta.oc_type == 'pwma'"
+                        class="form-group col-md-4">
+                        <label for="input_treatment_arm">Treatment Arm</label>
+                        <input v-model="extract.meta.treatments[0]"
+                            class="form-control" 
+                            id="input_treatment_arm" aria-describedby="input_treatment_arm_help">
+                        <small id="input_treatment_arm_help" class="form-text text-muted">
+                            The treatment arm name.
+                        </small>
+                    </div>
+                    
+                    <div v-if="extract.meta.oc_type == 'pwma'"
+                        class="form-group col-md-4">
+                        <label for="input_treatment_arm">Control Arm</label>
+                        <input v-model="extract.meta.treatments[1]"
+                            class="form-control" 
+                            id="input_treatment_arm" aria-describedby="input_treatment_arm_help">
+                        <small id="input_treatment_arm_help" class="form-text text-muted">
+                            The control arm name.
+                        </small>
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div v-if="extract.meta.oc_type == 'pwma'"
+                        class="form-group col-md-4">
+                        <label for="input_cat_outcome">Parent Category Outcome</label>
+                        <input v-model="extract.meta.category_outcome"
+                            class="form-control" 
+                            id="input_cat_outcome" aria-describedby="input_cat_outcome_help">
+                        <small id="input_cat_outcome_help" class="form-text text-muted">
+                            The Parent Category Of this Outcome
+                        </small>
+                    </div>
+
+                    <div v-if="extract.meta.oc_type == 'pwma'"
+                        class="form-group col-md-4">
+                        <label for="input_cat_outcome">Incidence Rate Annalysis</label>
+                        <input v-model="extract.meta.incidence_rate"
+                            class="form-control" 
+                            id="input_cat_outcome" aria-describedby="input_cat_outcome_help">
+                        <small id="input_cat_outcome_help" class="form-text text-muted">
+                            Inicdence Rate Analysis
+                        </small>
+                    </div>
+
+                    
+
+
+                </div>
+
+                
+
+                <div class="row">
+                    <div v-if="extract.meta.oc_type == 'nma'"
+                        class="form-group col-md-12">
+                        <label for="input_treatments">
+                            Treatments
+                            <!-- <button class="btn btn-xs btn-primary"
+                                title="Add a new treatment arm"
+                                v-on:click="on_click_add_treatment_arm">
+                                <i class="fa fa-plus"></i>
+                            </button> -->
+                        </label>
+
+                        <!-- <div class="row">
+
+                            <div v-for="treatment, treat_idx in extract.meta.treatments"
+                                class="col-sm-2">
+                                <input type="text" 
+                                    class="form-control" 
+                                    v-model="extract.meta.treatments[treat_idx]">
+                                <button v-if="treat_idx > 1" 
+                                    v-on:click="on_click_remove_treatment_arm(treat_idx)"
+                                    class="btn btn-sm">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                            </div>
+
+                        </div> -->
+
+                        <small id="input_treatments_help" class="form-text text-muted">
+                            The treatments in this outcome will be updated automatically according to the extracted data.
+                        </small>
+                    </div>
+
+                </div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- <div class="card border-dark mt-2 mb-2 ml-2 mr-2" >
+            <div class="card-body text-dark">
+                <h5 class="card-title">Certainty of Evidence Settings</h5>
+
+                <p class="card-text">The following settings will be used for the calculation of certainty in evidence.</p>
+
+                <div v-if="extract.meta.oc_type == 'pwma'"
+                    class="row">
+                    <div class="form-group col-md-2">
+                        <label for="input_rob">Risk of Bias</label>
+
+                        <select v-model="extract.meta.certainty.risk_of_bias"
+                            class="form-control" id="input_rob" 
+                            aria-describedby="input_rob_help">
+                            <option value="3">Very serious</option>
+                            <option value="2">Serious</option>
+                            <option value="1">No serious</option>
+                            <option value="0">Not specified</option>
+                        </select>
+
+                        <small id="input_rob_help" class="form-text text-muted">
+                            The risk of Bias
+                        </small>
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label>Inconsistency</label>
+
+                        <select v-model="extract.meta.certainty.inconsistency"
+                            class="form-control">
+                            <option value="3">Very serious</option>
+                            <option value="2">Serious</option>
+                            <option value="1">No serious</option>
+                            <option value="0">Not specified</option>
+                        </select>
+
+                        <small class="form-text text-muted">
+                            Inconsistency
+                        </small>
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label>Indirectness</label>
+
+                        <select v-model="extract.meta.certainty.indirectness"
+                            class="form-control">
+                            <option value="3">Very serious</option>
+                            <option value="2">Serious</option>
+                            <option value="1">No serious</option>
+                            <option value="0">Not specified</option>
+                        </select>
+
+                        <small class="form-text text-muted">
+                            Indirectness
+                        </small>
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label>Imprecision</label>
+
+                        <select v-model="extract.meta.certainty.imprecision"
+                            class="form-control">
+                            <option value="4">Extreme serious</option>
+                            <option value="3">Very serious</option>
+                            <option value="2">Serious</option>
+                            <option value="1">No serious</option>
+                            <option value="0">Not specified</option>
+                        </select>
+
+                        <small class="form-text text-muted">
+                            Imprecision
+                        </small>
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label>Publication Bias</label>
+
+                        <select v-model="extract.meta.certainty.publication_bias"
+                            class="form-control">
+                            <option value="2">Strongly suspected</option>
+                            <option value="1">Undetected</option>
+                            <option value="0">Not applicable</option>
+                        </select>
+
+                        <small class="form-text text-muted">
+                            Publication Bias
+                        </small>
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label>Importance</label>
+
+                        <select v-model="extract.meta.certainty.importance"
+                            class="form-control">
+                            <option value="2">Critical</option>
+                            <option value="1">Important</option>
+                            <option value="0">Not applicable</option>
+                        </select>
+
+                        <small class="form-text text-muted">
+                            Importance
+                        </small>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+        </div> -->
+
+
+        <div class="card border-dark mt-2 mb-2 ml-2 mr-2" >
+            <div class="card-body text-dark">
+                <h5 class="card-title">Default Meta-Analysis Settings</h5>
+                
+                <div class="Collapse_one">
+                <p class="card-text">The following settings will be used as the default parameters for running the analyzer for SoF and plots.</p>
+
+                <div class="row">
+
+                    <div class="form-group col-md-4">
+                        <label for="input_measure_of_effect">Measure of Effects</label>
+
+                        <select v-model="extract.meta.measure_of_effect"
+                            class="form-control" id="input_measure_of_effect" 
+                            aria-describedby="input_measure_of_effect_help">
+                            <option value="HR">Hazard Ratio (HR)</option>
+                            <option value="RR">Relative Risk (RR)</option>
+                            <option value="OR">Odds Ratio (OR)</option>
+                            <option value="RD">Risk Difference (RD)</option>
+                        </select>
+
+                        <small id="input_measure_of_effect_help" class="form-text text-muted">
+                            The measure of effects
+                        </small>
+                    </div>
+
+
+                    <div class="form-group col-md-4">
+                        <label for="input_fixed_or_random">Fixed or Random</label>
+
+                        <select v-model="extract.meta.fixed_or_random"
+                            class="form-control" id="input_fixed_or_random" 
+                            aria-describedby="input_fixed_or_random_help">
+                            <option value="fixed">Fixed</option>
+                            <option value="random">Random</option>
+                        </select>
+
+                        <small id="input_fixed_or_random_help" class="form-text text-muted">
+                            Fixed effect or random.
+                        </small>
+                    </div>
+
+                    <div class="form-group col-md-4">
+                        <label for="input_which_is_better">Which is better</label>
+
+                        <select v-model="extract.meta.which_is_better"
+                            class="form-control" id="input_which_is_better" 
+                            aria-describedby="input_which_is_better_help">
+                            <option value="lower">Lower is better</option>
+                            <option value="higher">Higher is better</option>
+                        </select>
+
+                        <small id="input_which_is_better_help" class="form-text text-muted">
+                            Which is better when comparing the measure of effects.
+                        </small>
+                    </div>
+
+
+                    <!-- for NMA -->
+                    <div v-if="extract.meta.oc_type == 'nma'"
+                        class="form-group col-md-4">
+                        <label for="input_analysis_method">NMA Analysis Method</label>
+
+                        <select v-model="extract.meta.analysis_method"
+                            class="form-control" id="input_analysis_method" 
+                            aria-describedby="input_analysis_method_help">
+                            <option value="freq">Frequentist Network Meta-Analysis</option>
+                            <option value="bayes">Bayesian Network Meta-Analysis</option>
+                        </select>
+
+                        <small id="input_analysis_method_help" class="form-text text-muted">
+                            How to perform the network meta-analysis
+                        </small>
+                    </div>
+                    
+                </div>
+                </div>
+            </div>
+        </div>
+        <!-- /card for the basic information -->
+
+        <div class="card border-dark mt-2 mb-2 ml-2 mr-2">
+            
+            <div class="card-body text-dark">
+                <h5 class="card-title">Public Website Appearance Settings</h5>
+                <div class="Collapse_one">
+
+                <p class="card-text">The following settings will be used to decide what and how to display the information of this outcome in the public website.</p>
+
+
+                <div class="row">
+                    
+                    <div class="form-group col-md-4">
+                        <label for="input_included_in_plots">Include in Plots</label>
+
+                        <select v-model="extract.meta.included_in_plots"
+                            class="form-control" id="input_included_in_plots" 
+                            aria-describedby="input_included_in_plots_help">
+                            <option value="yes">Yes, include this outcome</option>
+                            <option value="no">No, exclude this outcome</option>
+                        </select>
+
+                        <small id="input_included_in_plots_help" class="form-text text-muted">
+                            Include this outcome in the result plots or not?
+                        </small>
+                    </div>
+
+                    <div class="form-group col-md-4">
+                        <label for="input_included_in_sof">Include in SoF Table</label>
+
+                        <select v-model="extract.meta.included_in_sof"
+                            class="form-control" id="input_included_in_sof" 
+                            aria-describedby="input_included_in_sof_help">
+                            <option value="yes">Yes, include this outcome</option>
+                            <option value="no">No, exclude this outcome</option>
+                        </select>
+
+                        <small id="input_included_in_sof_help" class="form-text text-muted">
+                            Include this outcome in the SoF table or not?
+                        </small>
+                    </div>
+                    
+
+                </div>
+                </div>
+                <!-- /.row -->
+
+                
+
+
+            </div>
+
+        </div>
+
+        <!-- /card for the inclusion or not -->
+
+
+    </div>
+    <!-- /div of settings -->
+
+
+    <div class="card border-dark mt-2 mb-2 ml-2 mr-2">
+            
+        <div class="card-body text-dark">
+            <h5 class="card-title">
+                References
+                
+               <span class="text-sm ml-3">
+                    <input type="checkbox"
+                        v-model="only_show_selected"
+                        disabled
+                        v-on:change="on_change_only_show_selected($event);">
+                    <span>Only show selected studies</span>
+                    &nbsp;&nbsp;&nbsp;
+                    <input type="checkbox" id="select_all_for_analyzer"
+                    v-on:change="on_change_show_all($event);">
+                    <span>Select All Studies for Analyzer</span>
+                    &nbsp;&nbsp;&nbsp;
+                    <input type="checkbox"
+                    v-on:change="on_change_reset_all($event);">
+                    <span>Reset All Studies for Analyzer</span>
+                    <span v-if="extract.meta.input_format=='PRIM_CAT_RAW_G5'">
+                        <div class="form-group col-md-4">
+
+                            
+                            <a id="grade_wise" :href="'https://workspace.network-meta-analysis.com/extractor/get_extracts_io?project_id=' + extract.project_id + '&cq_abbr=default&abbr=' + extract.abbr + '&rnd=0.4537758129543916&_=1720105773202'"
+                            >
+                            Export CSV
+                            </a>
+                            <label for="input_input_format">Grade Wise Analysis</label>
+    
+                            <select 
+                               
+                                class="form-control" id="grade_input_format_selected" 
+                                aria-describedby="input_input_format_help">
+                                <option value="">Select Grade</option>
+                                <option value="All_Grade">ALL Grade</option>
+                                <option value="Grade_3_4">Grade 3/4</option>
+                                <option value="Grade_3H"> Grade 3 or Higher</option>
+                                <option value="Grade_5">Grade 5</option>
+                                
+                            </select>
+                        </div>
+                    </span>
+               </span>
+            </h5>
+
+            <p class="card-text mb-2">
+                There are following papers selected
+            </p>
+
+            <div v-if="extract != null"
+                class="panel-paperlist">
+
+                <!-- table for pwma -->
+                <table class="table" style="table-layout:auto;">
+                    <thead class="paper-table-header">
+                        <tr>
+                            <th v-if="extract.meta.is_subg_analysis=='yes'"
+                                class="paper-table-header-th" 
+                                colspan="7">
+                                &nbsp;
+                            </th>
+                            <th v-else
+                                class="paper-table-header-th" 
+                                colspan="7">
+                                &nbsp;
+                            </th>
+
+                            <th v-for="thr1 in thr1s"
+                                v-bind:colspan="thr1.cols"
+                                class="paper-table-header-th"
+                                style="text-align: center;">
+                                {{ thr1.name }}
+                            </th>
+                        </tr>
+                        <tr>
+                            <th class="paper-table-header-th" style="width: 40px;">
+                                #
+                            </th>
+                            <th class="paper-table-header-th" style="width: 90px;">
+                                Trial Name
+                            </th>
+                            <th class="paper-table-header-th" style="width: 90px">
+                                NCT
+                            </th>
+                            <th class="paper-table-header-th" style="width: 90px">
+                                PMID
+                            </th>
+                            <th class="paper-table-header-th" 
+                                style="width: 40px;"
+                                title="Original study or follow-up study">
+                                O/F
+                            </th>
+                            <th class="paper-table-header-th" style="width: 90px;" 
+                                v-show="show_col_nct">
+                                NCT
+                            </th>
+                            <th class="paper-table-header-th" style="width: 190px;">
+                                ({{ n_selected }} selected)
+                            </th>
+                            <th class="paper-table-header-th" style="width: 50px;">
+                                Arms
+                            </th>
+                            <th class="paper-table-header-th" 
+                                v-if="extract.meta.is_subg_analysis=='yes'">
+                                Subgroup
+                            </th>
+
+                            <!-- the attributes of pwma -->
+                            <th class="paper-table-header-th" 
+                                v-for="thr2 in thr2s"
+                                v-bind:colspan="thr2.cols"
+                                style="text-align: center;">
+                                <span>
+                                    {{ thr2.name }}
+                                </span>
+                            </th>
+                        </tr>
+                    </thead>
+        
+                    <tbody>
+                        <tr class="paper-table-row" 
+                            v-for="paper, pid in extract.data"
+                            v-bind:id="'paper-table-row-' + pid"
+                            v-bind:rct_id="paper_dict[pid].meta.rct_id">
+
+                            <td class="paper-table-body-td">
+                                <span class="badge badge-pill badge-light">
+                                    <input   class="row_selection" type="checkbox" v-bind:value="pid">
+                                    {{ paper_dict[pid].seq_num }}
+                                </span> 
+                            </td>
+                            <td class="paper-table-body-td">
+                                <span class="text-sm">{{ get_trial_name(paper_dict[pid].rct_id) }}</span> 
+                            </td>
+                            <td class="paper-table-body-td">
+                                <span class="text-sm">{{ paper_dict[pid].rct_id }}</span> 
+                            </td>
+                            <td class="paper-table-body-td">
+                                <span class="text-sm">{{ paper_dict[pid].pid }}</span> 
+                            </td>
+                            <td class="paper-table-body-td"
+                                v-show="show_col_nct">
+                                <span class="text-sm">{{ paper_dict[pid].meta.rct_id }}</span>
+                            </td>
+
+                            <td class="paper-table-body-td"
+                                style="cursor: pointer;"
+                                v-on:click="toggle_trial_studies(paper_dict[pid])"
+                                v-show="show_col_stype">
+                                <span class="badge badge-pill "
+                                    v-bind:class="'txt-col-stype-' + get_stype_badge(paper_dict[pid]).cls">
+                                    {{ get_stype_badge(paper_dict[pid]).label }}
+                                </span>
+                            </td>
+
+                            <td class="paper-table-body-td ">
+                                <div class="paper-table-body-td-author"
+                                    v-bind:title="get_first_author(paper_dict[pid].authors)">
+                                    {{ get_author_name(paper_dict[pid].short_name )}}
+                                </div>
+                            </td>
+                            
+                            <td class="paper-table-body-td">
+                                {{ extract.data[pid].n_arms }}
+                            </td>
+
+                            <td v-if="extract.meta.is_subg_analysis=='yes'">
+                                <div v-for="g, g_idx in extract.meta.sub_groups">
+                                    <span class="paper-table-body-cell">
+                                        {{ g }}&nbsp;
+                                    </span>
+                                </div>
+                            </td>
+                            
+                            <!-- the attributes of pwma -->
+                            <td v-for="attr_sub, attr_sub_idx in all_attrs" 
+                                class="paper-table-body-td paper-value">
+                                
+                                <!-- the main arm -->
+                                <div v-for="g, g_idx in extract.meta.sub_groups" class="parent-arm">
+                                    
+                                    <span class="paper-table-body-cell"
+                                        v-bind:title="attr_sub.cate_name + '|' + attr_sub.name + ': ' + get_extracted_data(pid, null, g_idx, attr_sub.abbr)">
+                                        {{ get_extracted_data(pid, null, g_idx, attr_sub.abbr) }}&nbsp;
+                                    </span>
+                                </div>
+        
+                                <!-- the other tracks if n_arms > 2 -->
+                                <hr class="n-arms-hr" v-if="extract.data[pid].n_arms > 2">
+                                
+                                <div v-if="extract.data[pid].n_arms > 2 && extract.data[pid].attrs.other.length > 0" class="nested-arms">
+                                    <div v-for="g, g_idx in extract.meta.sub_groups">
+                                        <span v-for="other, other_idx in extract.data[pid].attrs.other"
+                                        class="paper-table-body-cell"
+                                        v-bind:title="attr_sub.cate_name + '|' + attr_sub.name + ': ' + get_extracted_data(pid, other_idx, g_idx, attr_sub.abbr)">
+                                        {{ get_extracted_data(pid, other_idx, g_idx, attr_sub.abbr) }}&nbsp;
+                                    </span>
+        
+                                    </div>
+                                </div>
+                                
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+        
+        
+            </div>
+            <!-- /.panel-paperlist -->
+
+        </div>
+    </div>
+
+
+    <div class="card border-dark mt-2 mb-2 ml-2 mr-2" id="analyzer-in-system">
+
+       
+    </div>
+
+</div>
+<!-- /#pan_ocpapers -->
+
+
+
+</div>
+
+    
+</div>
+<!-- /#main -->
+
+
+{% endblock %}
+
+{% block script %}
+
+<!-- filesaver -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script>
+<!-- PapaParse -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.1/papaparse.min.js"></script>
+<script>
+
+{% include 'js/srv_shared.js' %}
+
+///////////////////////////////////////////////////////////
+// bind the project information to srv_analyzer.js
+///////////////////////////////////////////////////////////
+{% include 'js/srv_analyzer.js' %}
+srv_analyzer.project = [[ project_json_str|safe ]];
+
+
+///////////////////////////////////////////////////////////
+// bind the project information to srv_extractor.js
+///////////////////////////////////////////////////////////
+{% include "js/srv_extractor.js" %}
+srv_extractor.project = [[ project_json_str|safe ]];
+
+
+var pan_outcomes = {
+
+    vpp_id: '#pan_outcomes',
+    vpp: null,
+    vpp_data: {
+
+        // the data structure for showing extracts
+        extracts: [],
+        extract_tree: null,
+
+        // for filtering the outcome list
+        outcome_keyword: '',
+
+        // others
+        stat: {
+            pwma: { total: 0 },
+            subg: { total: 0 },
+            nam: { total: 0 },
+            itable: { total: 0 },
+        },
+
+        working_abbr: null,
+
+        // bind the project information to the outcome panel
+        project: [[ project_json_str|safe ]],
+
+        // for update sub-comp
+        force_update: false
+    },
+
+    vpp_methods: {
+        create_extract: function(oc_type, tpl, group, category) {
+            pan_outcomes.create_extract(oc_type, tpl, group, category);
+        },
+
+        show_extract_data: function(oc_type, abbr) {
+            this.working_abbr = abbr;
+            pan_outcomes.show_extract_data(abbr);
+        },
+
+        delete_extract: function(oc_type, abbr, full_name) {
+            pan_outcomes.delete_extract(
+                oc_type, abbr, full_name
+            );
+        },
+
+        close_all_cates: function(oc_type, event) {
+            $('.cate-extracts-' + oc_type).toggle();
+        }
+    },
+
+    load: function() {
+        var project_id = Cookies.get('project_id');
+        var cq_abbr = Cookies.get('cq_abbr');
+
+        srv_extractor.get_extracts(
+            project_id, 
+            cq_abbr,
+            function(data) {
+                console.log(data);
+                pan_outcomes.show_all_extracts(data.extracts);
+            }
+        );
+    },
+
+    resize: function() {
+        var h = $(window).height() - 50;
+        $(this.vpp_id).css('height', h);
+    },
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: this.vpp_data,
+            methods: this.vpp_methods
+        });
+
+        this.bind_import_extract_input();
+    },
+
+    delete_extract: function(oc_type, abbr, full_name) {
+        var ret = jarvis.confirm('The deleted outcome and related extractions can NOT be restored. Are you sure to delete [' + full_name + ']?');
+    
+        if (ret) {
+            // close the panel
+            pan_ocpapers.hide();
+
+            var project_id = Cookies.get('project_id');
+            $.post(
+                srv_extractor.url.delete_extract,
+                {project_id:project_id, oc_type:oc_type, abbr:abbr},
+                function(data) {
+                    jarvis.toast('Deleted!');
+                    pan_outcomes.load();
+                }, 'json'
+            );
+        }
+    },
+
+    download_bulk_io_outocmes(){
+
+    },
+
+    show_extract_data: function(abbr) {
+        console.log('* show extract [' + abbr + ']');
+
+        // set loc
+        $('#config_outcome').css("right", 0);
+
+        // set working_abbr
+        this.vpp.$data.working_abbr = abbr;
+
+
+        $('.row_selection:checkbox').prop('checked', 
+            false);
+
+        $('#select_all_for_analyzer:checkbox').prop('checked', 
+        false);
+
+        $('#analyzer-in-system').html('');
+
+        pan_ocpapers.show_extract_and_papers(abbr);
+    },
+
+    toggle_import_extract_panel: function() {
+        $('#pan_outcomes_import_extract').modal();
+    },
+
+    bind_import_extract_input: function() {
+        let input = document.getElementById("pan_outcomes_import_extract_input");
+
+        input.addEventListener("change", function(event) {
+            
+            if (input.files.length > 0) {
+                // File reader to read the file 
+                var reader = new FileReader(); 
+                
+                // This event listener will happen when the reader has read the file
+                reader.addEventListener('load', function() {
+                    // Parse the result into an object 
+                    var result = JSON.parse(reader.result); 
+                    console.log(result);
+                });
+                
+                // Read the uploaded file
+                reader.readAsText(input.files[0]); 
+            }
+        });
+    },
+
+    import_extract: function(oc) {
+
+    },
+    
+    create_extract: function(oc_type, tpl, group, category) {
+        // get the full name
+        var text = jarvis.prompt('The outcome full name:');
+        if (text == null) { return; }
+        text = text.trim();
+        if (text == '') { return; }
+
+        // create an abbr
+        var abbr = srv_extractor.mk_oc_abbr();
+
+        // create an meta
+        var meta = JSON.parse(
+            JSON.stringify(
+                srv_extractor.tpl.oc_type[oc_type][tpl]
+            )
+        );
+        meta.full_name = text;
+        meta.abbr = abbr;
+
+        // Primary, default or others
+        meta.group = group;
+        meta.category = category;
+
+        // for sub group
+        if (meta.group == 'subgroup') {
+            meta.is_subg_analysis = 'yes';
+        }
+
+        // set the default input format
+        if (srv_extractor.project.settings.outcome[oc_type].default_setting.hasOwnProperty('input_format')) {
+            meta.input_format = srv_extractor.project.settings.outcome[oc_type].default_setting.input_format;
+        }
+
+        // copy the meta.cate_attr according to the input_format
+        meta.cate_attrs = JSON.parse(
+            JSON.stringify(
+                srv_extractor.tpl.input_format[oc_type][meta.input_format]
+            )
+        );
+
+        // send this extract to backend
+        var data = {};
+        var project_id = Cookies.get('project_id');
+        var cq_abbr = Cookies.get('cq_abbr');
+        meta.cq_abbr = cq_abbr;
+
+        srv_extractor.create_extract(
+            project_id,
+            oc_type,
+            abbr,
+            meta,
+            data,
+            function(data) {
+                console.log(data);
+
+                // update UI
+                // pan_outcomes.add_vpp_extracts([data.extract]);
+                pan_outcomes.load();
+
+                // and open this outcome directly
+                pan_outcomes.show_extract_data(
+                    data.extract.abbr
+                )
+
+                // update the vpp
+                pan_outcomes.vpp.$forceUpdate();
+            }
+        );
+    },
+
+    show_all_extracts: function(extracts) {
+        // just re-build the tree with new extracts
+        this.vpp.$data.extract_tree = this.update_extract_tree(extracts);
+
+        // update the vpp
+        this.vpp.$forceUpdate();
+    },
+
+    add_vpp_extracts: function(extracts) {
+        var new_exts = this.vpp.$data.extracts.concat(extracts);
+        this.vpp.$data.extract_tree = this.update_extract_tree(new_exts);
+
+        this.vpp.$data.force_update = Math.random();
+    },
+
+    update_extract_tree: function(extracts) {
+        return srv_shared.create_extract_tree(extracts);
+    },
+
+    show: function() {
+        $(this.vpp_id).show();
+    },
+
+    hide: function() {
+        $(this.vpp_id).hide();
+    },
+
+    set_size: function(size) {
+        $(this.vpp_id).removeClass('panel-s panel-m panel-l')
+            .addClass('panel-' + size);
+    }
+};
+
+
+var pan_ocpapers = {
+    vpp_id: "#pan_ocpapers",
+    vpp: null,
+    vpp_data: {
+        // flags
+        show_settings: true,
+        only_show_selected: true,
+        show_col_nct: false,
+        show_col_stype: true,
+
+        //PRIM CAT Headers
+        primCatHeaders: [
+            'Et','Ec','survival_in_control'
+        ],
+        primCatHeadersIds: [
+            'rct_id','pmid'
+        ],
+
+        // for display:
+        thr1s: [],
+        thr2s: [],
+
+        // mode
+        mode: 'manage_outcomes',
+        
+        // bind the project information to the outcome panel
+        project: [[ project_json_str|safe ]],
+
+        // data
+        all_attrs: null,
+        show_attrs: null,
+        extract: null,
+        papers: [],
+        paper_dict: {},
+        standard_data_cols : [],
+        garde_wise_dict : {
+        All_Grade: {
+            Et: 'GA_Et',
+            Nt: 'GA_Nt',
+            Ec: 'GA_Ec',
+            Nc: 'GA_Nc',
+            Et_34: 'G34_Et',
+            Ec_34: 'G34_Ec',
+            Et_3H: 'G3H_Et',
+            
+            Ec_3H: 'G3H_Ec',
+           
+            Et_5N: 'G5N_Et',
+           
+            Ec_5N: 'G5N_Ec',
+    
+        },
+        Grade_3_4: {
+            Et: 'G34_Et',
+            Nt: 'GA_Nt',
+            Ec: 'G34_Ec',
+            Nc: 'GA_Nc'
+
+        },
+        Grade_3H: {
+            Et: 'G3H_Et',
+            Nt: 'GA_Nt',
+            Ec: 'G3H_Ec',
+            Nc: 'GA_Nc'
+
+        },
+
+        Grade_5: {
+            Et: 'G5N_Et',
+            Nt: 'GA_Nt',
+            Ec: 'G5N_Ec',
+            Nc: 'GA_Nc'
+        },
+    }
+    },
+
+    vpp_methods: {
+        // label converting function from srv_shared
+        _lbl: function(v) {
+            return srv_shared._lbl(v);
+        },
+
+        toggle_show_settings: function() {
+            this.show_settings = !this.show_settings;
+        },
+
+        toggle_on_all_attributes: function() {
+            for (const key in this.show_attrs) {
+                if (Object.hasOwnProperty.call(this.show_attrs, key)) {
+                    this.show_attrs[key] = true;
+                }
+            }
+            this.$forceUpdate();
+        },
+
+        toggle_off_all_attributes: function() {
+            for (const key in this.show_attrs) {
+                if (Object.hasOwnProperty.call(this.show_attrs, key)) {
+                    this.show_attrs[key] = false;
+                }
+            }
+            this.$forceUpdate();
+        },
+
+        toggle_trial_studies: function(paper) {
+            pan_ocpapers.toggle_trial_studies(paper);
+        },
+
+        goto_extract_by_outcome: function(extract) {
+            srv_extractor.goto_extract_by_outcome(extract.abbr);
+        },
+
+        goto_analysis: function(extract) {
+            location.href = srv_analyzer.url.azoc + 
+                '?abbr=' + extract.abbr;
+        },
+
+        delete_extract: function(extract) {
+            pan_outcomes.delete_extract(
+                extract.oc_type,
+                extract.abbr,
+                extract.meta.full_name,
+            );
+        },
+
+        export_extract_json: function(extract) {
+            console.log('* export this oc as json:', extract);
+            // copy this extract
+            var j = JSON.parse(JSON.stringify(extract));
+
+            // remove the used items
+            delete j['project_id'];
+            delete j['extract_id'];
+
+            // convert to string
+            j = JSON.stringify(j);
+
+            // save
+            var blob = new Blob([j], {type: "text/json;charset=utf-8"});
+            var fn = extract.abbr + '-' + 
+                extract.oc_type + '-' +
+                extract.meta.group + '-' +
+                extract.meta.category + '-' +
+                extract.meta.full_name + '.json';
+            saveAs(blob, fn);
+        },
+
+
+        export_extract_csv: function(extract, download_csv=true) {
+            // Specifically For PWMA 
+            let csv_updated = []
+            if (pan_ocpapers.vpp.$data.extract.oc_type=='pwma'){
+
+                selected_analyzed_rows = document.querySelectorAll('.row_selection:checked');
+                if (selected_analyzed_rows.length == 0){
+                    toast('Please select rows for Analysis')
+                    return;
+                }
+                table_data={}
+                for(i=0; i<selected_analyzed_rows.length; i++){
+                    if (pan_ocpapers.vpp.$data.extract.data[selected_analyzed_rows[i].value]){
+                        table_data[selected_analyzed_rows[i].value] = pan_ocpapers.vpp.$data.extract.data[selected_analyzed_rows[i].value];
+                       
+                    }
+                }
+                input_format = $('#input_input_format').val();
+                standard_cols = pan_ocpapers.vpp.$data.standard_data_cols
+                rec_index = 0;
+                // Especially for GRade PRIM RAW it will be override 
+                csv_haeder = standard_cols[8][1]
+                if (!(input_format =='PRIM_CAT_RAW_G5')){
+                    for(i=0; i<standard_cols.length; i++){
+                        record = standard_cols[i]
+                        if (record[0] == input_format){
+                            rec_index = i;
+                            break;
+                        }
+                    }
+                    csv_haeder = standard_cols[rec_index][1];
+                    if(input_format === 'PRIM_CAT_PRE' && !csv_haeder.includes('Et')) {
+                        for (let index = 0; index < this.primCatHeaders.length; index++) {
+                            csv_haeder.push(this.primCatHeaders[index]);
+                        }
+                        for (let index = 0; index < this.primCatHeadersIds.length; index++) {
+                            csv_haeder.unshift(this.primCatHeadersIds[index]);
+                        }
+                    }
+                }
+
+                // For PRIM CAT RAW G5 
+
+                if (download_csv && input_format =='PRIM_CAT_RAW_G5'){
+                    csv_haeder = standard_cols[13][1]
+                }
+
+
+
+
+
+                if(input_format=='PRIM_CAT_RAW_G5' && $('#grade_input_format_selected').val() =='' && !(download_csv)){
+                    toast('Please select Grade for Analysis ')
+                    return;
+                    
+                }
+               
+                if( pan_ocpapers.vpp.$data.extract.meta.is_subg_analysis=='yes'){
+                    csv_haeder.push('subgroup')
+                }
+                table_data_list  = Object.keys(table_data)
+                csv_updated.push(csv_haeder.join(','))
+                // if 
+                if( pan_ocpapers.vpp.$data.extract.meta.is_subg_analysis=='no'){
+                        for(i=0; i<Object.keys(table_data).length ; i++)    
+                        {
+                            // debugger;
+                            row = []
+                            if(input_format === 'PRIM_CAT_PRE') {
+                                row.push(pan_ocpapers.vpp.$data.paper_dict[table_data_list[i]].pid)
+                                row.push(pan_ocpapers.vpp.$data.paper_dict[table_data_list[i]].rct_id)
+                            }
+                            // for study column 
+                            author_name =pan_ocpapers.vpp.$data.paper_dict[table_data_list[i]].short_name
+                            // for Year
+                            author_name = author_name.replace(/,/g, "")
+                            row.push(author_name)
+
+                            // for Year
+                            year = pan_ocpapers.vpp.$data.paper_dict[table_data_list[i]].year
+                            row.push(pan_ocpapers.vpp.$data.paper_dict[table_data_list[i]].year)
+                            
+                            // For Grade aise ananlysis
+                            if (input_format == "PRIM_CAT_RAW_G5"){
+
+                                garde_selected =  pan_ocpapers.vpp.$data.garde_wise_dict[$('#grade_input_format_selected').val()]
+
+                                for(j=2; j<csv_haeder.length; j++){
+
+                                    record = garde_selected[csv_haeder[j]]
+                                    attr_= table_data[table_data_list[i]].attrs.main.g0
+                                    if (attr_.hasOwnProperty(record))
+                                    {
+                                        if ((attr_[record] == '' || attr_[record] == null) && !(download_csv)){
+                                            toast('Analyzer missing information for '+ $('#grade_input_format_selected').val() )
+                                            return;
+                                        }
+                                        row.push(attr_[record] );
+                                        continue;
+                                    }
+                                    if(csv_haeder[j] == 'treatment'){
+                                        row.push(pan_ocpapers.vpp.extract.meta.treatments[0].replace(/,/g, ""));
+                                        continue;
+                                    }
+                                    if(csv_haeder[j] == 'control'){
+                                        row.push(pan_ocpapers.vpp.extract.meta.treatments[1].replace(/,/g, ""));
+                                        continue;
+                                    }
+
+
+                                    //row.push('')
+                                    }
+                                    csv_updated.push(row.join(","))
+                                    // For Treatment Arms greater than 2 
+                                    for(k=0; k<table_data[table_data_list[i]].attrs.other.length; k++){
+
+                                    arm_row = []
+
+
+                                    // for study column 
+                                    arm= k+1;
+                                    author_name = "("+arm+")"
+                                    arm_row = [author_name]
+                                    // for Year
+                                    arm_row.push(year)
+
+                                    for(j=2; j<csv_haeder.length; j++){
+                                        record = garde_selected[csv_haeder[j]]
+                                        attr_ = table_data[table_data_list[i]].attrs.other[k].g0
+                                        if (attr_.hasOwnProperty(record))
+                                        {
+                                            if( (attr_[record] == '' || attr_[record] == null) && !(download_csv) ){
+                                                toast('Analyzer missing information for '+ $('#grade_input_format_selected').val())
+                                                return ;
+                                            }
+                                            arm_row.push(attr_[record] );
+                                            continue;
+                                        }
+                                        if(csv_haeder[j] == 'treatment'){
+                                            arm_row.push(pan_ocpapers.vpp.extract.meta.treatments[0]);
+                                            continue;
+                                        }
+                                        if(csv_haeder[j] == 'control'){
+                                            arm_row.push(pan_ocpapers.vpp.extract.meta.treatments[1]);
+                                            continue;
+                                        }
+
+
+                                        arm_row.push('')
+                                    }
+                                    csv_updated.push(arm_row.join(","))
+
+                                    }
+
+                            }
+
+                            else{
+                            
+                                for(j=2; j<csv_haeder.length; j++){
+
+
+                                    if (!( table_data[table_data_list[i]].attrs.main.g0[csv_haeder[j]] == undefined))
+                                    {
+                                        if (table_data[table_data_list[i]].attrs.main.g0[csv_haeder[j]] == ''){
+                                            toast('Please fill the analyzer missing information')
+                                            return;
+                                        }
+                                        row.push(table_data[table_data_list[i]].attrs.main.g0[csv_haeder[j]] );
+                                        continue;
+                                    }
+                                    if(csv_haeder[j] == 'treatment'){
+                                        row.push(pan_ocpapers.vpp.extract.meta.treatments[0].replace(/,/g, ""));
+                                        continue;
+                                    }
+                                    if(csv_haeder[j] == 'control'){
+                                        row.push(pan_ocpapers.vpp.extract.meta.treatments[1].replace(/,/g, ""));
+                                        continue;
+                                    }
+                                    
+                                
+                                    //row.push('')
+                                }
+                                csv_updated.push(row.join(","))
+                                // For Treatment Arms greater than 2 
+                                for(k=0; k<table_data[table_data_list[i]].attrs.other.length; k++){
+
+                                    arm_row = []
+
+                                    
+                                    // for study column 
+                                    arm= k+1;
+                                    author_name = "("+arm+")"
+                                    arm_row = [author_name]
+                                    // for Year
+                                    arm_row.push(year)
+
+                                    for(j=2; j<csv_haeder.length; j++){
+                                        if (!( table_data[table_data_list[i]].attrs.other[k].g0[csv_haeder[j]] == undefined))
+                                        {
+                                            if(table_data[table_data_list[i]].attrs.other[k].g0[csv_haeder[j]] == ''){
+                                                toast('Please fill the analyzer missing information ');
+                                                return ;
+                                            }
+                                            arm_row.push(table_data[table_data_list[i]].attrs.other[k].g0[csv_haeder[j]] );
+                                            continue;
+                                        }
+                                        if(csv_haeder[j] == 'treatment'){
+                                            arm_row.push(pan_ocpapers.vpp.extract.meta.treatments[0]);
+                                            continue;
+                                        }
+                                        if(csv_haeder[j] == 'control'){
+                                            arm_row.push(pan_ocpapers.vpp.extract.meta.treatments[1]);
+                                            continue;
+                                        }
+
+
+                                        arm_row.push('')
+                                    }
+                                    csv_updated.push(arm_row.join(","))
+
+                                }
+
+                            }
+                                                        
+
+                    }
+                }
+                // For SubGroup analysis 
+                else{
+
+                    for(i=0; i<Object.keys(table_data).length ; i++)    
+                        {
+                            // debugger;
+                            row = []
+                            // for study column 
+
+                            author_name =pan_ocpapers.vpp.$data.paper_dict[table_data_list[i]].short_name
+                            // for Year
+                            year = pan_ocpapers.vpp.$data.paper_dict[table_data_list[i]].year
+                            author_name = author_name.replace(/,/g, "")
+                            row = [author_name]
+                            // for Year
+                            row.push(year)
+                            
+                            for(j=2; j<csv_haeder.length; j++){
+
+
+                                if (!( table_data[table_data_list[i]].attrs.main.g0[csv_haeder[j]] == undefined))
+                                {
+                                    
+                                    if (table_data[table_data_list[i]].attrs.main.g0[csv_haeder[j]] == ''){
+                                        toast('Please fill the analyzer missing information')
+                                        return
+                                    }
+                                    row.push(table_data[table_data_list[i]].attrs.main.g0[csv_haeder[j]] );
+                                    continue;
+                                }
+                                if(csv_haeder[j] == 'treatment'){
+                                    row.push(pan_ocpapers.vpp.extract.meta.treatments[0].replace(/,/g, ""));
+                                    continue;
+                                }
+                                if(csv_haeder[j] == 'control'){
+                                    row.push(pan_ocpapers.vpp.extract.meta.treatments[1].replace(/,/g, ""));
+                                    continue;
+                                }
+                                if(csv_haeder[j] == 'subgroup'){
+                                    row.push(pan_ocpapers.vpp.$data.extract.meta.sub_groups[0].replace(/,/g, ""));
+                                    continue;
+                                }
+                                
+                            
+                                row.push('')
+                            }
+                            csv_updated.push(row.join(","))
+                            row = []
+                            // for Susbgroup analysis 
+                            row.push(author_name);
+                            row.push('');
+                            for(j=2; j<csv_haeder.length; j++){
+
+
+
+                                console.log(table_data[table_data_list[i]]);
+                                console.log(csv_haeder[j]);
+                                console.log(table_data_list[i]);
+                                if (table_data[table_data_list[i]].attrs.main.g1 == undefined){
+                                    row.push('')
+                                    toast('Please fill the analyzer missing information')
+                                        return;
+                                    
+                                }
+                                if (!( table_data[table_data_list[i]].attrs.main.g1[csv_haeder[j]] == undefined))
+                                {
+                                    if(table_data[table_data_list[i]].attrs.main.g1[csv_haeder[j]] == ''){
+                                        toast('Please fill the analyzer missing information');
+                                        return;
+                                    }
+                                    row.push(table_data[table_data_list[i]].attrs.main.g1[csv_haeder[j]] );
+                                    continue;
+                                }
+                                if(csv_haeder[j] == 'treatment'){
+                                    row.push(pan_ocpapers.vpp.extract.meta.treatments[0].replace(/,/g, ""));
+                                    continue;
+                                }
+                                if(csv_haeder[j] == 'control'){
+                                    row.push(pan_ocpapers.vpp.extract.meta.treatments[1].replace(/,/g, ""));
+                                    continue;
+                                }
+                                if(csv_haeder[j] == 'subgroup'){
+                                    row.push(pan_ocpapers.vpp.$data.extract.meta.sub_groups[1].replace(/,/g, ""));
+                                    continue;
+                                }
+
+
+
+                                row.push('')
+                            }
+                            csv_updated.push(row.join(","))
+                                                        
+
+                    }
+
+                }
+            }
+
+            
+            if (pan_ocpapers.vpp.$data.extract.oc_type=='nma'){
+
+            selected_analyzed_rows = document.querySelectorAll('.row_selection:checked');
+            if (selected_analyzed_rows.length ==0){
+                toast('Please select rows for Analysis')
+                return;
+            }
+            table_data={}
+            for(i=0; i<selected_analyzed_rows.length; i++){
+                if (pan_ocpapers.vpp.$data.extract.data[selected_analyzed_rows[i].value]){
+                    table_data[selected_analyzed_rows[i].value] = pan_ocpapers.vpp.$data.extract.data[selected_analyzed_rows[i].value];
+                
+                }
+            }
+            input_format = $('#input_input_format').val();
+            standard_cols = pan_ocpapers.vpp.$data.standard_data_cols
+            if(input_format=='NMA_RAW_ET'){
+                input_format='ET'
+            }
+            else{
+                input_format='HRLU'
+            }
+            rec_index = 0;
+            for(i=0; i<standard_cols.length; i++){
+                record = standard_cols[i]
+                if (record[0] == input_format){
+                    rec_index = i;
+                    break;
+                }
+            }
+            csv_haeder = standard_cols[rec_index][1]; 
+            table_data_list  = Object.keys(table_data)
+            csv_updated.push(csv_haeder.join(','))
+            traetements_ = ['t1', 't2']
+
+            if (input_format == "ET"){
+
+                for(i=0; i<Object.keys(table_data).length ; i++)    
+                {
+                   
+                    for (k=0; k<traetements_.length; k++){
+                        row = []
+                            // for study column 
+
+                        author_name =pan_ocpapers.vpp.$data.paper_dict[table_data_list[i]].short_name
+                        // for Year
+                        author_name = author_name.replace(/,/g, "")
+                        index = k+1
+                        author_name = author_name +'('+index+')'
+                        row = [author_name]
+                    
+                        for(j=1; j<csv_haeder.length; j++){
+
+                          
+                                if(csv_haeder[j] == 'treat'){
+                                    row.push(table_data[table_data_list[i]].attrs.main.g0[traetements_[k]]);
+                                    continue;
+                                }
+                                if(csv_haeder[j] == 'event'){
+                                    row.push(table_data[table_data_list[i]].attrs.main.g0['event_'+traetements_[k]]);
+                                    continue;
+                                }
+                                if(csv_haeder[j] == 'total'){
+                                    row.push(table_data[table_data_list[i]].attrs.main.g0['total_'+traetements_[k]]);
+                                    continue;
+                                }
+                                
+                            
+                                row.push('')
+                                
+                            
+                        }
+                        csv_updated.push(row.join(","))
+                }
+                    // For Treatment Arms greater than 2 
+                    for(k=0; k<table_data[table_data_list[i]].attrs.other.length; k++){
+
+                        for (k=0; k<traetements_.length; k++){
+                            row = []
+                                // for study column 
+
+                            author_name =pan_ocpapers.vpp.$data.paper_dict[table_data_list[i]].short_name
+                            // for Year
+                            author_name = author_name.replace(/,/g, "")
+                            index = k+1
+                            author_name = author_name +'(t_'+index+')'
+                            row = [author_name]
+
+
+
+                            for(j=1; j<csv_haeder.length; j++){
+
+                          
+                                if(csv_haeder[j] == 'treat'){
+                                    row.push(table_data[table_data_list[i]].attrs.main.g0[traetements_[k]]);
+                                    continue;
+                                }
+                                if(csv_haeder[j] == 'event'){
+                                    row.push(table_data[table_data_list[i]].attrs.main.g0['event_'+traetements_[k]]);
+                                    continue;
+                                }
+                                if(csv_haeder[j] == 'total'){
+                                    row.push(table_data[table_data_list[i]].attrs.main.g0['total_'+traetements_[k]]);
+                                    continue;
+                                }
+
+
+                                row.push('')
+
+
+                            }
+                            csv_updated.push(row.join(","))
+                    }
+
+                        
+
+                        // for(j=1; j<csv_haeder.length; j++){
+                        //     if (!( table_data[table_data_list[i]].attrs.other[k].g0[csv_haeder[j]] == undefined))
+                        //     {
+                        //         if(table_data[table_data_list[i]].attrs.other[k].g0[csv_haeder[j]] == ''){
+                        //             toast('Please fill the analyzer missing information ');
+                        //             return ;
+                        //         }
+                        //         arm_row.push(table_data[table_data_list[i]].attrs.other[k].g0[csv_haeder[j]] );
+                        //         continue;
+                        //     }
+                        //     if(csv_haeder[j] == 'treatment'){
+                        //         arm_row.push(pan_ocpapers.vpp.extract.meta.treatments[0]);
+                        //         continue;
+                        //     }
+                        //     if(csv_haeder[j] == 'control'){
+                        //         arm_row.push(pan_ocpapers.vpp.extract.meta.treatments[1]);
+                        //         continue;
+                        //     }
+
+
+                        //     arm_row.push('')
+                        // }
+                        // csv_updated.push(arm_row.join(","))
+
+                    }
+                                                
+
+                }
+
+
+
+
+            }
+
+            else{
+                for(i=0; i<Object.keys(table_data).length ; i++)    
+                {
+
+                    row = []
+                    // for study column 
+
+                    author_name =pan_ocpapers.vpp.$data.paper_dict[table_data_list[i]].short_name
+                    // for Year
+                    author_name = author_name.replace(/,/g, "")
+                    row = [author_name]
+                
+                    
+                    for(j=1; j<csv_haeder.length; j++){
+
+
+                        if (!( table_data[table_data_list[i]].attrs.main.g0[csv_haeder[j]] == undefined))
+                        {
+                            if (table_data[table_data_list[i]].attrs.main.g0[csv_haeder[j]] == ''){
+                                toast('Please fill the analyzer missing information')
+                                return;
+                            }
+                            row.push(table_data[table_data_list[i]].attrs.main.g0[csv_haeder[j]] );
+                            continue;
+                        }
+                        if(csv_haeder[j] == 'treatment'){
+                            row.push(pan_ocpapers.vpp.extract.meta.treatments[0].replace(/,/g, ""));
+                            continue;
+                        }
+                        if(csv_haeder[j] == 'control'){
+                            row.push(pan_ocpapers.vpp.extract.meta.treatments[1].replace(/,/g, ""));
+                            continue;
+                        }
+                        
+                    
+                        row.push('')
+                    }
+                    csv_updated.push(row.join(","))
+                    // For Treatment Arms greater than 2 
+                    for(k=0; k<table_data[table_data_list[i]].attrs.other.length; k++){
+
+                        arm_row = []
+
+                        ind = k+1
+                        // for study column 
+                        arm_row = [author_name+"("+ind+")"]
+
+                        for(j=1; j<csv_haeder.length; j++){
+                            if (!( table_data[table_data_list[i]].attrs.other[k].g0[csv_haeder[j]] == undefined))
+                            {
+                                if(table_data[table_data_list[i]].attrs.other[k].g0[csv_haeder[j]] == ''){
+                                    toast('Please fill the analyzer missing information ');
+                                    return ;
+                                }
+                                arm_row.push(table_data[table_data_list[i]].attrs.other[k].g0[csv_haeder[j]] );
+                                continue;
+                            }
+                            if(csv_haeder[j] == 'treatment'){
+                                arm_row.push(pan_ocpapers.vpp.extract.meta.treatments[0]);
+                                continue;
+                            }
+                            if(csv_haeder[j] == 'control'){
+                                arm_row.push(pan_ocpapers.vpp.extract.meta.treatments[1]);
+                                continue;
+                            }
+
+
+                            arm_row.push('')
+                        }
+                        csv_updated.push(arm_row.join(","))
+
+                    }
+                                                
+
+                }
+        }
+
+        }
+
+            // Download CSV
+            filename= $('.cate-extract-line-clicked').find('.cate-extract-name ').text().split('\n')[1].trim()+".csv"
+            //download_csv_file(csv.join("\n"), filename);
+
+            csv = csv_updated.join("\n")
+            if (!(download_csv)){
+               
+                return csv ;
+            }
+
+            var csvFile;
+            var downloadLink;
+
+            // CSV FILE
+            csvFile = new Blob([csv], {type: "text/csv"});
+
+            // Download link
+            downloadLink = document.createElement("a");
+
+            // File name
+            downloadLink.download = filename;
+
+            // We have to create a link to the file
+            downloadLink.href = window.URL.createObjectURL(csvFile);
+
+            // Make sure that the link is not displayed
+            downloadLink.style.display = "none";
+
+            // Add the link to your DOM
+            document.body.appendChild(downloadLink);
+
+            // Lanzamos
+            downloadLink.click();
+        },
+         collapse_settings : function(){
+           if ( $('.Collapse_one').hasClass('display-empty')){
+            $('.Collapse_one').removeClass('display-empty')
+
+           }
+           else{
+            $('.Collapse_one').addClass('display-empty')
+           }
+         },
+
+       
+         // Analysis within the system 
+        goto_analysis_v2: function(extract) {
+            // pan_ocpapers.export_extract_csv(extract, download_csv=false)
+            // debugger;
+            csv_rows = this.export_extract_csv(extract, download_csv=false);
+            if (!(csv_rows)){                
+                return;
+            }
+            var oc_type = pan_ocpapers.vpp_data.extract.oc_type;
+            
+            Cookies.set('analyzer_content', csv_rows);
+            if (oc_type=="nma"){
+
+                $('#analyzer-in-system').html(`
+                <iframe id="ifm-prisma" src="[[ url_for('analyzer.nma') ]]" frameborder="0" style="width: 100%; min-height: 790px;"></iframe>
+
+                `)
+                
+            // location.href = srv_analyzer.url.nma + 
+            //     '?system_analysis=true' ;
+            }
+            if(oc_type=="pwma"){
+
+                $('#analyzer-in-system').html(`
+                <iframe id="ifm-prisma" src="[[ url_for('analyzer.pwma') ]]" frameborder="0" style="width: 100%; min-height: 790px;"></iframe>
+
+                `)
+
+                // location.href = srv_analyzer.url.pwma + 
+                // '?system_analysis=true';
+
+            }
+
+    
+            
+        },
+        // save all!
+        update_extract: function() {
+            pan_ocpapers.update_extract();
+        },
+        
+        // copy 
+        copy_extract: function() {
+            pan_ocpapers.copy_extract();
+        },
+
+        get_input_size: function(str) {
+            // // convert null to empty
+            // if (str == null) {
+            //     str = '';
+            // }
+            // // convert number to string
+            // str = '' + str;
+            // var s = str.length;
+            // if (s<5) {
+            //     return 5;
+            // } else if (s > 14) {
+            //     return 14;
+            // } else {
+            //     return s;
+            // }
+            return srv_extractor.get_input_size(str);
+        },
+
+        // get year
+        get_year: function(s) {
+            return jarvis.get_year(s);
+        },
+
+        get_first_author: function(s) {
+            var aus = s.split(';');
+            if (aus.length == 1) {
+                aus = s.split(',');
+            }
+            return aus[0];
+        },
+
+        get_author_name : function(s){
+
+            return s.replace(/,/g, "")
+
+        },
+        get_trial_name : function(rctId){
+            return this.trial_name_dict[rctId] ? this.trial_name_dict[rctId] : '' 
+        },
+
+
+        get_stype_badge: function(paper) {
+            if (paper.meta.hasOwnProperty('study_type')) {
+                if (paper.meta.study_type == 'followup') {
+                    return { 
+                        label: 'F' + paper.meta.rct_seq,
+                        cls: 'f'
+                    };
+                } else {
+                    return { 
+                        label: 'O',
+                        cls: 'o'
+                    };
+                }
+            } else {
+                return { 
+                    label: 'N',
+                    cls: 'n'
+                };
+            }
+        },
+
+        on_change_input_format: function(event) {
+            let val = event.target.value;
+            console.log('Changed input_format: ' + val);
+
+            // update the attrs
+            this.extract.meta.cate_attrs = srv_extractor.tpl.input_format[
+                this.extract.oc_type
+            ][val];
+            
+            // update the papers setting
+            pan_ocpapers.update_all_and_show_attrs();
+        },
+
+        on_toggle_attr_selection: function(event) {
+            this.$forceUpdate();
+        },
+
+        on_click_paper: function(pmid) {
+            // set the working pmid ?
+            // no need to set
+
+            // highlight this line
+            $('.paper-table-row').removeClass('paper-table-row-clicked');
+            $('#paper-table-row-' + pmid).addClass('paper-table-row-clicked');
+
+            // call collector to do something
+            pan_collector.show_paper(
+                pmid, 
+                pan_ocpapers.vpp.$data.extract.data[pmid]
+            );
+        },
+
+        toggle_select_all_papers: function(event) {
+            let val = event.srcElement.checked;
+            console.log('* set all papers selected: ', val);
+            for (const pmid in this.extract.data) {
+                if (Object.hasOwnProperty.call(this.extract.data, pmid)) {
+                    this.extract.data[pmid].is_selected = val;
+                }
+            }
+            // this.$forceUpdate();
+        },
+
+        on_toggle_itable_select_category: function(cate_idx, event) {
+            let val = event.srcElement.checked;
+
+            for (let i = 0; i < this.extract.meta.cate_attrs[cate_idx].attrs.length; i++) {
+                const attr = this.extract.meta.cate_attrs[cate_idx].attrs[i];
+
+                if (attr.subs == null) {
+                    this.show_attrs[attr.abbr] = val;
+                } else {
+                    for (let j = 0; j < attr.subs.length; j++) {
+                        const sub = attr.subs[j];
+                        this.show_attrs[sub.abbr] = val;
+                    }
+                }
+            }
+            // force update the UI because change a lot
+            this.$forceUpdate();
+        },
+
+        on_change_itable_n_arms: function(pmid, event) {
+            let val = event.target.value;
+            console.log('* change ' + pmid + ' n_arms to ' + val);
+
+            var new_n_others = val - 2;
+            if (new_n_others == this.extract.data[pmid].attrs.other.length) {
+                // which means the number of arms doesn't change
+
+            } else if (new_n_others > this.extract.data[pmid].attrs.other.length) {
+                // the number of arms increases, need to put more elements
+                var delta = new_n_others - this.extract.data[pmid].attrs.other.length;
+                for (let i = 0; i < delta; i++) {
+                    // just copy the keys from main track
+                    var obj = JSON.parse(JSON.stringify(this.extract.data[pmid].attrs.main));
+                    // and clear the exising data
+                    for (const key in obj) {
+                        if (Object.hasOwnProperty.call(obj, key)) {
+                            obj[key] = '';
+                        }
+                    }
+                    this.extract.data[pmid].attrs.other.push(obj);
+                }
+            } else {
+                // the number of arms decreases, need to remove
+                var delta = this.extract.data[pmid].attrs.other.length - new_n_others;
+                for (let i = 0; i < delta; i++) {
+                    this.extract.data[pmid].attrs.other.pop();
+                }
+            }
+            this.$forceUpdate();
+        },
+
+        on_change_only_show_selected: function(event) {
+            // let val = event.srcElement.checked;                    
+            // this.only_show_selected = val;
+            this.$forceUpdate();
+        },
+        on_change_show_all: function(event){
+
+            $('.row_selection:checkbox').prop('checked', 
+            $('#select_all_for_analyzer').is(":checked")); 
+        },
+        on_change_reset_all: function(event){
+            $('.row_selection:checkbox').prop('checked', 
+            false)
+
+            $('#select_all_for_analyzer:checkbox').prop('checked', 
+            false)
+        },
+
+        append_href_tag: function(event){
+            var anchor = document.getElementById('grade_wise');
+
+            // Update the href attribute
+            project_id = this.extract.project_id 
+            abbr = this.extract.abbr
+            
+            anchor.href = 'https://workspace.network-meta-analysis.com/extractor/get_extracts_io?project_id='+project_id+"&cq=default&abbr="+abbr;
+
+            // Optionally, update the text content
+            anchor.textContent = 'Visit New URL';
+        },
+
+        on_click_add_sub_group: function() {
+            this.extract.meta.sub_groups.push('');
+        },
+
+        on_click_remove_sub_group: function(subg_idx) {
+            this.extract.meta.sub_groups.splice(subg_idx, 1);
+        },
+
+        on_click_add_treatment_arm: function() {
+            this.extract.meta.treatments.push('');
+        },
+
+        on_click_remove_treatment_arm: function(treat_idx) {
+            this.extract.meta.treatments.splice(treat_idx, 1);
+        },
+
+        /**
+            * Get the extracted data by the given info
+            * 
+            * which paper?
+            * main arm or other arm?, null is main, number is other seq
+            * which sub group?
+            * which attr or attr_sub?
+            */
+        get_extracted_data: function(pid, main_or_other, group_idx, attr_sub_abbr) {
+            console.log(pid, main_or_other, group_idx, attr_sub_abbr);
+            if (!this.extract.data.hasOwnProperty(pid)) {
+                // no such paper???
+                return '';
+            }
+            if (main_or_other == null) {
+                // check the main arm
+                if (!this.extract.data[pid].attrs.main.hasOwnProperty('g' + group_idx)) {
+                    // no such group in the main arm?
+                    return '';
+
+                } else {
+                    if (!this.extract.data[pid].attrs.main['g'+group_idx].hasOwnProperty(attr_sub_abbr)) {
+                        // no such attr in this main arm?
+                        return ''
+                    } else {
+                        return this.extract.data[pid].attrs.main['g'+group_idx][attr_sub_abbr];
+                    }
+                }
+            } else {
+                // check the other arm
+                if (!this.extract.data[pid].attrs.other[main_or_other].hasOwnProperty('g' + group_idx)) {
+                    // no such group in the other arm?
+                    return '';
+
+                } else {
+                    if (!this.extract.data[pid].attrs.other[main_or_other]['g'+group_idx].hasOwnProperty(attr_sub_abbr)) {
+                        // no such attr in this other arm?
+                        return ''
+                    } else {
+                        return this.extract.data[pid].attrs.other[main_or_other]['g'+group_idx][attr_sub_abbr];
+                    }
+                }
+            }
+
+        },
+
+        update_by_extract_and_papers: function(extract, papers, standard_data_cols, trial_name_dict) {
+            this.extract = extract;
+            this.papers = papers;
+            this.standard_data_cols = standard_data_cols;
+            this.trial_name_dict = trial_name_dict
+            // update dict
+            this.paper_dict = {};
+            for (let i = 0; i < this.papers.length; i++) {
+                const p = this.papers[i];
+                this.paper_dict[p.pid] = p;
+            }
+        }
+    },
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: this.vpp_data,
+            computed: {
+                n_selected: function() {
+                    var n = 0;
+                    for (const pmid in this.extract.data) {
+                        if (Object.hasOwnProperty.call(this.extract.data, pmid)) {
+                            if (this.extract.data[pmid].is_selected) {
+                                n += 1;
+                            };
+                        }
+                    }
+                    return n;
+                }
+            },
+            methods: this.vpp_methods
+        });
+    },
+
+    set_mode: function(mode) {
+        this.vpp.$data.mode = mode;
+    },
+
+    update: function(data) {
+        // the data is a combo of extract and papers
+        this.vpp.update_by_extract_and_papers(
+            data.extract,
+            data.papers,
+            data.standard_data_cols,
+            data.trial_name_dict
+        );
+
+        // update the all_attrs and show_attrs variables for display
+        this.update_all_and_show_attrs();
+    },
+
+    update_all_and_show_attrs: function() {
+        // init the all_attrs which for list all the nested attrs
+        this.vpp.all_attrs = [];
+
+        // init the show_attrs
+        this.vpp.show_attrs = {}
+
+        // for display
+        this.vpp.thr1s = [];
+        this.vpp.thr2s = [];
+
+        // loop on the cate_attrs
+        for (let i = 0; i < this.vpp.extract.meta.cate_attrs.length; i++) {
+            const cate = this.vpp.extract.meta.cate_attrs[i];
+
+            var thr1 = {
+                name: cate.name,
+                cols: 0
+            }
+            for (let j = 0; j < cate.attrs.length; j++) {
+                var attr = cate.attrs[j];
+                
+                thr1.cols += 1;
+
+                // update the attr cate name
+                attr.cate_name = cate.name;
+
+                var thr2 = {
+                    name: attr.name,
+                    cols: 0
+                }
+                if (attr.subs == null) {
+                    // which means this attr doesn't have a sub
+                    this.vpp.all_attrs.push(attr);
+                    this.vpp.show_attrs[attr.abbr] = true;
+                    
+                    // update the display row count
+                    thr2.cols += 1;
+
+                } else {
+                    for (let k = 0; k < attr.subs.length; k++) {
+                        const sub = attr.subs[k];
+                        this.vpp.all_attrs.push(sub);
+                        this.vpp.show_attrs[sub.abbr] = true;
+
+                        // update the display count
+                        thr2.cols += 1;
+
+                        // also increase the first row
+                        thr1.cols += 1;
+                    }
+                }
+                this.vpp.thr2s.push(thr2);
+            }
+
+            this.vpp.thr1s.push(thr1);
+        }
+
+        // update
+        this.vpp.$forceUpdate();
+    },
+
+
+    get_current_extract_and_papers: function() {
+        if (this.vpp.$data.extract == null) {
+            return null;
+        }
+        
+        // build a object
+        var ret = {
+            extract: this.vpp.$data.extract,
+            papers: this.vpp.$data.papers
+        };
+
+        return ret;
+    },
+
+    show_extract_and_papers: function(abbr) {
+        var project_id = Cookies.get('project_id');
+        var cq_abbr = Cookies.get('cq_abbr');
+
+        console.log('* show_extract_and_papers', project_id, ' cq_abbr', cq_abbr, 'abbr', abbr);
+        srv_extractor.get_extract_and_papers(
+            project_id,
+            cq_abbr,
+            abbr,
+            function(data) {
+                pan_ocpapers.update(data);
+            }
+        );
+    },
+
+    copy_extract: function() {
+        var project_id = Cookies.get('project_id');
+        var oc_type = this.vpp.$data.extract.oc_type;
+        var full_name = this.vpp.$data.extract.meta.full_name;
+        var abbr = this.vpp.$data.extract.abbr;
+        var meta = this.vpp.$data.extract.meta;
+        var data = this.vpp.$data.extract.data;
+
+        var new_full_name = jarvis.prompt('Copy current outcome [' + full_name + '] and make a new outcome. The new outcome full name is: ', full_name);
+        if (new_full_name == null) { return; }
+        new_full_name = new_full_name.trim();
+        if (new_full_name == '') { return; }
+
+        // save this new 
+        var new_abbr = srv_extractor.mk_oc_abbr();
+
+        // send request!
+        $.post(
+            srv_extractor.url.copy_extract,
+            {project_id:project_id, oc_type:oc_type, abbr:abbr,
+             new_abbr:new_abbr, new_full_name: new_full_name,
+             meta:JSON.stringify(meta), data:JSON.stringify(data)},
+            function(data) {
+                // show
+                toast('Copied the new outcome [' + data.extract.meta.full_name + ']');
+                // reload the outcomes
+                pan_outcomes.load();
+            }
+        );
+    },
+
+    update_extract: function() {
+        // there are 
+        var project_id = Cookies.get('project_id');
+        var oc_type = this.vpp.$data.extract.oc_type;
+        var abbr = this.vpp.$data.extract.abbr;
+        var meta = this.vpp.$data.extract.meta;
+        var data = this.vpp.$data.extract.data;
+
+        // send request!
+        $.post(
+            srv_extractor.url.update_extract,
+            {project_id:project_id, oc_type:oc_type, abbr:abbr,
+             meta:JSON.stringify(meta), data:JSON.stringify(data)},
+            function(data) {
+                // show
+                toast('Saved the outcome [' + data.extract.meta.full_name + ']');
+                // reload the outcomes
+                pan_outcomes.load();
+            }
+        );
+    },
+
+    toggle_trial_studies: function(paper) {
+        if (!paper.meta.hasOwnProperty('rct_id')) {
+            return;
+        }
+
+        var rct_id = paper.meta.rct_id;
+
+        // the check current rows
+        var flag_has = $('tr.paper-table-row[rct_id='+rct_id+']').hasClass('paper-table-row-emph');
+
+        // first, just remove all
+        $('tr.paper-table-row').removeClass('paper-table-row-fade');
+        $('tr.paper-table-row').removeClass('paper-table-row-emph');
+
+        // console.log('* found trial ' + rct_id + ': ' + flag_has);
+        if (flag_has) {
+
+        } else {
+            $('tr.paper-table-row').addClass('paper-table-row-fade');
+            $('tr.paper-table-row[rct_id='+rct_id+']').addClass('paper-table-row-emph');
+        }
+    },
+
+    show: function() {
+        $(this.vpp_id).show();
+    },
+
+    hide: function() {
+        $('#config_outcome').css('right', 5000);
+        // $(this.vpp_id).hide();
+    },
+
+    set_size: function(size) {
+        $(this.vpp_id).removeClass('panel-s panel-m panel-l')
+            .addClass('panel-' + size);
+    }
+};
+
+
+Vue.component('outcome-list', {
+    data: function () {
+        return {
+            update: 0,
+        }
+    },
+    methods: {
+        create_extract: function(oc_type, tpl, group, category) {
+            pan_outcomes.create_extract(oc_type, tpl, group, category);
+        },
+
+        show_extract_data: function(oc_type, abbr) {
+            // highlight this line
+            // $('.cate-extract-line').removeClass('cate-extract-line-clicked');
+            // $('#cate-extract-line-' + abbr).addClass('cate-extract-line-clicked');
+
+            // show it
+            pan_outcomes.show_extract_data(abbr);
+        },
+
+        delete_extract: function(oc_type, abbr, full_name) {
+            pan_outcomes.delete_extract(oc_type, abbr, full_name);
+        },
+
+        toggle_cate: function(event) {
+            var elem = $(event.target);
+            elem.next().toggle();
+        },
+
+        n_selected: function(extract) {
+            var n = 0;
+            for (const pmid in extract.data) {
+                if (Object.hasOwnProperty.call(extract.data, pmid)) {
+                    if (extract.data[pmid].is_selected) {
+                        n += 1;
+                    };
+                }
+            }
+            return n;
+            
+        },
+
+        is_match_keyword: function(oc) {
+            if (this.keyword == '') {
+                return true;
+            }
+
+            if (oc.meta.full_name.toLocaleLowerCase().indexOf(this.keyword)>=0) {
+                return true;
+            }
+
+            return false;
+        }
+    },
+
+    computed: {
+        sorted_cate_ocs: function() {
+            var sorted = [];
+            var cates = Object.keys(this.cate_ocs).sort();
+
+            for (let i = 0; i < cates.length; i++) {
+                const cate = cates[i];
+                
+                // sort the ocs by name
+                var ocs = this.cate_ocs[cate].ocs;
+                var ocs_list = Object.keys(ocs).map(function(abbr) {
+                    return ocs[abbr];
+                });
+                ocs_list.sort(function(a, b) {
+                    return a.meta.full_name > b.meta.full_name ? 1 : -1;
+                });
+
+                // add this to sorted
+                sorted.push({
+                    name: cate,
+                    ocs: ocs_list
+                });
+            }
+
+            return sorted;
+        }
+    },
+
+    props: [
+        'oc_type',
+        'cate_ocs',
+        'keyword',
+        'group',
+        'force_update',
+        'working_abbr'
+    ],
+
+    template: `
+<div v-if="Object.keys(cate_ocs).length != 0" :force_update="force_update">
+<div v-for="cate, cate_idx in sorted_cate_ocs" v-show="cate.ocs.length>0">
+    <div class="cate-line"
+        v-on:click="toggle_cate(event)">
+            <i class="far fa-folder-open"></i>
+            {{ cate.name }} 
+        <button class="btn btn-default btn-xs text-primary"
+            v-on:click="create_extract(oc_type, 'default', group, cate.name)">
+            <i class="fa fa-plus"></i>
+            Add outcome
+        </button>
+    </div>
+
+    <div v-bind:class="'cate-extracts cate-extracts-' + oc_type">
+        <div v-for="oc in cate.ocs" 
+            v-bind:id="'cate-extract-line-' + oc.abbr"
+            v-if="is_match_keyword(oc)"
+            class="cate-extract-line d-flex flex-row"
+            v-bind:class="{'cate-extract-line-clicked':working_abbr==oc.abbr}">
+                
+            <div class="cate-extract-name"
+                v-on:click="show_extract_data(oc_type, oc.abbr)">
+                <span class="badge badge-light badge-w-2em">{{ oc.n_selected }}</span>
+                {{ oc.meta.full_name }}
+            </div>
+
+            <div class="cate-extract-col">
+                <span v-if="oc.meta.included_in_plots=='yes'" class="badge badge-success">In Plot</span>
+                <span v-else class="badge badge-light">Plot</span>
+            </div>
+
+            <div class="cate-extract-col">
+                <span v-if="oc.meta.included_in_sof=='yes'" class="badge badge-success">In SoF</span>
+                <span v-else class="badge badge-light">SoF</span>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+`
+});
+
+// <div class="cate-extract-delete">
+//     <button class="btn btn-default btn-xs"
+//         v-on:click="delete_extract(oc.oc_type, oc.abbr, oc.full_name)">
+//         <i class="far fa-trash-alt"></i>
+//     </a>
+// </div>
+
+
+var jarvis = {
+    goto_screener: function(project_id, title) {
+        Cookies.set('project_id', project_id);
+        Cookies.set('project_title', title);
+
+        location.href = '[[ url_for("screener.overview") ]]';
+    },
+
+    init: function() {
+        // set cq_abbr if not 
+        this.set_default_cq();
+
+        // init the shared service
+        srv_shared.update_labels_by_project_settings(
+            srv_extractor.project.settings
+        );
+
+        pan_outcomes.init();
+        pan_ocpapers.init();
+        let garde_wise_dict = {
+        All_Grade: {
+            Et: 'GA_Et',
+            Nt: 'GA_Nt',
+            Ec: 'GA_Ec',
+            Nc: 'GA_Nc',
+            Et_34: 'G34_Et',
+            Ec_34: 'G34_Ec',
+            Et_3H: 'G3H_Et',
+            
+            Ec_3H: 'G3H_Ec',
+           
+            Et_5N: 'G5N_Et',
+           
+            Ec_5N: 'G5N_Ec',
+        },
+        Grade_3_4: {
+            Et: 'G34_Et',
+            Nt: 'GA_Nt',
+            Ec: 'G34_Ec',
+            Nc: 'GA_Nc'
+
+        },
+        Grade_3H: {
+            Et: 'G3H_Et',
+            Nt: 'GA_Nt',
+            Ec: 'G3H_Ec',
+            Nc: 'GA_Nc'
+
+        },
+
+        Grade_5: {
+            Et: 'G5N_Et',
+            Nt: 'GA_Nt',
+            Ec: 'G5N_Ec',
+            Nc: 'GA_Nc'
+        }
+    }
+
+        // resize
+        pan_outcomes.resize();
+
+        // the load the init outcomes
+        pan_outcomes.load();
+
+        // get the abbr if has
+        var oc_abbr = jarvis.get_url_paramter('abbr');
+
+        if (oc_abbr == '') {
+
+        } else {
+            pan_outcomes.show_extract_data(oc_abbr);
+        }
+
+        // bind resize event
+        this.bind_resize_event();
+    },
+
+    prompt: function(text, value) {
+        return window.prompt(text, value);
+    },
+
+    confirm: function(text) {
+        return window.confirm(text);
+    },
+
+    toast: function(s) {
+        toast(s);
+    },
+
+
+    get_year: function(s) {
+        const regex = /\d{4}/gm;
+        let m;
+        if ((m = regex.exec(s)) !== null) {
+            return m[0];
+        }
+        return '';
+    },
+
+    download_file: function(fn) {
+        // fixed image download bug
+        // Thanks to https://stackoverflow.com/questions/17311645/download-image-with-javascript
+        var a = $('<a>').attr('href', '/f/' + fn)
+            .attr('download', fn)
+            .appendTo("body");
+        a[0].click()
+        a.remove();
+    },
+
+    bind_resize_event: function() {
+        $(window).on('resize', function(){
+            pan_outcomes.resize();
+        });
+    }
+};
+
+{% include 'js/jarvis_ext_utils.js' %}
+
+$(document).ready(function() {
+     
+
+    jarvis.init();
+    
+});
+</script>
+{% endblock %}

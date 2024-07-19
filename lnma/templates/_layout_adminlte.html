@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<title>{% block title %}{% endblock %} | LNMA</title>
+<link rel="icon" href="/static/img/favicon.ico">
+<link rel="icon" href="/static/img/favicon-16x16.png" sizes="16x16" type="image/png">
+<link rel="icon" href="/static/img/favicon-32x32.png" sizes="32x32" type="image/png">
+
+<!-- Tell the browser to be responsive to screen width -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Theme style -->
+<link rel="stylesheet" href="/static/lib/adminlte3/css/adminlte.min.css">
+
+<!-- Google Font: Source Sans Pro -->
+<link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+<!-- fontawesome -->
+<!-- <script src="https://kit.fontawesome.com/cb45cc91b0.js" crossorigin="anonymous"></script> -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<!-- js cookie -->
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@2.2.1/src/js.cookie.min.js"></script>
+
+<!-- Bootstrap 4 -->
+<!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"> -->
+
+<!-- Toastr Style -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/bootstrap.tagsinput/0.8.0/bootstrap-tagsinput.css">
+
+{% block stylelink %}
+{% endblock %}
+<style>
+/***************************
+ * Reset some settings
+ **************************/
+p {
+    margin-bottom: .1rem;
+}
+label {
+    margin: 0;
+}
+/* adminlte and bootstrap */
+.card-body {
+    /* padding: .5rem; */
+}
+.table td, .table th {
+    padding: 0;
+}
+.table td {
+    font-size: .9em;
+}
+.navbar {
+    padding: .1rem .5rem;
+}
+.layout-navbar-fixed.layout-fixed .wrapper .sidebar {
+    margin-top: 0;
+}
+.layout-navbar-fixed .wrapper .content-wrapper {
+    margin-top: calc(2.5rem + 1px);
+}
+.content-wrapper {
+  padding-top: 10px;
+}
+.content-header {
+    padding: 10px .5rem 5px .5rem;
+}
+.col, .col-1, .col-2, .col-3, .col-4, .col-5, .col-6, .col-7, .col-8, .col-9, .col-10, .col-11, .col-12, .col-auto, .col-lg, .col-lg-1, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8, .col-lg-9, .col-lg-10, .col-lg-11, .col-lg-12, .col-lg-auto, .col-md, .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12, .col-md-auto, .col-sm, .col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12, .col-sm-auto, .col-xl, .col-xl-1, .col-xl-2, .col-xl-3, .col-xl-4, .col-xl-5, .col-xl-6, .col-xl-7, .col-xl-8, .col-xl-9, .col-xl-10, .col-xl-11, .col-xl-12, .col-xl-auto {
+    width: 100%;
+    padding: 5px;
+}
+/* my settings */
+.txt-code {
+  font-size: small;
+}
+.txt-sm {
+  font-size: small;
+}
+.txt-xs {
+  font-size: x-small;
+}
+</style>
+{% block style %}
+{% endblock %}
+</head>
+<body class="hold-transition sidebar-collapse sidebar-mini layout-fixed layout-navbar-fixed">
+
+<div class="wrapper">
+  <!-- Navbar -->
+  <nav class="main-header navbar navbar-expand navbar-light main-header-action">
+    <!-- Left navbar links -->
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" data-widget="pushmenu" href="#"><i class="fas fa-bars"></i></a>
+      </li>
+      
+      <li class="nav-item d-none d-sm-inline-block">
+        <span class="nav-link">
+          <script>
+            var header_bar_text = '';
+            if (typeof(Cookies.get('project_title'))!='undefined') {
+              header_bar_text = Cookies.get('project_title')
+            }
+            document.write(header_bar_text)
+          </script>
+        </span>
+      </li>
+
+      <li class="nav-item">
+        {% block section_cq %}{% endblock %}
+      </li>
+
+      <li class="nav-item d-none d-sm-inline-block">
+        <span class="nav-link">{% block page_name %}{% endblock %}</span>
+      </li>
+
+      <!-- <li class="nav-item d-none d-sm-inline-block">
+        <a href="./" class="nav-link">Home</a>
+      </li>
+      <li class="nav-item d-none d-sm-inline-block">
+        <a href="https://bookdown.org/MathiasHarrer/Doing_Meta_Analysis_in_R/" class="nav-link" title="Network Meta-Analysis with R">Help</a>
+      </li> -->
+    </ul>
+
+    <!-- SEARCH FORM -->
+    <!-- <form class="form-inline ml-3">
+      <div class="input-group input-group-sm">
+        <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search">
+        <div class="input-group-append">
+          <button class="btn btn-navbar" type="submit">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+      </div>
+    </form> -->
+
+    <!-- Right navbar links -->
+    <ul class="navbar-nav ml-auto">
+      
+      <!-- Notifications Dropdown Menu -->
+      <li class="nav-item dropdown">
+        <a class="nav-link" data-toggle="dropdown" href="#">
+          <i class="far fa-bell"></i>
+          <span class="badge badge-warning navbar-badge">3</span>
+        </a>
+        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+          <span class="dropdown-item dropdown-header">3 Notifications</span>
+          
+          <div class="dropdown-divider"></div>
+          <a href="#" class="dropdown-item">
+            <i class="fas fa-file mr-2"></i> N new papers
+            <span class="float-right text-muted text-sm">2 days</span>
+          </a>
+
+          <div class="dropdown-divider"></div>
+          <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
+        </div>
+      </li>
+
+      <li class="nav-item dropdown">
+        <a class="nav-link" data-toggle="dropdown" href="#">
+          <i class="fa fa-user"></i>
+        </a>
+        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+          <span class="dropdown-item dropdown-header">My Profile</span>
+          
+          <div class="dropdown-divider"></div>
+          <a href="#" class="dropdown-item">
+            <i class="fa fa-user mr-2"></i> Account Settings
+            <span class="float-right text-muted text-sm">2 days</span>
+          </a>
+          <div class="dropdown-divider"></div>
+
+          <a href="[[ url_for('auth.logout') ]]" class="dropdown-item">
+            <i class="fa fa-sign-out-alt mr-2"></i> Logout
+          </a>
+        </div>
+      </li>
+
+      <!-- <li class="nav-item">
+        <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#">
+          <i class="fas fa-th-large"></i>
+        </a>
+      </li> -->
+    </ul>
+  </nav>
+  <!-- /.navbar -->
+
+  <!-- Main Sidebar Container -->
+  <aside class="main-sidebar sidebar-dark-primary sidebar-actions">
+  <!-- <aside class="main-sidebar sidebar-dark-primary elevation-4"> -->
+    <!-- Sidebar -->
+    <div class="sidebar">
+
+      <!-- Sidebar Menu -->
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <!-- Add icons to the links using the .nav-icon class
+               with font-awesome or any other icon font library -->
+          <li class="nav-item has-treeview">
+            <a id="nav-link-dashboard" href="[[ url_for('portal.index') ]]" class="nav-link">
+              <i class="nav-icon fas fa-tachometer-alt"></i>
+              <p>
+                Dashboard
+              </p>
+            </a>
+          </li>
+
+          <!-- <li class="nav-item">
+            <a id="nav-link-project-create" href="[[ url_for('project.create') ]]" class="nav-link">
+              <i class="nav-icon far fa-folder"></i>
+              <p>Create New Project</p>
+            </a>
+          </li> -->
+
+          <li class="nav-item">
+            <a id="nav-link-project-list" href="[[ url_for('project.mylist') ]]" class="nav-link">
+              <i class="nav-icon fa fa-list"></i>
+              <p>List My Projects</p>
+            </a>
+          </li>
+
+          <li class="nav-item"><hr></li>
+
+          {% if current_user.role == 'admin' %}
+          <li class="nav-item">
+            <a id="nav-link-project-list" href="[[ url_for('usermanagement.users') ]]" class="nav-link">
+              <i class="nav-icon fa fa-user"></i>
+              <p>User Management</p>
+            </a>
+          </li>
+          {% endif %}
+
+          <li class="nav-item">
+            <a id="nav-link-project-editor" href="[[ url_for('project.editor') ]]" class="nav-link">
+              <i class="nav-icon fas fa-clipboard"></i>
+              <p>
+                Project Editor
+              </p>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a id="nav-link-importer" href="#" class="nav-link">
+              <i class="nav-icon fas fa-file-upload"></i>
+              <p>
+                Study Importer
+                <i class="fas fa-angle-left right"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a id="nav-link-importer-pmid-list" href="[[ url_for('importer.by_pmid_list') ]]" class="nav-link">
+                  &nbsp;&nbsp;
+                  <i class="fa fa-list nav-icon"></i>
+                  <p>Import by CSV</p>
+                </a>
+              </li>
+              <!-- <li class="nav-item">
+                <a id="nav-link-importer-pubmed-csv" href="[[ url_for('importer.by_pubmed_csv') ]]" class="nav-link">
+                  <i class="fa fa-file-csv nav-icon"></i>
+                  <p>Import by PubMed CSV</p>
+                </a>
+              </li> -->
+              <li class="nav-item">
+                <a id="nav-link-importer-endnote-xml" href="[[ url_for('importer.by_endnote_xml') ]]" class="nav-link">
+                  &nbsp;&nbsp;
+                  <i class="fa fa-clipboard nav-icon"></i>
+                  <p>Import by EndNote XML</p>
+                </a>
+              </li>
+
+              <li class="nav-item">
+                <a id="nav-link-importer-pmid" href="[[ url_for('importer.by_user_input_pmid') ]]" class="nav-link">
+                  &nbsp;&nbsp;
+                  <i class="fa fa-wpforms nav-icon"></i>
+                  <p>Import by PMID</p>
+                </a>
+              </li>
+
+              <li class="nav-item">
+                <a id="nav-link-importer-doi" href="[[ url_for('importer.by_user_input_doi') ]]" class="nav-link">
+                  &nbsp;&nbsp;
+                  <i class="fas fa-fingerprint nav-icon"></i>
+                  <p>Import by DOI</p>
+                </a>
+              </li>
+
+              <li class="nav-item">
+                <a id="nav-link-importer-manually" href="[[ url_for('importer.by_user_input_manually') ]]" class="nav-link">
+                  &nbsp;&nbsp;
+                  <i class="fas fa-hand-rock nav-icon"></i>
+                  <p>Import Manually</p>
+                </a>
+              </li>
+
+            </ul>
+          </li>
+
+          <!-- <li class="nav-item">
+            <a id="nav-link-study-timeline" href="[[ url_for('study.timeline') ]]" class="nav-link">
+              <i class="nav-icon fas fa-map-signs"></i>
+              <p>
+                Study Timeline
+              </p>
+            </a>
+          </li> -->
+
+          <li class="nav-item menu-open">
+
+            <a id="nav-link-screener" href="#" class="nav-link">
+              <i class="nav-icon fas fa-filter"></i>
+              <p>
+                Data Screener
+                <i class="fas fa-angle-left right"></i>
+              </p>
+            </a>
+
+            <ul class="nav nav-treeview">
+
+              <li class="nav-item">
+                <a id="nav-link-screener-overview" 
+                  href="[[ url_for('screener.overview') ]]" 
+                  class="nav-link">
+                  &nbsp;&nbsp;
+                  <i class="fa fa-table nav-icon"></i>
+                  <p>All Study Screener</p>
+                </a>
+              </li>
+
+              <li class="nav-item">
+                <a id="nav-link-screener-pcq-selector" 
+                  href="[[ url_for('screener.pcq_selector') ]]" 
+                  class="nav-link">
+                  &nbsp;&nbsp;
+                  <i class="fa fa-braille nav-icon"></i>
+                  <p>Manage Study-CQ</p>
+                </a>
+              </li>
+
+              <li class="nav-item">
+                <a id="nav-link-screener-timeline" 
+                  href="[[ url_for('screener.timeline') ]]" 
+                  class="nav-link">
+                  &nbsp;&nbsp;
+                  <i class="fa fa-clock nav-icon"></i>
+                  <p>Study Timeline</p>
+                </a>
+              </li>
+
+              <li class="nav-item">
+                <a id="nav-link-screener-deduplicate" 
+                  href="[[ url_for('screener.deduplicate') ]]" 
+                  class="nav-link">
+                  &nbsp;&nbsp;&nbsp;
+                  <i class="fas fa-object-group"></i>
+                  &nbsp;&nbsp;
+                  <p>Deduplicate</p>
+                </a>
+              </li>
+
+              
+
+            </ul>
+
+          </li>
+          
+          <li class="nav-item menu-open">
+            <a id="nav-link-extractor" href="#" class="nav-link">
+              <i class="nav-icon fas fa-edit"></i>
+              <p>
+                Data Extractor
+                <i class="fas fa-angle-left right"></i>
+              </p>
+            </a>
+
+            <ul class="nav nav-treeview">
+              
+              <li class="nav-item">
+                <a id="nav-link-extractor-manage-itable" href="[[ url_for('extractor.manage_itable') ]]" class="nav-link">
+                  &nbsp;&nbsp;
+                  <i class="fa fa-table nav-icon"></i>
+                  <p>Manage ITable</p>
+                </a>
+              </li>
+
+              <li class="nav-item menu-open">
+
+                <a id="nav-link-screener" href="#" class="nav-link">
+                  <i class="nav-icon fa fa-table"></i>
+                  <p>
+                    Result Table
+                    <i class="fas fa-angle-left right"></i>
+                  </p>
+                </a>
+    
+                <ul class="nav nav-treeview">
+    
+                  <!-- <li class="nav-item">
+                    <a id="nav-link-extractor-result-table" href="[[ url_for('extractor.result_table') ]]" class="nav-link">
+                      &nbsp;&nbsp;
+                      <i class="fa fa-table nav-icon"></i>
+                      <p>Result Table</p>
+                    </a>
+                  </li> -->
+    
+                  <li class="nav-item">
+                    <a id="nav-link-extractor-manage-result-table" href="[[ url_for('extractor.manage_result_table') ]]" class="nav-link">
+                      &nbsp;&nbsp;
+                      <i class="fa fa-table nav-icon"></i>
+                      <p>Manage Result Table</p>
+                    </a>
+                  </li>
+    
+                  <li class="nav-item">
+                    <a id="nav-link-extractor-manage-result-records" href="[[ url_for('extractor.manage_result_records') ]]" class="nav-link">
+                      &nbsp;&nbsp;
+                      <i class="fa fa-table nav-icon"></i>
+                      <p>Manage Result Records</p>
+                    </a>
+                  </li>
+                  
+    
+                </ul>
+    
+              </li>
+
+              <li class="nav-item">
+                <a id="nav-link-extractor-manage-outcomes" href="[[ url_for('extractor.manage_outcomes') ]]" class="nav-link">
+                  &nbsp;&nbsp;
+                  <i class="far fa-list-alt nav-icon"></i>
+                  <p>Manage Outcomes</p>
+                </a>
+              </li>
+
+
+              <li class="nav-item">
+                <a id="nav-link-extractor-manage-selections" href="[[ url_for('extractor.extract_by_paper') ]]" class="nav-link">
+                  &nbsp;&nbsp;
+                  <i class="fa fa-tasks nav-icon"></i>
+                  <p>Extract by paper</p>
+                </a>
+              </li>
+
+
+              <li class="nav-item">
+                <a id="nav-link-extractor-extract-data" href="[[ url_for('extractor.extract_by_outcome') ]]" class="nav-link">
+                  &nbsp;&nbsp;
+                  <i class="fa fa-edit nav-icon"></i>
+                  <p>Extract by outcome</p>
+                </a>
+              </li>
+              
+
+              <li class="nav-item">
+                <a id="nav-link-extractor-extract-coe" href="[[ url_for('extractor.extract_coe') ]]" class="nav-link">
+                  &nbsp;&nbsp;
+                  <i class="fas fa-balance-scale nav-icon"></i>
+                  <p>Evaluate CoE</p>
+                </a>
+              </li>
+              
+
+              <li class="nav-item">
+                <a id="nav-link-extractor-check-outcome-quality" 
+                  href="[[ url_for('extractor.check_outcome_quality') ]]" 
+                  class="nav-link">
+                  &nbsp;&nbsp;
+                  <i class="fas fa-check-circle nav-icon"></i>
+                  <p>Check Outcome Name</p>
+                </a>
+              </li>
+              
+
+              <li class="nav-item">
+                <a id="nav-link-extractor-check-data-quality" href="[[ url_for('extractor.check_data_quality') ]]" class="nav-link">
+                  &nbsp;&nbsp;
+                  <i class="far fa-thumbs-up nav-icon"></i>
+                  <p>Check Data Quality</p>
+                </a>
+              </li>
+              
+
+              <li class="nav-item">
+                <a id="nav-link-extractor-upload-xls-files" href="[[ url_for('extractor.upload_xls_files') ]]" class="nav-link">
+                  &nbsp;&nbsp;
+                  <i class="fas fa-file-upload nav-icon"></i>
+                  <p>Upload XLS Files</p>
+                </a>
+              </li>
+
+            </ul>
+          </li>
+
+          <li class="nav-item">
+            <a id="nav-link-analyzer" href="[[ url_for('analyzer.azoc') ]]" class="nav-link">
+              <i class="nav-icon fas fa-project-diagram"></i>
+              <p>
+                Data Analyzer
+              </p>
+            </a>
+            
+          </li>
+          
+          <li class="nav-item">
+            <a id="nav-link-project-public-website" href="[[ url_for('project.public_website') ]]" class="nav-link">
+              <i class="nav-icon fa fa-box-open"></i>
+              <p>
+                Public Website
+              </p>
+            </a>
+            
+          </li>
+
+
+          <li class="nav-item">
+            <a id="nav-link-project-public-version" href="[[ url_for('project.webiste_versioning') ]]" class="nav-link">
+              <i class="nav-icon fa fa-box-open"></i>
+              <p>
+                Website Versions
+              </p>
+            </a>
+            
+          </li>
+
+          <li class="nav-item"><hr></li>
+
+          <li class="nav-item">
+            <a id="nav-link-analyzer-nma" href="[[ url_for('analyzer.nma') ]]?standalone=true" class="nav-link">
+              <i class="nav-icon fas fa-project-diagram"></i>
+              <p>
+                NMA Analyzer
+              </p>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a id="nav-link-analyzer-pwma" href="[[ url_for('analyzer.pwma') ]]?standalone=true" class="nav-link">
+              <i class="nav-icon fas fa-arrows-alt-h"></i>
+              <p>
+                PWMA Analyzer
+              </p>
+            </a>
+          </li>
+
+          <li class="nav-item"><hr></li>
+
+          <li class="nav-item">
+            <a id="nav-link-portal-upload" href="[[ url_for('portal.upload') ]]" class="nav-link">
+              <i class="nav-icon fa fa-upload"></i>
+              <p>
+                Static File Upload
+              </p>
+            </a>
+          </li>
+
+          <!-- <li class="nav-header">EXPLORATION</li>
+          <li class="nav-item">
+            <a href="../calendar.html" class="nav-link">
+              <i class="nav-icon far fa-calendar-alt"></i>
+              <p>
+                Calendar
+                <span class="badge badge-info right">2</span>
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="../gallery.html" class="nav-link">
+              <i class="nav-icon far fa-image"></i>
+              <p>
+                Gallery
+              </p>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="fas fa-circle nav-icon"></i>
+              <p>Level 1</p>
+            </a>
+          </li> -->
+
+          <!-- <li class="nav-header">LABELS</li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon far fa-circle text-danger"></i>
+              <p class="text">Important</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon far fa-circle text-warning"></i>
+              <p>Warning</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon far fa-circle text-info"></i>
+              <p>Informational</p>
+            </a>
+          </li> -->
+        </ul>
+      </nav>
+      <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+  </aside>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    {% block content %}    
+    {% endblock %}
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <!-- /.control-sidebar -->
+
+</div>
+<!-- ./wrapper -->
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<!-- jQuery UI -->
+<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+<!-- AdminLTE App -->
+<script src="/static/lib/adminlte3/js/adminlte.min.js"></script>
+<!-- AdminLTE for this App -->
+<script src="/static/lib/adminlte3/js/demo.js"></script>
+<!-- Vue.js -->
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
+<!-- Toastr -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+<script>
+
+var ACTIVE_NAV_LINK = '{% block active_nav_link %}{% endblock %}';
+var __active_nav_links = ACTIVE_NAV_LINK.split(',');
+
+for (var i = 0; i < __active_nav_links.length; i++) {
+    var active_nav_link = __active_nav_links[i];
+    $('#nav-link-' + active_nav_link).addClass('active');    
+}
+
+function toast(msg, type, title, timeout) {
+    if (typeof(type) == 'undefined') {
+      type = 'info';
+    }
+    if (typeof(type) == 'undefined') {
+      type = 'info';
+    }
+    if (typeof(title) == 'undefined') {
+      title = '';
+    }
+    if (typeof(timeout) == 'undefined') {
+      timeout = 2000;
+    }
+    
+    if (!toastr.hasOwnProperty(type)) {
+      type = 'info';
+    }
+
+    var options = {
+      "showDuration": "300",
+      "hideDuration": "300",
+      "timeOut": "" + timeout,
+      "extendedTimeOut": "300",
+    }
+    toastr[type](msg, title, options);
+}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  <!-- Categories: success (green), info (blue), warning (yellow), danger (red) -->
+  {% if messages %}
+    {% for category, message in messages %}
+      toast("[[ message ]]", "[[ category ]]");
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+</script>
+
+{% block script %}
+{% endblock %}
+</body>
+</html>

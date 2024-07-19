@@ -1,0 +1,1146 @@
+{% extends '_layout_adminlte.html' %} {% block title %} Project Editor {%
+endblock %} {% block style %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.61.0/codemirror.min.css" />
+
+<style>
+  .CodeMirror {
+    border: 1px solid #eee;
+  }
+
+  .hidden {
+    display: none;
+  }
+  .loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.loader::before {
+    content: "";
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid #3498db;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgb(232 232 232 / 80%);
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      z-index: 1000;
+    }
+
+    .progress {
+      display: block;
+      width: 80%;
+      max-width: 400px;
+      margin: 20px auto;
+      background-color: #b7b7b7 !important;
+      height: 1.2rem;
+    }
+
+    #progressBar {
+      background-color: #007bff;
+      height: 30px;
+      width: 0;
+      border-radius: 5px;
+    }
+    .progress-text {
+      padding-bottom: 12px;
+    }
+
+</style>
+
+{% endblock %} {% block page_name %}
+<i class="far fa-clipboard"></i>
+Project Editor {% endblock %} {% block content %}
+
+<div class="content" style="overflow-x: hidden;">
+  <!-- <div id="loader" class="loader"></div> -->
+
+  <div id="overlay">
+    <div class="progress">
+      <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+        <span id="progressText" class="progress-text">0%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col">
+        <ul class="nav nav-tabs" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link active" id="basic_info_tab" data-toggle="tab" role="tab" href="#basic_info_panel"
+              aria-controls="basic_info_panel" aria-selected="true">
+              <i class="fa fa-credit-card"></i>
+              Basic Information
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="ie_criteria_info_tab" data-toggle="tab" role="tab" href="#ie_criteria_info_panel"
+              aria-controls="ie_criteria_info_panel" aria-selected="true">
+              <i class="fa fa-align-left"></i>
+              Inclusion / Exclusion Criteria
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="ie_keywords_info_tab" data-toggle="tab" role="tab" href="#ie_keywords_info_panel"
+              aria-controls="ie_keywords_info_panel" aria-selected="true">
+              <i class="fa fa-highlighter"></i>
+              Inclusion / Exclusion Keywords
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="ex_reason_info_tab" data-toggle="tab" role="tab" href="#ex_reason_info_panel"
+              aria-controls="ex_reason_info_panel" aria-selected="true">
+              <i class="fa fa-paragraph"></i>
+              Exclusion Reasons
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="tag_info_tab" data-toggle="tab" role="tab" href="#tag_info_panel"
+              aria-controls="tag_info_panel" aria-selected="true">
+              <i class="fa fa-tags"></i>
+              Tags
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" id="pdf_keywords_tab" data-toggle="tab" role="tab" href="#pdf_keywords_panel"
+              aria-controls="pdf_keywords_panel" aria-selected="true">
+              <i class="fa fa-highlighter"></i>
+              PDF Highlights
+            </a>
+          </li>
+
+          <!-- <li class="nav-item">
+                        <a class="nav-link"
+                            id="prisma_info_tab"
+                            data-toggle="tab"
+                            role="tab" 
+                            href="#prisma_info_panel"
+                            aria-controls="prisma_info_panel" 
+                            aria-selected="true">
+                            <i class="fa fa-project-diagram"></i>
+                            PRISMA
+                        </a>
+                    </li> -->
+
+          <li class="nav-item">
+            <a class="nav-link" id="advanced_mode_tab" data-toggle="tab" role="tab" href="#advanced_mode_panel"
+              aria-controls="advanced_mode_panel" aria-selected="true">
+              <i class="fa fa-code"></i>
+              ADVANCED MODE
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="clinical_questions_tab" data-toggle="tab" role="tab"
+              href="#clinical_questions_panel" aria-controls="clinical_questions_panel" aria-selected="true">
+              <i class="fa fa-question-circle"></i>
+              Clinical Questions
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" id="rob_tab" data-toggle="tab" role="tab" href="#rob_panel" aria-controls="rob_panel"
+              aria-selected="true">
+              <i class="fa fa-question-circle"></i>
+              Add ROB
+            </a>
+          </li>
+
+          <!-- <li class="nav-item">
+            <a class="nav-link" id="toxicity_tab" data-toggle="tab" role="tab" href="#toxicity_panel"
+              aria-controls="toxicity_panel" aria-selected="true">
+              <i class="fa fa-question-circle"></i>
+              Add Toxicity
+            </a>
+          </li> -->
+        </ul>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="basic_info_panel" role="tabpanel" aria-labelledby="basic_info_tab">
+          <p class="lead">Project basic information</p>
+          <div>
+            <div class="form-group">
+              <label for="input_title">Project Title</label>
+              <input type="text" class="form-control" id="input_title" name="title" value="[[ project.title ]]" />
+              <small id="input_title_help" class="form-text text-muted">
+                The project title must be at least 8 characters long, contain
+                letters and numbers, no special characters.
+              </small>
+            </div>
+
+            <div class="form-group">
+              <label for="input_keystr">Short Identifier</label>
+              <input type="text" class="form-control" id="input_keystr" name="title" value="[[ project.keystr ]]"
+                disabled />
+              <small id="input_keystr_help" class="form-text text-muted">
+                The project short identifier is used for checking updates in
+                email or other data sources. It must be at least 3 characters
+                long, contain upper case letters and numbers
+              </small>
+            </div>
+
+            <div class="form-group">
+              <label for="input_query">Query</label>
+              <textarea class="form-control" id="input_query" name="query" rows="2"></textarea>
+              <small id="input_query_help" class="form-text text-muted">
+                The query for automatic search in PubMed
+              </small>
+            </div>
+
+            <div class="form-group">
+              <label for="input_abstract">Project Abstract (Optional)</label>
+              <textarea class="form-control" id="input_abstract" name="abstract" rows="3"></textarea>
+              <small id="input_abstract_help" class="form-text text-muted">
+                Describe this project.
+              </small>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+              <i class="far fa-save"></i>
+              Save basic information
+            </button>
+          </div>
+        </div>
+        <!-- /#basic_info_panel -->
+
+        <div class="tab-pane fade" id="ie_criteria_info_panel" role="tabpanel" aria-labelledby="ie_criteria_info_tab">
+          <p class="lead">The inclusion / exclusion criteria</p>
+
+          <p>
+            The inclusion / exclusion criteria will be displayed as a floating
+            window to help user check the criterias.
+          </p>
+          <form method="POST" action="[[ url_for('project.api_set_criterias') ]]">
+            <div class="row">
+              <div class="col-3">
+                <div class="form-group">
+                  <label for="form_textarea_inclusion_criterias">Inclusion Criteria</label>
+                  <textarea class="form-control" style="background: rgb(223, 245, 223)"
+                    id="form_textarea_inclusion_criterias" name="form_textarea_inclusion_criterias" rows="15">
+[[ form_textarea_inclusion_criterias ]]</textarea>
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="form-group">
+                  <label for="form_textarea_exclusion_criterias">Exclusion Criteria</label>
+                  <textarea class="form-control" style="background: rgb(255, 205, 205)"
+                    id="form_textarea_exclusion_criterias" name="form_textarea_exclusion_criterias" rows="15">
+[[ form_textarea_exclusion_criterias ]]</textarea>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+              <i class="fa fa-save"></i>
+              Save inclusion and exclusion criterias
+            </button>
+          </form>
+        </div>
+        <!-- /#ie_criteria_info_panel -->
+
+        <div class="tab-pane fade" id="ie_keywords_info_panel" role="tabpanel" aria-labelledby="ie_keywords_info_tab">
+          <p class="lead">The inclusion / exclusion keywords</p>
+          <p>
+            The inclusion keywords will be highlighted as
+            <b style="
+                color: rgb(1, 56, 1);
+                background: rgb(223, 245, 223);
+                padding: 1px 8px;
+              ">green</b>
+            in title and abstract. <br />
+            The exclusion keywords will be highlighted as
+            <b style="
+                color: rgb(250, 89, 89);
+                background: rgb(255, 205, 205);
+                padding: 1px 8px;
+              ">red</b>
+            in title and abstract.<br />
+            One keyword per line.
+          </p>
+          <form method="POST" action="[[ url_for('project.api_set_highlight_keywords') ]]">
+            <div class="row">
+              <div class="col-3">
+                <div class="form-group">
+                  <label for="form_textarea_inclusion_keywords">Inclusion keywords</label>
+                  <textarea class="form-control" style="color: rgb(1, 56, 1); background: rgb(223, 245, 223)"
+                    id="form_textarea_inclusion_keywords" name="form_textarea_inclusion_keywords" rows="15">
+[[ form_textarea_inclusion_keywords ]]</textarea>
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="form-group">
+                  <label for="form_textarea_exclusion_keywords">Exclusion keywords</label>
+                  <textarea class="form-control" style="
+                      color: rgb(250, 89, 89);
+                      background: rgb(255, 205, 205);
+                    " id="form_textarea_exclusion_keywords" name="form_textarea_exclusion_keywords" rows="15">
+[[ form_textarea_exclusion_keywords ]]</textarea>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+              <i class="fa fa-save"></i>
+              Save inclusion and exclusion keywords
+            </button>
+          </form>
+        </div>
+        <!-- /#ie_criteria_info_panel -->
+
+        <div class="tab-pane fade" id="ex_reason_info_panel" role="tabpanel" aria-labelledby="ex_reason_info_tab">
+          <p class="lead">The full text exclusion reasons</p>
+          <p>
+            The full text exclusion reasons will be used in the full text review
+            stage.<br />
+            One reason per line.
+          </p>
+          <form method="POST" action="[[ url_for('project.api_set_exclusion_reasons') ]]">
+            <div class="row">
+              <div class="col-lg-3 col-md-4 col-sm-10">
+                <div class="form-group">
+                  <label for="form_textarea_inclusion_keywords">Full text exclusion reasons</label>
+                  <textarea class="form-control" id="form_textarea_exclusion_reasons"
+                    name="form_textarea_exclusion_reasons" rows="15">
+[[ form_textarea_exclusion_reasons ]]</textarea>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+              <i class="fa fa-save"></i>
+              Save exclusion reasons
+            </button>
+          </form>
+        </div>
+        <!-- /#ie_criteria_info_panel -->
+
+        <div class="tab-pane fade" id="tag_info_panel" role="tabpanel" aria-labelledby="tag_info_tab">
+          <p class="lead">The tags</p>
+          <p>
+            The tags will be used to label studies in the screener. In the
+            following text box, input the tags for this project.
+            <br />
+            One tag per line.
+          </p>
+          <form method="POST" action="[[ url_for('project.api_set_tags') ]]">
+            <div class="row">
+              <div class="col-3">
+                <div class="form-group">
+                  <textarea class="form-control" id="form_textarea_tags" name="form_textarea_tags" rows="15">
+[[ form_textarea_tags ]]</textarea>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+              <i class="fa fa-save"></i>
+              Save tags
+            </button>
+          </form>
+        </div>
+        <!-- /#tag_info_panel -->
+
+        <div class="tab-pane fade" id="pdf_keywords_panel" role="tabpanel" aria-labelledby="tag_info_tab">
+          <p class="lead">PDF Highlight Keywords</p>
+          <p>
+            The following keywords will be highlighted as
+            <span style="background-color: gold">YELLOW background color</span>
+            in the PDF file during data extraction.<br />
+            ONE keyword per line
+          </p>
+          <form method="POST" action="[[ url_for('project.api_set_pdf_keywords') ]]">
+            <div class="row">
+              <div class="col-3">
+                <div class="form-group">
+                  <textarea class="form-control" id="form_textarea_pdf_keywords" name="form_textarea_pdf_keywords"
+                    rows="15">
+[[ form_textarea_pdf_keywords ]]</textarea>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+              <i class="fa fa-save"></i>
+              Save those keywords
+            </button>
+          </form>
+        </div>
+        <!-- /#pdf_keywords_panel -->
+
+        <div class="tab-pane fade" id="prisma_info_panel" role="tabpanel" aria-labelledby="tag_info_tab">
+          <p class="lead">The PRISMA</p>
+          <p>
+            The tags will be used to generate the PRISMA for public website.
+          </p>
+          <form method="POST" action="[[ url_for('project.api_set_tags') ]]">
+            <div class="row">
+              <div class="col-3">
+                <div class="form-group">
+                  <textarea class="form-control" id="form_textarea_tags" name="form_textarea_tags" rows="15">
+[[ form_textarea_tags ]]</textarea>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+              <i class="fa fa-save"></i>
+              Save PRISMA settings
+            </button>
+          </form>
+        </div>
+        <!-- /#prisma_info_panel -->
+
+        <div class="tab-pane fade" id="advanced_mode_panel" role="tabpanel" aria-labelledby="tag_info_tab">
+          <p class="lead">The Advanced Mode</p>
+          <p>
+            <b>DO NOT</b> edit anything below if you are not sure what would be
+            affected.
+            <button onclick="jarvis.resize_cm_editor();">
+              <i class="fa fa-expand"></i>
+              Re-size
+            </button>
+          </p>
+          <form method="POST" action="[[ url_for('project.api_set_settings') ]]"
+            onsubmit="return jarvis.on_submit_advanced_mode()">
+            <div class="row">
+              <div class="col-9">
+                <div class="form-group">
+                  <textarea class="form-control" id="form_textarea_settings" name="form_textarea_settings">
+[[ form_textarea_settings ]]</textarea>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" onabort="">
+              <i class="fa fa-save"></i>
+              Save project settings
+            </button>
+          </form>
+        </div>
+        <!-- /#advanced_mode_panel -->
+
+        <div class="tab-pane fade" id="clinical_questions_panel" role="tabpanel" aria-labelledby="tag_info_tab">
+          <div class="row">
+            <div class="col-12 card">
+              <div class="d-flex my-4">
+                <div class="d-flex" style="
+                justify-content: space-between;
+                width: 50%;
+                margin-left: 17px;
+              ">
+                  <input type="text" id="cq_abbr" class="form-control mr-5" placeholder="Unique abbr" value="" />
+                  <input type="text" id="cq_name" class="form-control" placeholder="Name" value="" />
+                </div>
+                <div class="ml-5" style="position: relative; width: 48%;">
+                  <label for="">Solely Toxicity Question</label>
+                  <br />
+                  <label class="font-weight-normal mt-2" for="yes-radio">Yes</label>
+                  <input type="radio" name="choice" id="yes-radio" value="yes" />&nbsp;&nbsp;&nbsp;
+                  <label class="font-weight-normal" for="no-radio">No</label>
+                  <input type="radio" name="choice" id="no-radio" value="no" />
+
+                  <div id="yes-section" class="hidden" style="position: absolute;">
+                    <label class="mt-2" for="toxicity_group">Toxicity Group:</label><br />
+                    <div class="mt-1 ml-2">
+                      <input type="radio" name="group" id="pwma-radio" value="pwma" />
+                      <label class="font-weight-normal" for="pwma-radio">PWMA</label>
+                      <input class="ml-3" type="radio" name="group" id="nma-radio" value="nma" />
+                      <label class="font-weight-normal" for="nma-radio">NMA</label>
+                    </div>
+
+                    <div id="pwma-section" class="hidden">
+                      <label class="mt-2" for="pwma-toxicity">PWMA Specific Toxicity:</label><br />
+                      <div class="mt-1 ml-2">
+                        <input type="checkbox" name="treatment" id="treatment" value="treatment" />
+                        <label class="font-weight-normal" for="treatment">Treatment related adverse events</label>
+
+                        <br />
+                        <input type="checkbox" name="all_adverse" id="all_adverse" value="all_adverse" />
+                        <label class="font-weight-normal" for="all_adverse">All cause adverse events</label>
+
+                        <br />
+                        <input type="checkbox" name="immune" id="immune" value="immune" />
+                        <label class="font-weight-normal" for="immune">Immune related adverse events</label>
+                      </div>
+                    </div>
+
+                    <div id="nma-section" class="hidden">
+                      <label class="mt-2" for="nma-toxicity">NMA Specific Toxicity:</label><br />
+                      <div class="mt-1 ml-2">
+                        <input type="checkbox" name="treatment" id="n_treatment" value="treatment" />
+                        <label class="font-weight-normal" for="n_treatment">Treatment related adverse events</label>
+
+                        <br />
+                        <input type="checkbox" name="all_adverse" id="n_all_adverse" value="all_adverse" />
+                        <label class="font-weight-normal" for="n_all_adverse">All cause adverse events</label>
+
+                        <br />
+                        <input type="checkbox" name="immune" id="n_immune" value="immune" />
+                        <label class="font-weight-normal" for="n_immune">Immune related adverse events</label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div id="no-section" class="hidden" style="position: absolute;">
+                    <label class="mt-2" for="toxicity_group">Analysis Group:</label><br />
+                    <div class="mt-1 ml-2">
+                      <input type="radio" name="group" id="no-pwma-radio" value="pwma" />
+                      <label class="font-weight-normal" for="no-pwma-radio">PWMA</label>
+                      <input class="ml-3" type="radio" name="group" id="nwma-radio" value="nwma" />
+                      <label class="font-weight-normal" for="nwma-radio">NMA</label>
+                    </div>
+
+                    <div id="no-pwma-section" class="hidden">
+                      <label class="mt-2" for="pwma-toxicity">PWMA Specific Group:</label><br />
+                      <div class="mt-1 ml-2">
+                        <input type="checkbox" name="primary" id="primary" value="primary" />
+                        <label class="font-weight-normal" for="primary">Primary Analysis</label>
+
+                        <br />
+                        <input type="checkbox" name="sensitivity" id="sensitivity" value="sensitivity" />
+                        <label class="font-weight-normal" for="sensitivity">Sensitivity Analysis</label>
+
+
+                        <br />
+                        <input type="checkbox" name="subgroup" id="subgroup" value="subgroup" />
+                        <label class="font-weight-normal" for="subgroup">Sub Group Analysis</label>
+                      </div>
+
+                    </div>
+
+                    <div id="nwma-section" class="hidden">
+                      <label class="mt-2" for="nwma-toxicity">NMA Specific Group:</label><br />
+                      <div class="mt-1 ml-2">
+                        <input type="checkbox" name="primary" id="n_primary" value="primary" />
+                        <label class="font-weight-normal" for="n_primary">Primary Analysis</label>
+
+                        <br />
+                        <input type="checkbox" name="sensitivity" id="n_sensitivity" value="sensitivity" />
+                        <label class="font-weight-normal" for="n_sensitivity">Sensitivity Analysis</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button class="btn btn-primary" style="margin-left: 17px; width: 73px" id="add_clinical_question">
+                <i class="fa fa-add"></i>
+                Add
+              </button>
+
+              <div class="card-body">
+                <div class="d-flex mb-0" style="justify-content: space-between; width: 30%">
+                  <h5>abbr</h5>
+                  <h5>name</h5>
+                </div>
+
+                {% for cq in form_textarea_settings_cqs %}
+                <div class="d-flex mb-3" style="justify-content: space-between; width: 50%">
+                  <input type="text" class="form-control mr-5" name="title" value="[[ cq.abbr ]]" readonly />
+                  <input type="text" class="form-control" name="title" value="[[ cq.name ]]" readonly />
+                </div>
+
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="rob_panel" role="tabpanel" aria-labelledby="tag_info_tab">
+          <div class="row container">
+            <div class="col-12 card">
+              <p class="lead">Project Clinical Question ROB</p>
+              <br />
+              <div class="form-group">
+                <label for="rob_select">Assign ROB:</label><br />
+                <select class="form-control" id="rob_select">
+                  <option value="">Select Clinical Question</option>
+                  {% for cq in form_textarea_settings_cqs %}
+                  <option value="[[cq.abbr]]">[[cq.name]]</option>
+
+                  {% endfor %}
+                </select>
+              </div>
+              <button class="btn btn-primary ml-auto" id="add_cq_rob">
+                <i class="fa fa-add"></i>
+                Add ROB
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="toxicity_panel" role="tabpanel" aria-labelledby="tag_info_tab">
+          <div class="row container">
+            <div class="col-12 card">
+              <p class="lead">Project Clinical Question Toxicity</p>
+              <br />
+              <div class="form-group">
+                <label for="toxicity_select">Assign Toxicity:</label><br />
+                <select class="form-control" id="toxicity_select">
+                  <option value="">Select Clinical Question</option>
+                  {% for cq in form_textarea_settings_cqs %}
+                  <option value="[[cq.abbr]]">[[cq.name]]</option>
+
+                  {% endfor %}
+                </select>
+              </div>
+              <div>
+                <label for="">Solely Toxicity Question</label>
+                <br />
+
+                <div>
+                  <label class="mt-2" for="toxicity_group">Toxicity Group:</label><br />
+                  <div class="mt-1 ml-2">
+                    <input type="radio" name="group" id="tox-pwma-radio" value="pwma" />
+                    <label class="font-weight-normal" for="tox-pwma-radio">PWMA</label>
+                    <input class="ml-3" type="radio" name="group" id="tox-nma-radio" value="nma" />
+                    <label class="font-weight-normal" for="tox-nma-radio">NMA</label>
+                  </div>
+
+                  <div id="tox-pwma-section" class="hidden">
+                    <label class="mt-2" for="pwma-toxicity">PWMA Specific Toxicity:</label><br />
+                    <div class="mt-1 ml-2">
+                      <input type="checkbox" name="tox-treatment" id="tox-treatment" value="treatment" />
+                      <label class="font-weight-normal" for="tox-treatment">Treatment related adverse events</label>
+
+                      <br />
+                      <input type="checkbox" name="tox-all_adverse" id="tox-all_adverse" value="all_adverse" />
+                      <label class="font-weight-normal" for="tox-all_adverse">All cause adverse events</label>
+
+                      <br />
+                      <input type="checkbox" name="tox-immune" id="tox-immune" value="immune" />
+                      <label class="font-weight-normal" for="tox-immune">Immune related adverse events</label>
+                    </div>
+                  </div>
+
+                  <div id="tox-nma-section" class="hidden">
+                    <label class="mt-2" for="nma-toxicity">NMA Specific Toxicity:</label><br />
+                    <div class="mt-1 ml-2">
+                      <input type="checkbox" name="tox-nma-treatment" id="tox-nma-treatment" value="treatment" />
+                      <label class="font-weight-normal" for="tox-nma-treatment">Treatment related adverse events</label>
+
+                      <br />
+                      <input type="checkbox" name="tox-nma-all_adverse" id="tox-nma-all_adverse" value="all_adverse" />
+                      <label class="font-weight-normal" for="tox-nma-all_adverse">All cause adverse events</label>
+
+                      <br />
+                      <input type="checkbox" name="tox-nma-immune" id="tox-nma-immune" value="immune" />
+                      <label class="font-weight-normal" for="tox-nma-immune">Immune related adverse events</label>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+              <button class="btn btn-primary ml-auto" id="add_cq_toxicity">
+                <i class="fa fa-add"></i>
+                Add Toxicity
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Clinical Questions  -->
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %} {% block active_nav_link %}project-editor{% endblock %} {% block
+script %}
+<!-- Code Mirror -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.61.0/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.61.0/mode/javascript/javascript.min.js"></script>
+
+<script>
+  var vw_prjeditor = {
+    vpp: null,
+    vpp_id: "#vw_prjeditor",
+    api_url: {
+      project: "",
+    },
+
+    load: function () { },
+
+    init: function () { },
+  };
+
+  var myCodeMirror = null;
+
+  var vw_cmeditor = {
+    init: function () { },
+
+    resize: function () { },
+  };
+
+  var jarvis = {
+    init: function () {
+      // initialize the global editor
+      var myTextArea = document.getElementById("form_textarea_settings");
+      myCodeMirror = CodeMirror.fromTextArea(myTextArea, {
+        lineWrapping: true,
+        mode: "application/json",
+        viewportMargin: 50,
+      });
+
+      // switch tab
+      // ^ means starting, meaning only match the first hash
+      if (!( Cookies.get('clinical_tab') == undefined || Cookies.get('clinical_tab') == 'false'))
+      {
+        $('#clinical_questions_tab').tab('show');
+        Cookies.set('clinical_tab', false)
+      }
+      else{
+        var hash = location.hash.replace(/^#/, "");
+        if (hash) {
+          $("#" + hash + "_tab").tab("show");
+        }
+    }
+    },
+
+    resize_cm_editor: function () {
+      var w = $(window).width();
+      var h = $(window).height();
+
+      $(".CodeMirror").css("height", h - 250);
+    },
+
+    on_submit_advanced_mode: function () {
+      // check the json format first
+      try {
+        JSON.parse(myCodeMirror.getValue());
+      } catch (err) {
+        console.log(err);
+        toast(
+          "The settings are not a valid JSON text, please review.\n" + err,
+          "error"
+        );
+        return false;
+      }
+
+      // final confirm
+      var ret = confirm("Do you really want to submit the settings?");
+
+      return ret;
+    },
+
+    on_submit_clinical_question: function () {
+      // check the json format first
+      if ($("#cq_abbr").val() && $("#cq_name").val()) {
+        var ret = confirm(
+          "Do you really want to update  the Clinical Question?"
+        );
+
+        return ret;
+      } else {
+        toast("Fields should not be empty");
+        return false;
+      }
+
+      // final confirm
+    },
+
+    is_valid_project_setting_json: function () { },
+  };
+
+  $(document).ready(function () {
+    jarvis.init();
+    let selectedOptions =[];
+
+    function showLoader() {
+    document.getElementById("loader").style.display = "flex"; // Or "block" for other display styles
+    }
+
+    // Function to hide the loader
+    function hideLoader() {
+        document.getElementById("loader").style.display = "none";
+    }
+    add_cq = document.querySelector("#add_clinical_question");
+
+    let checkBoxes = document.querySelectorAll("input[type=checkbox]");
+    let radioButtons = document.querySelectorAll("input[type=radio]");
+    let cq_toxicity = false;
+
+    document.getElementById('yes-radio').addEventListener('change', function () {
+      cq_toxicity = this.checked
+    });
+
+    document.getElementById('no-radio').addEventListener('change', function () {
+      cq_toxicity = !this.checked;
+    });
+
+    radioButtons.forEach(function (radio) {
+      radio.addEventListener("change", function () {
+        if (this.checked) {
+          checkBoxes.forEach(function (checkbox) {
+            checkbox.disabled = false;
+            checkbox.checked = false;
+            selectedOptions =[]
+
+          });
+        }
+      });
+    });
+
+    // for (let i = 0; i < checkBoxes.length; i++) {
+    //   checkBoxes[i].addEventListener("click", function () {
+    //     for (let j = 0; j < checkBoxes.length; j++) {
+    //       if (checkBoxes[j] !== this) {
+    //         checkBoxes[j].disabled = this.checked;
+    //       }
+    //     }
+    //   });
+    // }
+
+    toxicity_pwma = document.querySelector("#tox-pwma-radio");
+    toxicity_pwma.addEventListener("click", function () {
+      if (this.checked) {
+        document.getElementById("tox-pwma-section").classList.remove("hidden");
+        document.getElementById("tox-nma-section").classList.add("hidden");
+      }
+    });
+
+    toxicity_nma = document.querySelector("#tox-nma-radio");
+    toxicity_nma.addEventListener("click", function () {
+      if (this.checked) {
+        document.getElementById("tox-pwma-section").classList.add("hidden");
+        document.getElementById("tox-nma-section").classList.remove("hidden");
+      }
+    });
+
+    toxicity_yes = document.querySelector("#yes-radio");
+    toxicity_yes.addEventListener("click", function () {
+      if (this.checked) {
+        document.getElementById("yes-section").classList.remove("hidden");
+        document.getElementById("no-section").classList.add("hidden");
+        document.getElementById("pwma-section").classList.add("hidden");
+        document.getElementById("nma-section").classList.add("hidden");
+        document.getElementById("no-pwma-radio").checked = false;
+        document.getElementById("nwma-radio").checked = false;
+      }
+    });
+
+    pwma_yes = document.querySelector("#pwma-radio");
+    pwma_yes.addEventListener("click", function () {
+      if (this.checked) {
+        document.getElementById("pwma-section").classList.remove("hidden");
+        document.getElementById("nma-section").classList.add("hidden");
+      }
+    });
+
+    nma_yes = document.querySelector("#nma-radio");
+    nma_yes.addEventListener("click", function () {
+      if (this.checked) {
+        document.getElementById("nma-section").classList.remove("hidden");
+        document.getElementById("pwma-section").classList.add("hidden");
+      }
+    });
+
+    toxicity_no = document.querySelector("#no-radio");
+    toxicity_no.addEventListener("click", function () {
+      if (this.checked) {
+        document.getElementById("no-section").classList.remove("hidden");
+        document.getElementById("yes-section").classList.add("hidden");
+        document.getElementById("no-pwma-section").classList.add("hidden");
+        document.getElementById("nwma-section").classList.add("hidden");
+        document.getElementById("pwma-radio").checked = false;
+        document.getElementById("nma-radio").checked = false;
+      }
+    });
+
+    pwma_no = document.querySelector("#no-pwma-radio");
+    pwma_no.addEventListener("click", function () {
+      if (this.checked) {
+        document.getElementById("no-pwma-section").classList.remove("hidden");
+        document.getElementById("nwma-section").classList.add("hidden");
+      }
+    });
+
+    nma_no = document.querySelector("#nwma-radio");
+    nma_no.addEventListener("click", function () {
+      if (this.checked) {
+        document.getElementById("nwma-section").classList.remove("hidden");
+        document.getElementById("no-pwma-section").classList.add("hidden");
+      }
+    });
+
+    add_cq_rob = document.querySelector("#add_cq_rob");
+    add_cq_toxicity = document.querySelector("#add_cq_toxicity");
+
+    add_cq_toxicity.addEventListener("click", function () {
+      let cq_clinical_group = null;
+      let cq_out_group = null;
+      let radioButtons = [
+        'tox-pwma-radio',
+        'tox-nma-radio'
+      ];
+
+      for (let i = 0; i < radioButtons.length; i++) {
+        let radioButton = document.getElementById(radioButtons[i]);
+
+        if (radioButton.checked) {
+          cq_out_group = radioButton.value;
+          break;
+        }
+      }
+
+      for (let i = 0; i < checkBoxes.length; i++) {
+        if (checkBoxes[i].checked) {
+          cq_clinical_group = checkBoxes[i].value;
+          break;
+        }
+      }
+      if (!($("#toxicity_select").val()) || (!cq_clinical_group) || (!cq_out_group)) {
+        toast("Please add missing information");
+        return;
+      } else {
+        cqs__ = $("#toxicity_select").val();
+        abbr_list = [];
+        for (i = 0; i < cqs__.length; i++) {
+          abbr_list.push(cqs__[i].abbr);
+        }
+
+        if (abbr_list.includes($("#cq_abbr").val().trim())) {
+          toast("Abbr Shoud be unique");
+          return;
+        }
+        //showLoader();
+        document.getElementById('overlay').style.display = 'flex';
+        $(".progress").show();
+
+        var duration = (2 * 60 + 15) * 1000;
+        var interval = 100;
+        var elapsedTime = 0;
+
+        var progressInterval = setInterval(function () {
+          elapsedTime += interval;
+          var percentage = (elapsedTime / duration) * 100;
+
+          $("#progressBar").css("width", percentage + "%");
+          $("#progressBar").attr("aria-valuenow", percentage);
+          $("#progressText").text(Math.round(percentage) + "%");
+
+          if (elapsedTime >= duration) {
+            clearInterval(progressInterval);
+            $(".progress").hide();
+            document.getElementById('overlay').style.display = 'none';
+          }
+        }, interval);
+        $.ajax({
+          url: "/project/add_cq_toxicity",
+          type: "post",
+          dataType: "json",
+
+          data: {
+            cq_abbr: $("#toxicity_select").val(),
+            project_id: Cookies.get("project_id"),
+            cq_group: cq_clinical_group,
+            cq_out_group: cq_out_group
+          },
+
+          success: function (data) {
+            toast(data["msg"]);
+            $(".progress").hide();
+            document.getElementById('overlay').style.display = 'none';
+            //hideLoader();
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            toast("Something wrong", "alert");
+            console.error(textStatus, errorThrown);
+            $(".progress").hide();
+            document.getElementById('overlay').style.display = 'none';
+            //showLoader();
+          },
+        });
+      }
+    });
+
+    add_cq_rob.addEventListener("click", function () {
+      if (!$("#rob_select").val()) {
+        return;
+      } else {
+        cqs__ = $("#rob_select").val();
+        abbr_list = [];
+        for (i = 0; i < cqs__.length; i++) {
+          abbr_list.push(cqs__[i].abbr);
+        }
+
+        if (abbr_list.includes($("#cq_abbr").val().trim())) {
+          toast("Abbr Shoud be unique");
+          return;
+        }
+
+        $.ajax({
+          url: "/project/add_cq_rob",
+          type: "post",
+          dataType: "json",
+
+          data: {
+            cq_abbr: $("#rob_select").val(),
+            project_id: Cookies.get("project_id"),
+          },
+
+          success: function (data) {
+            toast(data["msg"]);
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            toast("Something wrong", "alert");
+            console.error(textStatus, errorThrown);
+          },
+        });
+      }
+    });
+
+    add_cq.addEventListener("click", function () {
+
+      let cq_clinical_group = [];
+      let cq_out_group = null;
+      let radioButtons = [
+        'pwma-radio',
+        'nma-radio',
+        'no-pwma-radio',
+        'nwma-radio'
+      ];
+
+      for (let i = 0; i < radioButtons.length; i++) {
+        let radioButton = document.getElementById(radioButtons[i]);
+
+        if (radioButton.checked) {
+          cq_out_group = radioButton.value;
+          break;
+        }
+      }
+
+      // for (let i = 0; i < checkBoxes.length; i++) {
+      //   if (checkBoxes[i].checked) {
+      //     cq_clinical_group = checkBoxes[i].value;
+      //     break;
+      //   }
+      // }
+      $("input:checkbox:checked").each(function(){
+     cq_clinical_group.push($(this).val());
+   })
+
+      console.log(cq_toxicity, cq_out_group, cq_clinical_group);
+      debugger;
+
+      if (!($("#cq_abbr").val() && $("#cq_name").val() && cq_out_group && cq_clinical_group.length) ){
+        toast("Fields should not be empty");
+      } else {
+        cqs__ = JSON.parse(myCodeMirror.getValue()).clinical_questions;
+        abbr_list = [];
+        for (i = 0; i < cqs__.length; i++) {
+          abbr_list.push(cqs__[i].abbr);
+        }
+
+        if (abbr_list.includes($("#cq_abbr").val().trim())) {
+          toast("Abbr Shoud be unique");
+          return;
+        }
+        document.getElementById('overlay').style.display = 'flex';
+        $(".progress").show();
+
+        var duration = (2 * 60 + 15) * 1000;
+        var interval = 100;
+        var elapsedTime = 0;
+
+        var progressInterval = setInterval(function () {
+          elapsedTime += interval;
+          var percentage = (elapsedTime / duration) * 100;
+
+          if (percentage >= 80) {
+            percentage = 80;
+            clearInterval(progressInterval);
+          }
+
+          $("#progressBar").css("width", percentage + "%");
+          $("#progressBar").attr("aria-valuenow", percentage);
+          $("#progressText").text(Math.round(percentage) + "%");
+          
+        }, interval);
+
+
+        $.ajax({
+          url: "/project/add_clinical_question",
+          type: "post",
+          dataType: "json",
+
+          data: {
+            cq_abbr: $("#cq_abbr").val(),
+            cq_name: $("#cq_name").val(),
+            cq_toxicity: cq_toxicity,
+            cq_out_group: cq_out_group,
+            cq_clinical_group: JSON.stringify(cq_clinical_group)
+          },
+
+          success: function (data) {
+           
+            Cookies.set('clinical_tab', true)
+
+
+            var percentage = 80;
+
+            function updateProgressBar() {
+
+              if (percentage < 100) {
+                percentage++;
+
+                $("#progressBar").css("width", percentage + "%");
+                $("#progressBar").attr("aria-valuenow", percentage);
+                $("#progressText").text(Math.round(percentage) + "%");
+
+                setTimeout(updateProgressBar, 200);
+              }
+              else {
+                $(".progress").hide();
+                document.getElementById('overlay').style.display = 'none';
+                toast("Clinical Question Added  Successfully");
+                window.location.reload(true);
+              }
+            }
+            updateProgressBar();          
+
+            // history.go(0);            
+
+            // console.log(data);
+            //location.reload();
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            toast("Something wrong", "alert");
+            console.error(textStatus, errorThrown);
+            $(".progress").hide();
+            document.getElementById('overlay').style.display = 'none';
+          },
+        });
+      }
+    });
+  });
+</script>
+{% endblock %}

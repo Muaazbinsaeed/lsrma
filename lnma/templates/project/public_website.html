@@ -1,0 +1,1057 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Public Website
+{% endblock %}
+
+{% block style %}
+{% endblock %}
+
+
+{% block section_cq %}
+{% include 'shared_module/_cq_selector_toolbar.html' %}
+{% endblock %}
+
+{% block page_name %}
+<i class="far fa-folder"></i>
+Public Website
+{% endblock %}
+
+{% block content %}
+
+<div id="app_public" class="content">
+<div class="container-fluid"
+    style="height: 100%; overflow: hidden;">
+
+<div class="row"
+    style="height: 100%;">
+    <div class="col-md-5"
+        style="height: calc(100% - 10px); overflow-y: auto;">
+        <p>
+            Due to performance concerns, some of the contents on the public website are not updated directly with database. 
+            <br>
+            Check the 
+            <a target="_blank"
+                href="[[ url_for('pub.php', k=project.keystr, c=cq_abbr) ]]">
+                Development Version of Public Webiste for 
+                <b>
+                    [[ project.title ]] / [[ cq_abbr ]]
+                </b>
+                <i class="far fa-share-square"></i>
+            </a>
+            .
+        </p>
+
+        <!-- PRISMA -->
+        <div class="card card-info">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fa fa-project-diagram"></i>
+                    PRISMA Diagram
+                </h3>
+    
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
+                    </button>
+                </div>
+                <!-- /.card-tools -->
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body" style="display: block;">
+                <div>
+                    <button class="btn btn-primary"
+                        v-bind:disabled="ui_disabled"
+                        v-on:click="mk_prisma_json()">
+                        <span v-if="ui_disabled">
+                            Backend is updating ... 
+                            <i class="fas fa-sync fa-spin"></i>
+                        </span>
+                        <span v-else>
+                            <i class="fas fa-random"></i> Generate JSON Data File
+                        </span>
+                    </button>
+                </div>
+                
+                <div v-if="json.prisma == null">
+                    <p>
+                        Data not found.
+                    </p>
+                </div>
+                <div v-else>
+                    <p>
+                        Last update: {{ json.prisma.latest.last_queried }}
+                    </p>
+                    <div>
+                        <a target="_blank" 
+                            href="[[ url_for('pub.prisma', prj=project.keystr, cq=cq_abbr) ]]">
+                            <i class="fa fa-project-diagram"></i>
+                            Check PRISMA Diagram
+                        </a>
+
+                        &nbsp;&nbsp;
+
+                        <a target="_blank" 
+                            href="[[ url_for('pub.graphdata_prisma_json', keystr=project.keystr, cq=cq_abbr, src='db') ]]">
+                            <i class="fas fa-database"></i>
+                            Check PRISMA JSON
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+
+
+        <!-- iTable -->
+        <div class="card card-info">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fa fa-table"></i>
+                    Interactive Table
+                </h3>
+    
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
+                    </button>
+                </div>
+                <!-- /.card-tools -->
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body" style="display: block;">
+                <div>
+                    <button class="btn btn-primary"
+                        v-bind:disabled="ui_disabled"
+                        v-on:click="mk_itable_json()">
+                        <span v-if="ui_disabled">
+                            Backend is updating ... 
+                            <i class="fas fa-sync fa-spin"></i>
+                        </span>
+                        <span v-else>
+                            <i class="fas fa-random"></i> Generate JSON Data File
+                        </span>
+                    </button>
+                </div>
+                
+                <div v-if="json.itable == null">
+                    <p>
+                        Data not found.
+                    </p>
+                </div>
+                <div v-else>
+                    <p>
+                        Last update: {{ json.itable.latest.last_queried }}
+                    </p>
+                    <div>
+                        <a target="_blank" 
+                            href="[[ url_for('pub.itable', prj=project.keystr, cq=cq_abbr) ]]">
+                            <i class="fa fa-table"></i>
+                            Check Interactive Table
+                        </a>
+
+                        &nbsp;&nbsp;
+                        
+                        <a target="_blank" 
+                            href="[[ url_for('pub.graphdata_itable_json', keystr=project.keystr, cq=cq_abbr, src='db') ]]">
+                            <i class="fas fa-database"></i>
+                            Check iTable JSON
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+
+
+        <!-- PMA Plots -->
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fa fa-chart-line"></i>
+                    Graphs of Pairwise MA
+                </h3>
+    
+                <div class="card-tools">
+                    <button type="button" 
+                        class="btn btn-tool" 
+                        data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+                <!-- /.card-tools -->
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body" style="display: block;">
+                <div>
+                    <button class="btn btn-primary"
+                        v-bind:disabled="ui_disabled"
+                        v-on:click="mk_graph_pwma_json()">
+                        <span v-if="ui_disabled">
+                            Backend is updating ... 
+                            <i class="fas fa-sync fa-spin"></i>
+                        </span>
+                        <span v-else>
+                            <i class="fas fa-random"></i> Generate JSON Data File
+                        </span>
+                    </button>
+                </div>
+                
+                <div v-if="json.graph_pma == null">
+                    <p>
+                        Data not found.
+                    </p>
+                </div>
+                <div v-else>
+                    <p>
+                        Last update: {{ json.graph_pma.latest.last_queried }}
+                    </p>
+                    <div>
+
+                        <a target="_blank"
+                            href="[[ url_for('pub.graph_pma', prj=project.keystr, cq=cq_abbr, group='primary', src='cache') ]]">
+                            <i class="fas fa-chart-line"></i>
+                            Check PMA Plot (Primary)
+                        </a>
+
+                        &nbsp;&nbsp;
+
+                        <a target="_blank" 
+                            href="[[ url_for('pub.graphdata_graph_pwma_json', keystr=project.keystr, cq=cq_abbr, src='cache') ]]">
+                            <i class="fas fa-database"></i>
+                            Check PMA Plot JSON
+                        </a>
+
+                        <a target="_blank" 
+                        href="[[ url_for('pub.graphdata_graph_pwma_incidence_json', keystr=project.keystr, cq=cq_abbr, src='cache') ]]">
+                        <i class="fas fa-database"></i>
+                        Check PMA Plot JSON
+                    </a>
+                        
+                    </div>
+                    <div>
+                        The outcome sequence may be different from the public website. Please check the sequence in the public website instead of this module view.
+                    </div>
+                </div>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+
+
+        <!-- PMA SoF Table -->
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fa fa-table"></i>
+                    SoF Table of Pairwise MA
+                </h3>
+    
+                <div class="card-tools">
+                    <button type="button" 
+                        class="btn btn-tool" 
+                        data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+                <!-- /.card-tools -->
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body" style="display: block;">
+                <div>
+                    <button class="btn btn-primary"
+                        v-bind:disabled="ui_disabled"
+                        v-on:click="mk_softable_pwma_json()">
+                        <span v-if="ui_disabled">
+                            Backend is updating ... 
+                            <i class="fas fa-sync fa-spin"></i>
+                        </span>
+                        <span v-else>
+                            <i class="fas fa-random"></i> Generate JSON Data File
+                        </span>
+                    </button>
+                </div>
+                
+                <div v-if="json.softable_pma == null">
+                    <p>
+                        Data not found.
+                    </p>
+                </div>
+                <div v-else>
+                    <p>
+                        Last update: {{ json.softable_pma.latest.last_queried }}
+                    </p>
+                    <div>
+
+                        <a target="_blank"
+                            href="[[ url_for('pub.softable_pma', prj=project.keystr, cq=cq_abbr, group='primary') ]]">
+                            <i class="fa fa-table"></i>
+                            Check PMA SoF Table
+                        </a>
+
+                        &nbsp;&nbsp;
+
+                        <a target="_blank" 
+                            href="[[ url_for('pub.graphdata_softable_pwma_json', keystr=project.keystr, cq=cq_abbr, src='cache') ]]">
+                            <i class="fas fa-database"></i>
+                            Check PMA SoF Table JSON
+                        </a>
+                    </div>
+                    <div>
+                        The outcome sequence may be different from the public website. Please check the sequence in the public website instead of this module view.
+                    </div>
+                </div>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+
+
+        <!-- NMA Plots -->
+        <div class="card card-success">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fa fa-chart-line"></i>
+                    Graphs of Network MA
+                </h3>
+    
+                <div class="card-tools">
+                    <button type="button" 
+                        class="btn btn-tool" 
+                        data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+                <!-- /.card-tools -->
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body" style="display: block;">
+                <div>
+                    <button class="btn btn-primary"
+                        v-bind:disabled="ui_disabled"
+                        v-on:click="mk_graph_nma_json()">
+                        <span v-if="ui_disabled">
+                            Backend is updating ... 
+                            <i class="fas fa-sync fa-spin"></i>
+                        </span>
+                        <span v-else>
+                            <i class="fas fa-random"></i> Generate JSON Data File
+                        </span>
+                    </button>
+                </div>
+                
+                <div v-if="json.graph_nma == null">
+                    <p>
+                        Data not found.
+                    </p>
+                </div>
+                <div v-else>
+                    <p>
+                        Last update: {{ json.graph_nma.latest.last_queried }}
+                    </p>
+                    <div>
+                        <a target="_blank" 
+                            href="[[ url_for('pub.graph_nma', prj=project.keystr, cq=cq_abbr) ]]">
+                            <i class="fas fa-chart-line"></i>
+                            Check NMA Plot (Primary)
+                        </a>
+
+                        &nbsp;&nbsp;
+
+                        <a target="_blank" 
+                            href="[[ url_for('pub.graphdata_graph_nma_json', keystr=project.keystr, cq=cq_abbr, src='cache') ]]">
+                            <i class="fas fa-database"></i>
+                            Check NMA Plot JSON
+                        </a>
+                    </div>
+                    <div>
+                        The outcome sequence may be different from the public website. Please check the sequence in the public website instead of this module view.
+                    </div>
+                </div>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+
+
+        <!-- NMA SoF Table -->
+        <div class="card card-success">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fa fa-table"></i>
+                    SoF Table of Network MA
+                </h3>
+    
+                <div class="card-tools">
+                    <button type="button" 
+                        class="btn btn-tool" 
+                        data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+                <!-- /.card-tools -->
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body" style="display: block;">
+                <div>
+                    <button class="btn btn-primary"
+                        v-bind:disabled="ui_disabled"
+                        v-on:click="mk_softable_nma_json()">
+                        <span v-if="ui_disabled">
+                            Backend is updating ... 
+                            <i class="fas fa-sync fa-spin"></i>
+                        </span>
+                        <span v-else>
+                            <i class="fas fa-random"></i> Generate JSON Data File
+                        </span>
+                    </button>
+                </div>
+                
+                <div v-if="json.softable_nma == null">
+                    <p>
+                        Data not found.
+                    </p>
+                </div>
+                <div v-else>
+                    <p>
+                        Last update: {{ json.softable_nma.latest.last_queried }}
+                    </p>
+                    <div>
+                        <a target="_blank" 
+                            href="[[ url_for('pub.softable_nma', prj=project.keystr, cq=cq_abbr) ]]">
+                            <i class="fa fa-table"></i>
+                            Check NMA SoF Table
+                        </a>
+
+                        &nbsp;&nbsp;
+
+                        <a target="_blank" 
+                            href="[[ url_for('pub.graphdata_softable_nma_json', keystr=project.keystr, cq=cq_abbr, src='cache') ]]">
+                            <i class="fas fa-database"></i>
+                            Check NMA SoF Table JSON
+                        </a>
+                    </div>
+                    <div>
+                        The outcome sequence may be different from the public website. Please check the sequence in the public website instead of this module view.
+                    </div>
+                </div>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+
+
+        <!-- EVMap -->
+        <div class="card card-default">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fa fa-chart-line"></i>
+                    Evidence Map
+                </h3>
+    
+                <div class="card-tools">
+                    <button type="button" 
+                        class="btn btn-tool" 
+                        data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+                <!-- /.card-tools -->
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body" style="display: block;">
+                <div>
+                    <button class="btn btn-primary"
+                        v-bind:disabled="ui_disabled"
+                        v-on:click="mk_evmap_json()">
+                        <span v-if="ui_disabled">
+                            Backend is updating ... 
+                            <i class="fas fa-sync fa-spin"></i>
+                        </span>
+                        <span v-else>
+                            <i class="fas fa-random"></i> Generate JSON Data File
+                        </span>
+                    </button>
+                </div>
+                
+                <div v-if="json.evmap == null">
+                    <p>
+                        Data not found.
+                    </p>
+                </div>
+                <div v-else>
+                    <p>
+                        Last update: {{ json.evmap.latest.last_queried }}
+                    </p>
+                    <div>
+                        <a target="_blank" 
+                            href="[[ url_for('pub.evmap', prj=project.keystr, cq=cq_abbr) ]]">
+                            <i class="fas fa-chart-line"></i>
+                            Check EVMap Plot
+                        </a>
+
+                        &nbsp;&nbsp;
+
+                        <a target="_blank" 
+                            href="[[ url_for('pub.graphdata_evmap_json', keystr=project.keystr, cq=cq_abbr, src='cache') ]]">
+                            <i class="fas fa-database"></i>
+                            Check EVMap JSON
+                        </a>
+                    </div>
+                    <div>
+                        The outcome sequence may be different from the public website. Please check the sequence in the public website instead of this module view.
+                    </div>
+                </div>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+
+
+
+    </div>
+
+
+    <div class="col-md-3"
+    style="height: calc(100% - 10px); overflow-y: auto; border: 1px solid; border-radius: 5px;">
+        <h4>
+            Action Items
+        </h4>
+
+        <div class="mt-3" v-if="error_output === ''">
+            <h6>Running ... please wait ...</h6>
+        </div>
+
+        <div v-if="error_output.length === 0 && error_output !== ''" style="color: #059c05;">
+            <h3>JSON updated succesfully</h3>
+        </div>
+
+        <div v-if="error_output.length > 0">
+            <h6 >These action items are required</h6>
+            <div style="margin-top: 10px; border: 1px solid black; border-radius: 5px; padding: 5px 8px; word-wrap: break-word;" v-for="(error, index) in error_output">
+                    <h6 style="font-weight: bold;">Outcome: <span style="font-weight: normal;">{{arrayErrorNames[index].outcome}}</span></h6>
+                    <h6 style="font-weight: bold;">Analysis Group: <span style="font-weight: normal;">{{arrayErrorNames[index].analysisGroup}}</span></h6>
+                    <h6 style="font-weight: bold;">Analysis Title: <span style="font-weight: normal;">{{arrayErrorNames[index].analysisTitle}}</span></h6>
+                    <h6 style="font-weight: bold;">Analysis Type: <span style="font-weight: normal;">{{arrayErrorNames[index].analysisType}}</span></h6>
+                <template v-for="(value, key) in error">
+                    <!-- <h4>{{ key }}</h4> -->
+                    <p style="color: red;">{{ value }}</p>
+                </template>
+            </div>
+        </div>
+        <pre v-html="">
+
+        </pre>
+    </div>
+
+    <div class="col-md-4"
+        style="height: calc(100% - 10px); overflow-y: auto;">
+        <h4>
+            Server Output
+        </h4>
+        <pre v-html="sys_output">
+
+        </pre>
+    </div>
+</div>
+<!-- .row -->
+
+</div>
+</div>
+
+
+{% endblock %}
+
+{% block active_nav_link %}project-public-website{% endblock %}
+
+{% block script %}
+<script>
+
+{% include "js/srv_pub.js" %}
+
+
+var app_public = {
+    // the project keystr
+    prj: '[[ project.keystr ]]',
+
+    // the cq for current project
+    cq: '[[ cq_abbr ]]',
+
+    // vpp
+    vpp: null,
+
+    vpp_id: '#app_public',
+
+    vpp_data: {
+        prj: '[[ project.keystr ]]',
+        cq: '[[ cq_abbr ]]',
+
+        sys_output: '',
+        error_output: '',
+        arrayErrorNames: [],
+
+        json: {
+            // the prisma content
+            prisma: null,
+
+            // the itable
+            itable: null,
+
+            // the graphs for PMA
+            graph_pma: null,
+
+            // the graphs for NMA
+            graph_nma: null,
+
+            // the sof table PMA
+            softable_pma: null,
+
+            // the sof table NMA
+            softable_nma: null,
+
+            // the evmap
+            evmap: null,
+        },
+
+        ui_disabled: false,
+    },
+
+    vpp_methods: {
+
+        freeze_ui: function() {
+            this.ui_disabled = true;
+            this.sys_output = 'Running ... please wait ...'
+        },
+
+        unfreeze_ui: function() {
+            this.ui_disabled = false;
+        },
+
+        show_sys_output: function(s) {
+            this.sys_output = s;
+        },
+
+        mk_prisma_json: function() {
+            this.freeze_ui();
+            srv_pub.mkjson_prisma_json(
+                this.prj,
+                this.cq,
+                function(rsp) {
+                    app_public.vpp.unfreeze_ui();
+                    app_public.vpp.show_sys_output(rsp.sys_output);
+                }
+            );
+        },
+
+        mk_itable_json: function() {
+            this.freeze_ui();
+            srv_pub.mkjson_itable_json(
+                this.prj,
+                this.cq,
+                function(rsp) {
+                    app_public.vpp.unfreeze_ui();
+                    app_public.vpp.show_sys_output(rsp.sys_output);
+                }
+            );
+        },
+
+        mk_graph_pwma_json: function() {
+            this.freeze_ui();
+            srv_pub.mkjson_graph_pwma_json(
+                this.prj,
+                this.cq,
+                function(rsp) {
+                    app_public.vpp.unfreeze_ui();
+                    app_public.vpp.show_sys_output(rsp.sys_output);
+                    app_public.vpp.error_output = rsp.data.failed_extracts;
+                        if(app_public.vpp.error_output.length > 0) {
+                                rsp.data.failed_extracts.forEach(element => {
+                                let key = Object.keys(element);
+                                let splitResult = key[0].split('|');
+                                let namesObj = {
+                                    "outcome": splitResult[4],
+                                    "analysisGroup": splitResult[3],
+                                    "analysisTitle": splitResult[2],
+                                    "analysisType": splitResult[1]
+                                }
+                                app_public.vpp.arrayErrorNames.push(namesObj);
+                            });
+                        }
+                }
+            );
+        },
+
+        mk_softable_pwma_json: function() {
+            this.freeze_ui();
+            srv_pub.mkjson_softable_pwma_json(
+                this.prj,
+                this.cq,
+                function(rsp) {
+                    app_public.vpp.unfreeze_ui();
+                    app_public.vpp.show_sys_output(rsp.sys_output);
+                    app_public.vpp.error_output = rsp.data.failed_extracts;
+                        if(app_public.vpp.error_output.length > 0) {
+                                rsp.data.failed_extracts.forEach(element => {
+                                let key = Object.keys(element);
+                                let splitResult = key[0].split('|');
+                                let namesObj = {
+                                    "outcome": splitResult[4],
+                                    "analysisGroup": splitResult[3],
+                                    "analysisTitle": splitResult[2],
+                                    "analysisType": splitResult[1]
+                                }
+                                app_public.vpp.arrayErrorNames.push(namesObj);
+                            });
+                        }
+                }
+            );
+        },
+
+        mk_graph_nma_json: function() {
+            this.freeze_ui();
+            srv_pub.mkjson_graph_nma_json(
+                this.prj,
+                this.cq,
+                function(rsp) {
+                    app_public.vpp.unfreeze_ui();
+                    app_public.vpp.show_sys_output(rsp.sys_output);
+                    app_public.vpp.error_output = rsp.data.failed_extracts;
+                        if(app_public.vpp.error_output.length > 0) {
+                                rsp.data.failed_extracts.forEach(element => {
+                                let key = Object.keys(element);
+                                let splitResult = key[0].split('|');
+                                let namesObj = {
+                                    "outcome": splitResult[4],
+                                    "analysisGroup": splitResult[3],
+                                    "analysisTitle": splitResult[2],
+                                    "analysisType": splitResult[1]
+                                }
+                                app_public.vpp.arrayErrorNames.push(namesObj);
+                            });
+                        }
+                }
+            );
+        },
+
+        mk_softable_nma_json: function() {
+            this.freeze_ui();
+            srv_pub.mkjson_softable_nma_json(
+                this.prj,
+                this.cq,
+                function(rsp) {
+                    app_public.vpp.unfreeze_ui();
+                    app_public.vpp.show_sys_output(rsp.sys_output);
+                    app_public.vpp.error_output = rsp.data.failed_extracts;
+                        if(app_public.vpp.error_output.length > 0) {
+                                rsp.data.failed_extracts.forEach(element => {
+                                let key = Object.keys(element);
+                                let splitResult = key[0].split('|');
+                                let namesObj = {
+                                    "outcome": splitResult[4],
+                                    "analysisGroup": splitResult[3],
+                                    "analysisTitle": splitResult[2],
+                                    "analysisType": splitResult[1]
+                                }
+                                app_public.vpp.arrayErrorNames.push(namesObj);
+                            });
+                        }
+                }
+            );
+        },
+
+        mk_evmap_json: function() {
+            this.freeze_ui();
+            srv_pub.mkjson_evmap_json(
+                this.prj,
+                this.cq,
+                function(rsp) {
+                    app_public.vpp.unfreeze_ui();
+                    app_public.vpp.show_sys_output(rsp.sys_output);
+                }
+            );
+        },
+
+        get_graph_nma_json: function(src, gp) {
+            if (typeof(src)=='undefined') {
+                src = 'cache';
+            }
+            if (typeof(gp)=='undefined') {
+                gp = 'primary';
+            }
+
+            this.freeze_ui();
+
+            $.ajax({
+                url: '/pub/graphdata/'+this.prj+'/GRAPH_NMA.json',
+                type: 'get',
+                data: {
+                    src: src, 
+                    cq: this.cq, 
+                    gp: gp,
+                    ver: Math.random()
+                },
+                dataType: 'json',
+                success: function(data) {
+                    toast('Updated Graph NMA JSON data');
+                    console.log(data);
+
+                    // update the prisma
+                    app_public.vpp.$data.json.graph_nma = data;
+
+                    // update the UI
+                    app_public.vpp.unfreeze_ui();
+                }, 
+                error: function(jqXHR, textStatus, errorThrown) {
+                    toast('Something wrong when creating the extraction.', 'alert');
+                    console.error(textStatus, errorThrown);
+                }
+            });
+        },
+
+        get_sofnma_json: function(src, gp) {
+            if (typeof(src)=='undefined') {
+                src = 'cache';
+            }
+            if (typeof(gp)=='undefined') {
+                gp = 'primary';
+            }
+
+            this.freeze_ui();
+
+            $.ajax({
+                url: '/pub/graphdata/'+this.prj+'/SOFTABLE_NMA.json',
+                type: 'get',
+                data: {
+                    src: src, 
+                    cq: this.cq, 
+                    gp: gp,
+                    ver: Math.random()
+                },
+                dataType: 'json',
+                success: function(data) {
+                    toast('Updated SoF NMA JSON data');
+                    console.log(data);
+
+                    // update the prisma
+                    app_public.vpp.$data.json.softable_nma = data;
+
+                    // update the UI
+                    app_public.vpp.unfreeze_ui();
+                }, 
+                error: function(jqXHR, textStatus, errorThrown) {
+                    toast('Something wrong when creating the extraction.', 'alert');
+                    console.error(textStatus, errorThrown);
+                }
+            });
+        },
+
+        get_graphpma_json: function(src, gp) {
+            if (typeof(src)=='undefined') {
+                src = 'cache';
+            }
+            if (typeof(gp)=='undefined') {
+                gp = 'primary';
+            }
+
+            this.freeze_ui();
+
+            $.ajax({
+                url: '/pub/graphdata/'+this.prj+'/GRAPH_PMA.json',
+                type: 'get',
+                data: {
+                    src: src, 
+                    cq: this.cq, 
+                    gp: gp,
+                    ver: Math.random()
+                },
+                dataType: 'json',
+                success: function(data) {
+                    toast('Updated Graph PMA JSON data');
+                    console.log(data);
+
+                    // update the prisma
+                    app_public.vpp.$data.json.graph_pma = data;
+
+                    // update the UI
+                    app_public.vpp.unfreeze_ui();
+                }, 
+                error: function(jqXHR, textStatus, errorThrown) {
+                    toast('Something wrong when creating the extraction.', 'alert');
+                    console.error(textStatus, errorThrown);
+                }
+            });
+        },
+
+        get_sofpma_json: function(src, gp) {
+            if (typeof(src)=='undefined') {
+                src = 'cache';
+            }
+            if (typeof(gp)=='undefined') {
+                gp = 'primary';
+            }
+
+            this.freeze_ui();
+
+            $.ajax({
+                url: '/pub/graphdata/'+this.prj+'/SOFTABLE_PMA.json',
+                type: 'get',
+                data: {
+                    src: src, 
+                    cq: this.cq, 
+                    gp: gp,
+                    ver: Math.random()
+                },
+                dataType: 'json',
+                success: function(data) {
+                    toast('Updated SoF PMA JSON data');
+                    console.log(data);
+
+                    // update the prisma
+                    app_public.vpp.$data.json.softable_pma = data;
+
+                    // update the UI
+                    app_public.vpp.unfreeze_ui();
+                }, 
+                error: function(jqXHR, textStatus, errorThrown) {
+                    toast('Something wrong when creating the extraction.', 'alert');
+                    console.error(textStatus, errorThrown);
+                }
+            });
+        },
+
+        get_prisma_json: function(src) {
+            if (typeof(src)=='undefined') {
+                src = 'cache';
+            }
+
+            this.freeze_ui();
+
+            $.get(
+                '/pub/graphdata/' + this.prj + '/PRISMA.json',
+                {
+                    src: src,
+                    cq: this.cq,
+                    ver: Math.random()
+                },
+                function(data) {
+                    toast('Updated PRISMA JSON data');
+                    console.log(data);
+
+                    // update the prisma
+                    app_public.vpp.$data.json.prisma = data;
+
+                    // update the UI
+                    app_public.vpp.unfreeze_ui();
+
+                }, 'json'
+            );
+        },
+
+        get_itable_json: function(src) {
+            if (typeof(src)=='undefined') {
+                src = 'cache';
+            }
+
+            this.freeze_ui();
+
+            $.get(
+                '/pub/graphdata/'+this.prj+'/ITABLE.json',
+                {
+                    ver: Math.random(), 
+                    src: src, 
+                    cq: this.cq
+                },
+                function(data) {
+                    toast('Updated interactive table JSON data!');
+                    console.log(data);
+
+                    // update the itable
+                    app_public.vpp.$data.json.itable = data;
+
+                    // update the UI
+                    app_public.vpp.unfreeze_ui();
+
+                }, 'json'
+            );
+        },
+
+        get_evmap_json: function(src) {
+            $.get(
+                '/pub/graphdata/'+this.prj+'/EVMAP.json',
+                {
+                    ver: Math.random(), 
+                    src: src, 
+                    cq: this.cq
+                },
+                function(data) {
+                    toast('Updated evmap JSON data!');
+                    console.log(data);
+
+                    // update the evmap
+                    app_public.vpp.$data.json.evmap = data;
+
+                    // update the UI
+                    app_public.vpp.unfreeze_ui();
+
+                }, 'json'
+            );
+        }
+    },
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+
+            data: this.vpp_data,
+
+            methods: this.vpp_methods
+        });
+    },
+
+    resize: function() {
+        var h = $(window).height() - 50;
+        $(this.vpp_id).css('height', h);
+    }
+    
+}
+
+
+var jarvis = {
+
+    init: function() {
+        app_public.init();
+
+        // get the JSON data of current status
+
+        app_public.vpp.get_prisma_json();
+        app_public.vpp.get_itable_json();
+
+        // the PWMA JSON
+        app_public.vpp.get_graphpma_json();
+        app_public.vpp.get_sofpma_json();
+
+        // the NMA JSON
+        app_public.vpp.get_graph_nma_json();
+        app_public.vpp.get_sofnma_json();
+
+        // the EVMAP JSON
+        app_public.vpp.get_evmap_json();
+
+        this.bind_resize_event();
+    }, 
+
+    bind_resize_event: function() {
+        app_public.resize();
+        $(window).on('resize', function(){
+            app_public.resize();
+        });
+    }
+};
+{% include 'js/jarvis_ext_utils.js' %}
+
+
+$(document).ready(function() {
+    jarvis.init();
+});
+</script>
+{% endblock %}

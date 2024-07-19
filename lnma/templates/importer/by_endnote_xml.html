@@ -1,0 +1,348 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Study Importer | By Endnote XML
+{% endblock %}
+
+{% block style %}
+<style>
+.paper-item {
+    width: 8px;
+    height: 8px;
+    margin: 1px;
+    border: 1px solid grey;
+}
+.col-info {
+    width: 120px;
+}
+.paper-result-waiting {
+    background-color: rgb(197, 197, 176);
+}
+.paper-result-created {
+    background-color: rgb(12, 194, 6);
+}
+.paper-result-existed {
+    background-color: rgb(194, 150, 6);
+}
+.paper-result-error {
+    background-color: rgb(194, 6, 6);
+}
+</style>
+{% endblock %}
+
+{% block page_name %}
+<i class="nav-icon fas fa-file-upload"></i> 
+Study Importer | By Endnote XML
+{% endblock %}
+
+{% block active_nav_link %}importer-endnote-xml{% endblock %}
+
+{% block content %}
+
+<div class="content">
+    <div class="container-fluid">
+
+        <div id="vw_uploader_endnote_xml" class="row">
+            <div class="col-md-3" style="min-width: 150px;">
+                <h5>Import Studies by EndNote XML File</h5>
+                <p class="card-text">
+                    Please make sure:
+
+                    <ol>
+                        <li>XML file exported by Endnote.</li>
+                        <li>The "Output style" is "Show All Fields".</li>
+                    </ol>
+                    In addition, the maximum upload file size is 50MB, don't upload too large file at once. Split them into smaller files and upload one by one.
+
+                </p>
+                <p>
+                    Attention: Do NOT close this page before all studies are imported, otherwise the importing will be interrupted.
+                </p>
+
+                <form id="upload_file" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="default_stage">The EndNote exported XML file</label>
+                        <input type="file" class="form-control-file" name="input_file" id="input_file">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="default_stage">The decision for the uploaded studies</label>
+                        <select class="form-control" 
+                            id="default_stage" name="default_stage"
+                            v-model="select_default_stage">
+                            <option value="[[ ss.SS_STAGE_UNSCREENED ]]">Unscreened</option>
+                            <option value="[[ ss.SS_STATE_PASSED_TITLE_NOT_FULLTEXT ]]">Full-text Review</option>
+                            <option value="[[ ss.SS_STAGE_INCLUDED_SR ]]">Included in SR</option>
+                            <option value="[[ ss.SS_STAGE_EXCLUDED_BY_TITLE ]]">Excluded by Title</option>
+                            <option value="[[ ss.SS_STAGE_EXCLUDED_BY_ABSTRACT ]]">Excluded by Abstract</option>
+                            <option value="[[ ss.SS_STAGE_EXCLUDED_BY_FULLTEXT ]]">Excluded by Full Text</option>
+                        </select>
+                    </div>
+
+                </form>
+                
+                <div>
+                    <button class="btn btn-primary mb-2"
+                        v-bind:disabled="is_uploading || is_importing"
+                        v-on:click="upload_xml">
+                        <span v-if="is_uploading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            Uploading the selected XML file ...
+                        </span>
+                        <span v-else>
+                            <i class="fa fa-upload"></i>
+                            Upload this XML file
+                        </span>
+                    </button>
+
+                    <button class="btn btn-success"
+                        v-bind:disabled="is_importing || papers == null || papers.length == 0"
+                        v-on:click="import_studies">
+                        <span v-if="is_importing">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            Importing the studies
+                        </span>
+                        <span v-else>
+                            <i class="fa fa-upload"></i>
+                            Import the studies found in XML file
+                        </span>
+                    </button>
+                </div>
+
+            </div>
+
+            <div class="col-md-9" v-if="papers != null && cnt != null">
+                <div>
+                    <h5>
+                        <i class="fa fa-file"></i>
+                        Studies in the uploaded XML file
+                    </h5>
+                    <p>
+                        <b>{{ papers.length }}</b> studies are found in the uploaded file.<br>
+                        <b>{{ cnt.has_pid }}</b> have an ID (PMID / EMBASE ID / PMC),
+                        <b>{{ cnt.no_pid_has_doi }}</b> use the DOI instead, 
+                        <b>{{ cnt.no_id }}</b> don't have any ID (System assigned an ID based on title). <br>
+                        <b>{{ count.processed }}</b> / {{ papers.length }} studies are processed. <b>{{ count.existed }}</b> studies are already existed, and <b>{{ count.created }}</b> studies are created.
+                        <b>{{ count.error }}</b> errors.
+                    </p>
+                </div>
+                <div class="d-flex flex-wrap">
+                    <div v-for="r, i in papers"
+                        v-bind:class="'paper-item paper-result-' + r.result"
+                        v-bind:title="r.title">
+                    
+                    </div>
+                </div>
+
+                
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block script %}
+<script>
+
+{% include 'js/srv_importer.js' %}
+
+var vw_uploader_endnote_xml = {
+    vpp: null,
+    vpp_id: '#vw_uploader_endnote_xml',
+    batch_size: 2,
+    idx_processing: 0,
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                results: null,
+                project_id: Cookies.get('project_id'),
+                papers: null,
+                cnt: null,
+                count: {
+                    processed: 0,
+                    existed: 0,
+                    created: 0,
+                    error: 0
+                },
+
+                is_uploading: false,
+
+                is_importing: false,
+
+                select_default_stage: 'unscreened'
+            },
+            methods: {
+                upload_xml: function() {
+                    vw_uploader_endnote_xml.upload_xml();
+                },
+
+                import_studies: function() {
+                    vw_uploader_endnote_xml.import_papers();
+                }
+            }
+        });
+    },
+
+    upload_xml: function() {
+        // final confirm
+        // var default_stage = $('#default_stage').val();
+        // var msg = "The studies found in your uploaded XML file would be imported as [" + srv_importer.stage[default_stage].title + "], are you sure?";
+        // var ret = window.confirm(msg);
+        // if (!ret) {
+        //     return;
+        // }
+
+        // check the file
+        // if ($('#input_file').val() == '') {
+        //     window.alert('You need to select the exported XML file from EndNote.');
+        //     return;
+        // }
+
+        // now start to upload
+
+        // get the project ID
+
+        if (document.getElementById("input_file").value.length == 0){
+            toast('No File selected')
+            return;
+        }
+        var project_id = this.vpp.$data.project_id;
+        if (project_id == undefined) {
+            alert('Set working project first.');
+            return;
+        }
+
+        // update UI
+        this.vpp.$data.is_uploading = true;
+
+        // create the form for submit
+        var form_data = new FormData($('#upload_file')[0]);
+        form_data.append('project_id', project_id);
+
+        srv_importer.upload_endnote_xml(
+            form_data,
+            function(data) {
+                console.log(data);
+                if(data.success == false){
+                    success = false
+                    toast(data.msg);
+                    
+                    return;
+                }
+                
+                vw_uploader_endnote_xml.show_papers(data);
+            }
+        );
+    },
+
+    show_papers: function(data) {
+        // bind local data
+        this.data = data;
+        
+        // update the UI
+        this.vpp.$data.is_uploading = false;
+
+        this.vpp.$data.cnt = data.cnt;
+
+        // update the paper list
+        if (this.vpp.papers == null) {
+            this.vpp.papers = [];
+            this.papers = [];
+        }
+        
+        // append the papers
+        for (var i = 0; i < data.papers.length; i++) {
+            var p = data.papers[i];
+            p.success = false;
+            p.result = 'waiting';
+            p.seq = this.papers.length;
+
+            // append!
+            this.vpp.papers.push(p);
+            this.papers.push(p);
+        }
+
+        // then process!
+        // this.import_papers();
+    },
+
+    import_papers: function(data) {
+        // first handle the return data
+        if (typeof(data) == 'undefined') {
+            // it's the first time run!
+        } else {
+            // it's a callback run
+            // update the UI
+            for (var i = 0; i < data.papers.length; i++) {
+                var p = data.papers[i];
+                this.vpp.papers[p.seq].result = p.result;
+                this.papers[p.seq].result = p.result;
+                
+                this.vpp.count[p.result] += 1;
+                this.vpp.count.processed += 1;
+            }
+            // Just pause the processing for a little while to reduce the server load   
+
+        }
+        
+        if (this.idx_processing == this.papers.length) {
+            // it means all the papers have been processed!
+            this.vpp.$data.is_importing = false;
+            return;
+        }
+
+        this.vpp.$data.is_importing = true;
+        
+        // create a small batch for saving
+        var papers_for_processing = [];
+        for (var i = 0; i < this.batch_size; i++) {
+            if (this.idx_processing < this.papers.length) {
+                papers_for_processing.push(
+                    this.papers[this.idx_processing]
+                )
+                this.idx_processing += 1;
+            } else {
+                break;
+            }
+        }
+
+        if (papers_for_processing.length>0) {
+            var stage = vw_uploader_endnote_xml.vpp.$data.select_default_stage;
+            var project_id = vw_uploader_endnote_xml.vpp.$data.project_id
+            srv_importer.save_papers(
+                papers_for_processing, 
+                stage,
+                project_id,
+                function(data) {
+                    vw_uploader_endnote_xml.import_papers(data);
+                },
+                function(jqXHR, textStatus, errorThrown) {
+                    toast('A paper is not saved due to data issue')
+                }
+            )
+        } else {
+            // finished!
+        }
+    }
+};
+
+var jarvis = {
+    init: function() {
+        vw_uploader_endnote_xml.init();
+    },
+
+    sleep: function(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+};
+
+$(document).ready(function() {
+    jarvis.init();
+})
+</script>
+{% endblock %}

@@ -1,0 +1,313 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+My Projects
+{% endblock %}
+
+{% block stylelink %}
+{% endblock %}
+
+{% block style %}
+<style>
+/* fix vuetify row */
+.row {
+    margin-right: -7.5px;
+    margin-left: -7.5px;
+}
+
+.select_users {
+    min-height: 30px !important
+;
+    max-height: 200px !important
+;
+    height: 200px !important
+;
+}
+
+
+.selector-add{
+    float: left;
+    width: 22px;
+    background-color: var(--selected-bg);
+    border-radius: 10px;
+    margin: 10em 5px 0 5px;
+    padding: 0;
+}
+
+</style>
+{% endblock %}
+
+{% block page_name %}
+<i class="fa fa-list"></i>
+Assign Project
+{% endblock %}
+
+{% block content %}
+<div class="content">
+    <div class="container mt-1">
+
+        <div class="row ">
+            <div class="col">
+                <div class="row">
+                    
+                    <div class="col-11"
+                       >
+                        <div class="card">
+                            <div class="card-body">
+                                <h5>Project Title: [[project_obj.title]] </h5>
+                                <hr>
+                                <p>Project Identifier: <b>[[project_obj.keystr]]</b></p>
+                                <p>Project Owner: <b>[[project_obj.owner_uid]]</b></p>
+                                <p>Date of Creation: <b>[[project_obj.date_created]]</b></p>
+                                <p>Clinical Questions:  
+                                    {% for questions in clinica_questions %}
+                                    <i class="fas fa-notes-medical mr-2"></i>
+                                        [[questions.abbr]]&nbsp;&nbsp;&nbsp;
+                                    {% endfor%}
+                                </p>
+                                <p>Total Unscreened Papers: <b>[[unscreened_papers]]</b></p>                           
+                
+                            </div>
+                                
+                        </div>
+                    </div>
+    
+                </div>
+    
+            </div>
+        </div><!-- /.row -->
+
+        
+        <div class="row align-items-center" id="project_assignment">
+
+            <div class="col-5 card border p-0">
+                <p class="card-header"><b>Existing Users</b></p>
+               
+                <div class="selector-available ">
+
+                    
+                        <select id="unassigned_users"  multiple class="rounded-0 border-0 form-control select_users">
+                        {% for user in unassigned_users %}
+                        <option id ="[[user]]" value="[[user]]" title="[[user]]"  >[[user]]
+                            
+                        </option>
+                        {% endfor %}
+                        </select>
+
+
+                        
+                </div>
+
+                <div class=" card-footer">
+                    <a   v-on:click="choose_all_users();"class="btn ">
+                        
+                        <p><b></b>Choose All</p>
+                        </a>
+                    
+                </div>
+            </div>
+
+            <div class="col-1 text-center">
+                <div><i v-on:click="push_to_assign();" class="fa-solid fa-circle-arrow-right"></i></div>
+                <div><i  v-on:click="remove_from_assign();"class="fa-solid fa-circle-arrow-left"></i></div>
+
+            </div>
+
+            <div class="col-5 card border p-0">
+                <p class="card-header"><b>Assigned Users</b></p>
+        
+                <div class="selector-available">
+                    <select id="assigned_users"  multiple="" class=" rounded-0 border-0 form-control select_users" >
+                        {% for user in assigned_users %}
+                        <option id="[[user]]" value="[[user]]" title="[[user]]" >[[user]] </option>
+                       
+                        {% endfor %}
+                       
+                    </select>
+                </div>
+
+                <div class=" card-footer">
+                    <a   v-on:click="remove_all_users();"class="btn ">
+                        
+                        <p><b>Remove All</b></p>
+                        </a>
+                    
+                </div>
+
+            </div>
+
+            <div class="col-12">
+            
+                <button id="" v-on:click="project_assignment_json();" class="btn-sm btn-primary mt-5o d-block ml-auto">Assign Users</button>
+            </div>
+
+           
+            
+        </div>
+
+        
+            
+       
+
+    </div><!-- /.container-fluid -->
+</div>
+
+
+{% endblock %}
+
+{% block active_nav_link %}project-list{% endblock %}
+
+{% block script %}
+
+<!-- my script -->
+<script>
+
+var users_ = document.getElementById('assigned_users')
+assigned_users = []
+
+for (i = 0; i < users_.length; i++) {
+        assigned_users.push(users_.options[i].text);
+    }
+
+
+var project_app = {
+	project_assignment : null,
+
+	project_assignment_id: '#project_assignment',
+
+	project_assignment_data: {
+		
+	},
+
+	project_assignment_methods: {
+
+
+		project_assignment_json: function() {
+			console.log(assigned_users);
+            var params = new URLSearchParams(location.search); 
+            var users_ = document.getElementById('assigned_users')
+            assigned_users = []
+
+            for (i = 0; i < users_.length; i++) {
+                assigned_users.push(users_.options[i].text);
+                }
+            
+            var keystr = params.get('project_keystr')
+			$.ajax({
+				url: '/project/project_assignment/',
+				type: 'post',
+                dataType: 'json',
+                
+				data: {
+					assigne_users:assigned_users,
+                    project_keystr:keystr
+				
+				},
+				
+				success: function(data) {
+					toast('User Assigned Successfully');
+					console.log(data);
+
+				},
+				error: function(jqXHR, textStatus, errorThrown) {
+					toast('Something wrong when assigning users.', 'alert');
+					console.error(textStatus, errorThrown);
+				}
+			});
+		},
+
+		
+        push_to_assign: function(){
+            selected_users = $("#unassigned_users").children("option:selected");
+            if (selected_users.length){
+                for (let i=0; i< selected_users.length; i++){
+                    to_be_appended  = document.getElementById('assigned_users')
+                    to_be_appended.append(selected_users[i]);
+                }
+            }
+            else
+            {
+                toast('Please select any user');
+            }
+
+
+        },
+
+        remove_from_assign: function(){
+            selected_users = $("#assigned_users").children("option:selected");
+            if (selected_users.length){
+                for (let i=0; i< selected_users.length; i++){
+                    to_be_appended  = document.getElementById('unassigned_users')
+                    to_be_appended.append(selected_users[i]);
+                }
+            }
+            else
+            {
+                toast('Please select any user');
+            }
+
+
+        },
+
+
+        choose_all_users: function(){
+            existing_users = $("#unassigned_users").children("option");
+            if (existing_users.length){
+                for (let i=0; i<existing_users.length; i++){
+                    to_be_appended  = document.getElementById('assigned_users')
+                    to_be_appended.append(existing_users[i]);
+                }
+                   
+            }
+            else
+            {
+                toast('Please select any user');
+            }
+        },
+
+
+        remove_all_users: function(){
+            selected_users = $("#assigned_users").children("option");
+            if (selected_users.length){
+                for (let i=0; i<selected_users.length; i++){
+                    to_be_appended  = document.getElementById('unassigned_users')
+                    to_be_appended.appendChild(selected_users[i]);
+                }
+                   
+            }
+            else
+            {
+                toast('Please select any user');
+            }
+        },
+	},
+
+	init: function() {
+		this.project_assignment = new Vue({
+			el: this.project_assignment_id,
+
+			data: this.project_assignment_data,
+
+			methods: this.project_assignment_methods
+		});
+	},
+
+}
+
+
+var jarvis = {
+
+	init: function() {
+		project_app.init();
+
+
+	}
+};
+
+
+$(document).ready(function() {
+	jarvis.init();
+});
+
+</script>
+{% endblock %}

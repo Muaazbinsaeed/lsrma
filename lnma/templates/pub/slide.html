@@ -1,0 +1,132 @@
+{% extends '_layout_bs.html' %}
+
+{% block title %}
+Slide
+{% endblock %}
+
+{% block style %}
+<style>
+.carousel-indicators {
+    bottom: -30px;
+}
+.carousel-indicators li {
+    width: 30px;
+    height: 8px;
+    background-color: #999999;
+}
+.carousel-caption {
+    top: 10px;
+    left: 0;
+    right: 0;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    color: black;
+}
+</style>
+{% endblock %}
+
+{% block page_name %}
+<i class="far fa-clipboard"></i>
+Project Editor
+{% endblock %}
+
+{% block main %}
+<div id="main" class="container-fluid">
+    <div class="row">
+        <div class="col">
+            <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+                <ol id="slide-idcs" class="carousel-indicators">
+                </ol>
+                <div id="slide-imgs" class="carousel-inner">
+                </div>
+                <!-- <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                </a>
+                <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                </a> -->
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script>
+var jarvis = {
+    get_url_paramter: function(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    },
+
+    init: function() {
+        // get filename
+        var prj = jarvis.get_url_paramter('prj');
+
+        // which clinical question
+        var cq = jarvis.get_url_paramter('cq');
+        if (cq == '') {
+            cq = 'default';
+        }
+
+        // add offset to top
+        var pt = jarvis.get_url_paramter('pt');
+        
+        /**
+         * slides is a string defined as follows:
+         * filename.png$a sentence for legend|filename.png$xxx
+         */
+
+        var slides = jarvis.get_url_paramter('slides');
+        var slides = slides.split('|');
+
+        // build the page
+        var url_img_base = '/pub/graphdata/' + prj + '/img/';
+
+        // add each slide
+        for (let i = 0; i < slides.length; i++) {
+            const s = slides[i];
+            var tmp = s.split('$');
+            var fn = tmp[0];
+            var legend = tmp[1];
+
+            // to remove cache ...
+            var s_imgurl = url_img_base + fn + '?ver=' + Math.random();
+            var s_class = '';
+            if (i == 0) {
+                s_class = 'active';
+            }
+            // create the idc and img
+            var elem_idc = '<li data-target="#carouselExampleIndicators" data-slide-to="'+i+'" class="'+s_class+'"></li>';
+            var elem_img = '<div class="carousel-item '+s_class+'">' + 
+                '<img src="'+s_imgurl+'" class="d-block w-100" alt="">' +
+                    '<div class="carousel-caption d-none d-md-block">' +
+                        '<p>' + legend + '</p>' +
+                    '</div>' +
+                '</div>';
+            // add idc and img to html
+            $('#slide-idcs').append($(elem_idc));
+            $('#slide-imgs').append($(elem_img));
+        }
+
+        // start the loop
+        $('.carousel').carousel('cycle');
+
+        if (pt == '' || pt == null) {
+
+        } else {
+            // $('#main').css('padding-top', pt + 'px');
+            $('.carousel-caption').css('top', '-10px');
+        }
+    }
+};
+$(document).ready(function() {
+    jarvis.init();
+});
+</script>
+{% endblock %}

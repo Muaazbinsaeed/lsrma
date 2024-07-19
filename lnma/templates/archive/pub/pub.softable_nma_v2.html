@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
+<title>Summary of Findings: NMA</title>
+
+<link rel="icon" href="/static/img/favicon.png" type="image/png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+
+<style>
+{% include 'css/box.css' %}
+html, body {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+body {
+    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+a {
+    color: #333333;
+    text-decoration: none;
+}
+#wrapper {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+}
+#start-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#ss-msg {
+    width: 100%;
+    padding: 10px 0;
+    text-align: center;
+}
+
+/* for this page */
+#app {
+    width: 100%;
+    height: 100%;
+}
+
+/* for the simple oclist */
+
+#vw_simple_oclist {
+    width: 200px;
+    min-width: 200px;
+    padding: 0 5px;
+    height: 100%;
+}
+.oc-item {
+    display: flex;
+    align-items: center;
+    width: calc(100% - 10px);
+    height: 50px;
+    border: 1px solid #dddddd;
+    margin: 0 0 10px;
+    padding: 0 0 0 10px;
+    cursor: pointer;
+}
+.oc-item:hover {
+    background: whitesmoke;
+    font-weight: bold;
+}
+.oc-item-selected {
+    background: #ececec;
+    font-weight: bold;
+}
+
+/* for the NMA table */
+
+#tb_simple_sofnma {
+    width: 100%;
+}
+
+/* for the SoF table */
+.sof-table {
+    width: 100%;
+}
+.sof-table th {
+    text-align: center;
+    background: whitesmoke;
+    padding: 5px 0;
+    background: #c3c3c3;
+}
+.sof-table td {
+    text-align: center;
+    line-height: 1.45em;
+    padding: 3px 0;
+    border-bottom: 1px solid #e6e6e6;
+    border-right: 1px solid #e6e6e6;
+}
+.sof-table .col-oc-name {
+    width: 150px;
+    max-width: 200px;
+    cursor: pointer;
+    background: #f1f1f1;
+}
+.sof-table .col-oc-name:hover {
+    background: whitesmoke;
+}
+.sof-table .col-treat {
+    width: 100px;
+    max-width: 150px;
+}
+.sof-table .col-comparator {
+    background: white;
+}
+.sof-table .col-ta-left {
+    text-align: left !important;
+    padding-left: 10px;
+}
+.sof-table .col-flipable {
+    cursor: pointer;
+}
+.sof-table .col-flipable:hover {
+    background: whitesmoke;
+}
+.cie-table th {
+    text-align: left;
+    padding: 3px 5px;
+}
+.cell-treat {
+    background: white;
+    cursor: pointer;
+}
+.cell-treat:hover {
+    /* background: #efefef; */
+}
+.cie-bene-4 { background: rgb(55, 86, 35); color: white; }
+.cie-bene-3 { background: rgb(169, 208, 142); color: black; }
+.cie-bene-2 { background: rgb(226, 239, 218); color: black; }
+.cie-bene-1 { background: rgb(255, 242, 204); color: black; }
+.cie-harm-4 { background: rgb(150, 0, 0); color: white; }
+.cie-harm-3 { background: rgb(255, 103, 91); color: black; }
+.cie-harm-2 { background: rgb(255, 199, 193); color: black; }
+.cie-harm-1 { background: rgb(255, 242, 204); color: black; }
+.cie-nner-2 { background: rgb(191, 191, 191); color: black; }
+.cie-nner-1 { background: rgb(255, 242, 204); color: black; }
+
+/* for test data without real values */
+.cie-bene-0 { background: rgb(169, 208, 142); color: black; }
+.cie-harm-0 { background: rgb(255, 50, 50); color: black; }
+.cie-nner-0 { background: rgb(202, 183, 10); color: black; }
+
+.legend-table td { padding: 5px 10px; font-size: 14px; }
+
+.dlg-sm h4 { margin: 5px 0; }
+.dlg-sm p { margin: 0; }
+.dlg-sm hr { border: 0; border-bottom: 1px solid #ececec; }
+
+.red { color: red; }
+.grey { color: grey; }
+</style>
+</head>
+<body>
+<div id="start-screen">
+    <h1>
+        <i class="fa fa-table"></i>
+        Summary of Findings: Network Meta-Analysis
+    </h1>
+    <div id="ss-msg">Loading data and initializing ...</div>
+</div>
+
+<div id="color_guide" style="display: none;" title="Color guide">
+<table class="legend-table">
+    <tr>
+        <td class="cie-bene-4">High certainty benefit</td>
+        <td class="cie-harm-4">High certainty harm</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="cie-bene-3">Moderate certainty benefit</td>
+        <td class="cie-harm-3">Moderate certainty harm</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="cie-bene-2">Low certainty benefit</td>
+        <td class="cie-harm-2">Low certainty harm</td>
+        <td class="cie-nner-2">Low certainty neither harm nor benefit</td>
+    </tr>
+    <tr>
+        <td class="cie-bene-1">Very low certainty benefit</td>
+        <td class="cie-harm-1">Very low certainty harm</td>
+        <td class="cie-nner-1">Very low certainty neither harm nor benefit</td>
+    </tr>
+</table>
+</div>
+<!-- /div#legend -->
+
+<div id="wrapper">
+
+<div id="app" class="d-flex fx-row">
+
+
+    <div id="tb_simple_sofnma">
+        <div class="box" style="height: 100%;">
+            <div class="box-header">
+                <h4>
+                    <i class="fa fa-table"></i>
+                </h4>
+                <div class="d-flex fx-row">
+
+                    <div class="box-menu-group d-flex fx-row">
+                        <div class="red">
+                            <i class="fa fa-cog"></i>
+                            <b>Reference treatment: </b>
+                        </div>
+                        <div>
+                            <select v-model='comparator'>
+                                <option v-for="treat in treat_list"
+                                    v-bind:value="treat">
+                                    {{ treat }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- <div class="box-menu-group d-flex fx-row">
+                        <div>
+                            <i class="fa fa-cog"></i>
+                            Measure of effect: 
+                        </div>
+                        <div>
+                            <select v-model='measure'>
+                                <option v-for="m in measure_list"
+                                    v-bind:value="m.abbr">
+                                    {{ m.name }}
+                                </option>
+                            </select>
+                        </div>
+                    </div> -->
+
+                    <div class="box-menu-group d-flex fx-row">
+                        <div>
+                            <i class="fa fa-cog"></i>
+                            Display risks per: 
+                        </div>
+                        <div>
+                            <select v-model="baseline">
+                                <option value="100">100</option>
+                                <option value="1000">1000</option>
+                                <option value="10000">10,000</option>
+                                <option value="100000">100,000</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="box-menu-group d-flex fx-row">
+                        <div>
+                            <i class="fa fa-cog"></i>
+                            Show survival data: 
+                        </div>
+                        <div>
+                            <select v-model="show_survival">
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="box-menu-group d-flex fx-row">
+                        <div class="box-menu-link" onclick="jarvis.show_color_guide();">
+                            <i class="fa fa-paint-brush"></i>
+                            Color guide
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box-body" style="height: 100%; overflow-y: auto;">
+
+                <table class="sof-table">
+                    <tr>
+                        <th class="col-oc-name">Outcome</th>
+                        <th class="col-treat">Reference treatment: <br><b class="red">{{ comparator }}</b></th>
+                        <th class="col-treat" 
+                            v-for="treat in treat_list" 
+                            v-if="treat!=comparator">
+                            {{ treat }}
+                        </th>
+                    </tr>
+                    
+                    <tr v-for="r, oc_name in rs">
+                        <td class="col-oc-name"
+                            v-on:click="show_ctrl_options(r.oc.oc_name)">
+                            <b>{{ r.oc.oc_fullname }}</b><br>
+                            <span class="grey">( {{ get_a_measure(r) }} )</span>
+                        </td>
+
+                        <td class="col-comparator"
+                            v-if="show_survival == 'yes'">
+                            {{ get_SRVC_txt(r, comparator) }} <br>
+                            <b>{{ get_rank_txt(r, comparator) }}</b>
+                        </td>
+                        <td class="col-comparator"
+                            v-else>
+                            <span v-html="get_ACR_txt(r, comparator)"></span> <br>
+                            <b>{{ get_rank_txt(r, comparator) }}</b>
+                        </td>
+
+                        <td class="cell-treat"
+                            v-for="treat in treat_list" 
+                            v-if="treat!=comparator"
+                            v-bind:class="get_bg_color_class2(r, comparator, treat, get_cet_attr_val(r.oc.oc_name, comparator, treat, 'cie') )"
+                            v-on:click="show_detail(r.oc.oc_name, treat)">
+                            <span v-if="show_survival == 'yes'">
+                                {{ get_SRVD_txt(r, comparator, treat, 'sm') }}<br>
+                            </span>
+                            <span v-else>
+                                {{ get_ARD_txt(r, comparator, treat, 'sm') }}<br>
+                            </span>
+                            <b>{{ get_rank_txt(r, treat) }}</b>
+                        </td>
+                    </tr>
+                </table>
+
+            </div>
+
+        </div>
+
+        <div id="tb_simple_sofnma_detail" class="box" title="Outcome detail">
+            <div class="box-header">
+                <h4>    
+                    <i class="fa fa-table"></i>
+                    <b class="txt-lg">{{ rs[detail.oc_name].oc.oc_fullname }}</b>
+                    Treatment: <b class="txt-lg">{{ detail.treat }}</b>, Comparator: <b class="txt-lg">{{ comparator }}</b>
+                </h4>
+            </div>
+            <div class="box-body">
+                <div class="d-flex fx-row">
+                    <div style="width: 50%;">
+                        <h5>Summary of data</h5>
+                        <p>Randomized controlled trials: <span class="txt-lg txt-fb">{{ get_n_stus_text(detail.oc_name, detail.treat) }}</span></p>
+                        <!-- <p>Observational studies: <span class="txt-lg txt-fb">N/A</span></p> -->
+                        <!-- <p>Follow up: <span class="txt-lg txt-fb">N/A</span></p> -->
+                        <div v-if="oc_dict[detail.oc_name].oc_datatype == 'raw'">
+                            <p>Number of events in arm: <span class="txt-lg txt-fb">{{ get_treat_attr_txt(detail.oc_name, detail.treat, 'event') }}</span></p>
+                            <p>Total participants in arm: <span class="txt-lg txt-fb">{{ get_treat_attr_txt(detail.oc_name, detail.treat, 'total') }}</span></p>
+                        </div>
+                        <div v-else-if="get_SRVC(rs[detail.oc_name], comparator) != null">
+                            <p>
+                                Survival in comparator: 
+                                <span class="txt-lg txt-fb">{{ get_SRVC_txt(rs[detail.oc_name], comparator) }} </span>
+                            </p>
+                            <p>
+                                Survival in intervention:
+                                <span class="txt-lg txt-fb">{{ get_SRVI_txt(rs[detail.oc_name], comparator, detail.treat, 'sm') }} </span><br>
+                                ({{ get_SRVI_txt(rs[detail.oc_name], comparator, detail.treat, 'up') }} to 
+                                {{ get_SRVI_txt(rs[detail.oc_name], comparator, detail.treat, 'lw') }})
+                            </p>
+                            <p>
+                                Survival difference:
+                                <span class="txt-lg txt-fb">{{ get_SRVD_txt(rs[detail.oc_name], comparator, detail.treat, 'sm') }} </span><br>
+                                ({{ get_SRVD_txt(rs[detail.oc_name], comparator, detail.treat, 'up') }} to 
+                                {{ get_SRVD_txt(rs[detail.oc_name], comparator, detail.treat, 'lw') }})
+                            </p>
+                        </div>
+                        <div v-else>
+                            &nbsp;
+                        </div>
+                        
+                    </div>
+
+                    <div style="width: 50%;">
+                        <h5>Summary measure: {{ txt(get_a_measure(rs[detail.oc_name])) }}</h5>
+                        <p>
+                            Relative effect: 
+                            <span class="txt-lg txt-fb">{{ get_effect_txt(detail.oc_name, get_a_measure(rs[detail.oc_name]), comparator, detail.treat, 'sm') }} </span>
+                            ({{ get_effect_txt(detail.oc_name, get_a_measure(rs[detail.oc_name]), comparator, detail.treat, 'lw') }} to 
+                            {{ get_effect_txt(detail.oc_name, get_a_measure(rs[detail.oc_name]), comparator, detail.treat, 'up') }})
+                        </p>
+                        <p>
+                            Absolute risk: 
+                            <span class="txt-lg txt-fb">{{ get_CIR_txt(rs[detail.oc_name], comparator, detail.treat, 'sm') }}</span><br>
+                            ({{ get_CIR_txt(rs[detail.oc_name], comparator, detail.treat, 'lw') }} to 
+                            {{ get_CIR_txt(rs[detail.oc_name], comparator, detail.treat, 'up') }})
+                        </p>
+                        <p>
+                            Absolute risk difference: 
+                            <span class="txt-lg txt-fb">{{ get_ARD_txt(rs[detail.oc_name], comparator, detail.treat, 'sm') }}</span><br>
+                            ({{ get_ARD_txt(rs[detail.oc_name], comparator, detail.treat, 'lw') }} to 
+                            {{ get_ARD_txt(rs[detail.oc_name], comparator, detail.treat, 'up') }})
+                        </p>
+                        <p>
+                            Absolute risk percentage:
+                            <span class="txt-lg txt-fb">{{ get_ARDp_txt(rs[detail.oc_name], comparator, detail.treat, 'sm') }}</span><br>
+                            ({{ get_ARDp_txt(rs[detail.oc_name], comparator, detail.treat, 'lw') }} to 
+                            {{ get_ARDp_txt(rs[detail.oc_name], comparator, detail.treat, 'up') }})
+                        </p>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div>
+                    <p>Certainty in Evidence: 
+                        <b class="txt-lg" style="padding: 0 5px;">
+                            {{ get_cet_attr_txt(detail.oc_name, comparator, detail.treat, 'cie') }}
+                        </b>
+                    </p>
+                    <table class="cie-table">
+                        <tr>
+                            <th>Risk of bias</th>
+                            <td>{{ get_cet_attr_txt(detail.oc_name, comparator, detail.treat, 'cie_rob') }}</td>
+                        </tr>
+                        <tr>
+                            <th>Inconsistency</th>
+                            <td>{{ get_cet_attr_txt(detail.oc_name, comparator, detail.treat, 'cie_inc') }}</td>
+                        </tr>
+                        <tr>
+                            <th>Indirectness</th>
+                            <td>{{ get_cet_attr_txt(detail.oc_name, comparator, detail.treat, 'cie_ind') }}</td>
+                        </tr>
+                        <tr>
+                            <th>Imprecision</th>
+                            <td>{{ get_cet_attr_txt(detail.oc_name, comparator, detail.treat, 'cie_imp') }}</td>
+                        </tr>
+                        <tr>
+                            <th>Publication</th>
+                            <td>{{ get_cet_attr_txt(detail.oc_name, comparator, detail.treat, 'pub_bia') }}</td>
+                        </tr>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+        <!-- /#tb_simple_sofnma_detail -->
+
+        <div id="tb_simple_sofnma_ctrl_select" class="box dlg-sm" title="Assumed Baseline Risk">
+            <div class="box-body">
+                <!-- <h4>Measure {{ set_ctrl_oc_name }} and {{ comparator }} </h4>
+                <div>
+                    OR, RR
+                </div> -->
+                <h4>Assumed Baseline Risk for {{ set_ctrl_oc_name }} and {{ comparator }} </h4>
+                <div v-if="rs[set_ctrl_oc_name].oc.treats.hasOwnProperty(comparator)">
+                    <p>
+                        <input type="radio" name="ipt_which_ctrl" value="external" 
+                        v-model="rs[set_ctrl_oc_name].oc.treats[comparator].which_ACR.use_which_val"> 
+                        User provided
+                        <input type="text"
+                            v-bind:disabled="rs[set_ctrl_oc_name].oc.treats[comparator].which_ACR.use_which_val == 'internal'"
+                            v-model="rs[set_ctrl_oc_name].oc.treats[comparator].which_ACR.external_val">
+                    </p>
+                    <hr>
+                    <div v-if="rs[set_ctrl_oc_name].oc.treats[comparator].has_internal_val">
+                        <p>
+                            <input type="radio" name="ipt_which_ctrl" value="internal"
+                                v-model="rs[set_ctrl_oc_name].oc.treats[comparator].which_ACR.use_which_val">
+                            Pre-specified 
+                        </p>
+                        <!-- <p>&nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="ipt_ctrl"> Mean
+                           &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="ipt_ctrl"> High risk
+                           &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="ipt_ctrl"> Low risk</p> -->
+                    </div>
+                    <div v-else>
+                        Internal data not available.
+                    </div>
+                </div>
+
+                <div v-else>
+                    {{ comparator }} not available in {{ set_ctrl_oc_name }}
+                </div>
+                
+            </div>
+        </div>
+        <!-- /#tb_simple_sofpma_ctrl_select -->
+
+    </div>
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/alasql/0.5.5/alasql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.1/d3.min.js"></script>
+
+<script>
+var isIE = /*@cc_on!@*/false || !!document.documentMode;
+if (isIE) {
+    document.getElementById('ss-msg').innerHTML = 'The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.';
+}
+</script>
+
+<script>
+
+{% include 'js/vw_simple_oclist_v2.js' %}
+{% include 'js/tb_simple_sofnma_v2.js' %}
+
+var jarvis = {
+    txt: {
+        'OR': 'Odds Ratio (OR)',
+        'RR': 'Risk Ratio (RR)',
+        'HR': 'Hazard Ratio (HR)',
+        'CIE_TOT_4': 'High',
+        'CIE_TOT_3': 'Moderate',
+        'CIE_TOT_2': 'Low',
+        'CIE_TOT_1': 'Very Low',
+        'CIE_VAL_4': 'Very serious',
+        'CIE_VAL_3': 'Very serious',
+        'CIE_VAL_2': 'Serious',
+        'CIE_VAL_1': 'No serious',
+        'PUB_BIA_2': 'Strongly suspected',
+        'PUB_BIA_1': 'Undetected',
+        'PUB_BIA_0': 'Not applicable'
+    },
+
+    // for the PMA table
+    default_measure: '',
+    measure_list: [],
+
+    measure_dict: {
+        OR: { abbr: 'OR', name: 'Odds Ratio (OR)' },
+        RR: { abbr: 'RR', name: 'Risk Ratio (RR)' },
+        HR: { abbr: 'HR', name: 'Hazard Ratio (HR)' },
+    },
+    default_comparator: null,
+
+    init: function() {
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+
+        console.log('* User is using IE:', isIE);
+        if (isIE) {
+            jarvis.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
+            return;
+        }
+
+        // OK, 
+        var prj = jarvis.get_url_paramter('prj');
+        if (prj == null || prj == '') {
+            jarvis.ssmsg('Project information error.')
+            return;
+        }
+
+        // set the measures
+        // the msrs should be a comma seperated string:
+        // e.g., OR,RR
+        // HR,OR
+        var msrs = jarvis.get_url_paramter('msrs');
+        if (msrs == null || msrs == '') {
+            msrs = 'OR,RR,HR';
+        }
+        msrs = msrs.split(',')
+        this.default_measure = msrs[0];
+        this.measure_list = msrs.map(function(v) {
+            return jarvis.measure_dict[v];
+        });
+        
+        // set the measures in SoF PMA
+        tb_simple_sofnma.default_measure = this.default_measure;
+        tb_simple_sofnma.measure_list = this.measure_list;
+
+        // set default_comparator
+        this.default_comparator = jarvis.get_url_paramter('dc');
+        if (this.default_comparator == null || this.default_comparator == '') {
+            this.default_comparator == null;
+        }
+
+        $.get(
+            './graphdata/' + prj + '/SOFTABLE_NMA.json',
+            // { ver: Math.random() },
+            { v: 2, ver: Math.random(), use_cache: 'yes', prj: prj },
+            function(data) {
+                console.log(data);
+                // init the oc list
+                // vw_simple_oclist.init(data);
+
+                // set the default_comparator
+                tb_simple_sofnma.default_comparator = jarvis.default_comparator;
+
+                // init the NMA table
+                tb_simple_sofnma.init(data);
+
+                // show the first one
+                // vw_simple_oclist.toggle_oc(data.oc_list[0].oc_names[0]);
+
+                // ok, remove the start screen
+                jarvis.ssmsg('Almost initialized.');
+                setTimeout('jarvis.ssclose();', 400);
+
+            }, 'json'
+        );
+
+    },
+
+    get_url_paramter: function(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    },
+
+    toggle_oc: function(oc_name) {
+        console.log('* toggle_oc '+ oc_name);
+        tb_simple_sofnma.toggle_oc(oc_name);
+    },
+
+    clear_all_oc: function() {
+        tb_simple_sofnma.clear_all_oc();
+    },
+
+    ssmsg: function(msg) {
+        $('#ss-msg').html(msg);
+    },
+
+    ssclose: function() {
+        $('#start-screen').hide();
+    },
+
+    show_color_guide: function() {
+        $('#color_guide').dialog({
+            width: 720
+        });
+    }
+};
+
+$(document).ready(function() {
+    jarvis.init();
+})
+</script>
+</body>

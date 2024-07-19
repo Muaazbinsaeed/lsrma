@@ -1,0 +1,430 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Deduplicate
+{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css">
+
+<style>
+/* shared rules */
+{% include 'css/pan_paperviewer.css' %}
+
+/* local rules */
+html {
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+#main {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    margin: 0 0 0 10px;
+    overflow: hidden;
+}
+.col-cq-name {
+    max-width: 150px;
+    text-align: center;
+}
+.col-ss-cq {
+    text-align: center;
+}
+
+.table-ss-cq tr:hover {
+    background-color: #efefef;
+}
+.table-ss-cq tbody {
+    overflow-y: auto;
+}
+#app {
+    width: calc(100% - 10px);
+    height: 100%;
+}
+.dd-rst-table div.pp-group {
+    padding: 3px 0;
+}
+.dd-rst-table div:hover {
+    background-color: whitesmoke;
+}
+.dd-rst-table div:nth-child(odd) {
+    background-color: #efefef;
+}
+.dd-rst-group {
+    border-bottom: 5px solid #cccccc;
+    margin: 10px 0;
+    padding: 10px 0;
+}
+.dd-rst-paper {
+    width: 49%;
+}
+.txt-pid {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+</style>
+{% endblock %}
+
+{% block page_name %}
+<i class="fas fa-object-group"></i>
+Deduplicate
+{% endblock %}
+
+{% block content %}
+
+<div id="main">
+
+<div id="app">
+
+<div>
+    <p>
+        <button class="btn btn-primary"
+            :disabled="is_working"
+            @click="find_duplicates('db');">
+            <span v-if="is_working">
+                Server is working ... Please wait ...
+            </span>
+            <span v-else>
+                Find Duplications
+            </span>
+        </button>
+
+        <button class="btn btn-success"
+            :disabled="is_working"
+            @click="get_deduplicate_search_result();">
+
+            <span v-if="is_working">
+                Server is working ... Please wait ...
+            </span>
+            <span v-else>
+                Load Duplicate Results
+            </span>
+        </button>
+    </p>
+</div>
+
+<div>
+    <span>
+        Show both duplicates included only: 
+    </span>
+    <select v-model="filter.show_both_included_only">
+        <option :value="true">Yes</option>
+        <option :value="false">No</option>
+    </select>
+
+    <span v-if="rst != null"
+        class="ml-3">
+        {{ cnt_matched_filter()[0] }} Groups
+    </span>
+</div>
+
+<div v-if="rst == null">
+    &nbsp;
+</div>
+<div v-else
+    style="height: calc(100% - 100px); overflow-y: auto;">
+    <div class="dd-rst-table"
+        style="height: calc(100% - 5px); overflow-y: auto;">
+        <template v-for="(ps, title, idx) in rst.dup_dict">
+        <div v-if="has_matched_filter(ps)"
+            class="dd-rst-group d-flex flex-row">
+
+            <div v-for="(pid, i) in ps"
+                class="dd-rst-paper">
+                <span v-if="get_paper(ps[i]) != null">
+                    <span class="txt-pid">{{ ps[i] }}</span> |
+                    {{ get_paper(ps[i]).meta.rct_id }} | 
+                    {{ srv_shared.get_paper_pmid_if_exists(get_paper(ps[i])) }}
+                    <br>
+
+                    <b>
+                        {{ get_paper(ps[i]).title }}
+                    </b>
+                    <br>
+
+                    {{ get_paper(ps[i]).authors }}
+                    <br>
+
+                    <b>{{ get_paper(ps[i]).journal }}</b>
+                    <br>
+                    
+                    <b>
+                        {{ get_paper(ps[i]).ss_rs }}
+                        ({{ srv_screener.ss.rs[get_paper(ps[i]).ss_rs].name }})
+                    </b>
+                    |
+                    C.Qs: 
+                    <span v-if="['f1','f3'].indexOf(get_paper(ps[i]).ss_rs)>=0">
+                        <template v-for="(v, k) in get_paper(ps[i]).ss_ex.ss_cq">
+                            <span v-if="v.d == 'yes'"
+                                class="badge badge-primary mr-2">
+                                {{ k }}
+                            </span>
+                            <span v-else
+                                class="badge mr-2">
+                                <del>{{ k }} ({{ v.r }})</del>
+                            </span>
+                        </template>
+                    </span>
+                    <br>
+
+                    Outcomes: 
+                    {{ get_paper(ps[i]).ext_abbrs }}
+                    <br>
+                    
+                    <button class="btn btn-sm btn-success mr-2"
+                        :disabled="is_working"
+                        @click="keep_and_exclude(ps[i], ps)">
+                        <span v-if="is_working">
+                            Updating ...
+                        </span>
+                        <span v-else>
+                            <b>KEEP {{ ps[i] }}</b>, 
+                            exclude+merge other {{ get_other_than(ps, i) }}
+                        </span>
+                    </button>
+                    
+                </span>
+                <span v-else>
+                    {{ ps[i] }} has been renamed or deleted.
+                </span>
+            </td>
+
+
+        </div>
+        </template>
+    </div>
+</div>
+
+
+
+</div>
+<!-- /#app -->
+
+</div>
+<!-- /#main -->
+
+{% endblock %}
+
+{% block active_nav_link %}screener-deduplicate{% endblock %}
+
+{% block script %}
+<script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.4.0/clipboard.min.js" integrity="sha512-iJh0F10blr9SC3d0Ow1ZKHi9kt12NYa+ISlmCdlCdNZzFwjH1JppRTeAnypvUez01HroZhAmP4ro4AvZ/rG0UQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<!-- my scripts -->
+<script>
+
+{% include 'js/srv_shared.js' %}
+
+///////////////////////////////////////////////////////////
+// bind the project information to srv_screener.js
+///////////////////////////////////////////////////////////
+{% include 'js/srv_screener.js' %}
+srv_screener.project = [[ project_json_str|safe ]];
+
+var app = {
+    vpp_id: "#app",
+    vpp: null,
+    vpp_data: {
+        srv_shared: srv_shared,
+        srv_screener: srv_screener,
+        keywords: '',
+        project: [[ project_json_str|safe ]],
+        papers: null,
+        filter: {
+            show_both_included_only: true
+        },
+        rst: null,
+
+        // UI
+        is_working: false,
+    },
+    
+    vpp_methods: {
+        freeze_ui: function() {
+            this.is_working = true;
+        },
+
+        unfreeze_ui: function() {
+            this.is_working = false;
+        },
+
+        get_other_than: function(pids, idx) {
+            var others = [];
+            for (let i = 0; i < pids.length; i++) {
+                if (i == idx) {
+                    continue;
+                }
+                const p = pids[i];
+                others.push(p);
+            }
+            return others.join(', ');
+        },
+
+        find_duplicates: function(src) {
+            this.freeze_ui();
+            srv_screener.find_duplicates(
+                src,
+                function(rsp) {
+                    toast('Found all duplicates');
+                    app.vpp.get_deduplicate_search_result();
+                }
+            )
+        },
+
+        get_deduplicate_search_result: function() {
+            this.freeze_ui();
+            srv_screener.get_deduplicate_search_result(function(data) {
+                if (data.success) {
+                    app.vpp.$data.rst = data.rst;
+                    toast('Updated deduplicate search result');
+                } else {
+                    toast('Error when getting result: ' + data.msg, 'warning');
+                }
+                app.vpp.unfreeze_ui();
+
+            });
+        },
+
+        cnt_matched_filter: function() {
+            var cnt_mc = 0;
+            var cnt_tt = 0;
+            for (const title in this.rst.dup_dict) {
+                var ps = this.rst.dup_dict[title];
+                var flag = this.has_matched_filter(ps);
+
+                if (flag) {
+                    cnt_mc += 1;
+                }
+
+                cnt_tt += 1;
+            }
+
+            return [cnt_mc, cnt_tt];
+        },
+
+        has_matched_filter: function(ps) {
+            var p0 = this.get_paper(ps[0]);
+            var p1 = this.get_paper(ps[1]);
+
+            if (p0 == null || p1 == null) {
+                // which means one of the record has been removed
+                return false;
+            }
+
+            if (this.filter.show_both_included_only) {
+                if (p0.ss_rs.startsWith('f') &&
+                    p1.ss_rs.startsWith('f')) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
+            return true;
+        },
+
+        keep_and_exclude: function(pid_to_keep, dup_pids) {
+            this.freeze_ui();
+
+            srv_screener.keep_and_exclude(
+                pid_to_keep, 
+                dup_pids,
+                function(rsp) {
+                    console.log(rsp);
+                    for (let i = 0; i < rsp.excluded_papers.length; i++) {
+                        const p = rsp.excluded_papers[i];
+                        app.vpp.update_paper(p);
+                    }
+                    app.vpp.unfreeze_ui();
+
+                }
+            );
+        },
+
+        update_paper: function(p) {
+            var title = p.title.toLocaleLowerCase();
+            var pid = p.pid;
+            var flag = false;
+
+            if (this.rst.paper_dict.hasOwnProperty(pid)) {
+                Object.assign(
+                    this.rst.paper_dict[pid],
+                    p
+                );
+                flag = true;
+            }
+
+            if (flag) {
+                toast('Updated paper [' + p.pid + ']');
+            } else {
+                toast('Not found paper [' + p.pid + '] in current list?', 'warning');
+            }
+                
+        },
+
+        get_paper: function(pid) {
+            if (this.rst.paper_dict.hasOwnProperty(pid)) {
+                return this.rst.paper_dict[pid];
+            } else {
+                return null;
+            }
+        }
+    },
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: this.vpp_data,
+            methods: this.vpp_methods,
+        });
+
+    },
+
+    load: function() {
+        
+    },
+
+    resize: function() {
+        var h = $(window).height() - 20;
+        $(this.vpp_id).css('height', h);
+    }
+};
+
+var jarvis = {
+
+    project: [[ project_json_str|safe ]],
+
+    init: function () {
+        app.init();
+        this.bind_resize_event();
+        app.resize();
+    },
+
+    toast: function(msg, type) {
+        toast(msg, type);
+    },
+
+    prompt: function(text, value) {
+        return window.prompt(text, value);
+    },
+
+    confirm: function(text) {
+        return window.confirm(text);
+    },
+
+    bind_resize_event: function() {
+        $(window).on('resize', function(){
+            app.resize();
+        });
+    }
+
+};
+
+$(document).ready(function () {
+    jarvis.init();
+})
+</script>
+{% endblock %}

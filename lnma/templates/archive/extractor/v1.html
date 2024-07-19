@@ -1,0 +1,2271 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Data Extractor v1
+{% endblock %}
+
+{% block style %}
+<style>
+html {
+    overflow: hidden;
+}
+#navi_header {
+    width: 130px;
+    height: 100%;
+    margin: 5px 5px 0 0;
+    padding: 0 5px 0 10px;
+}
+#navi_header button {
+    text-align: left;
+    margin: 0 0 15px 0;
+}
+#main {
+    display: flex;
+    flex-direction: row;
+    width: calc(100% - 150px);
+    height: 100%;
+    overflow: hidden;
+}
+.panel-s {
+    width: calc(25% - 5px);
+    margin: 5px 5px 0 0;
+    padding: 0 5px 0 10px;
+    border-right: 1px dotted #999999;
+}
+.panel-m {
+    width: calc(50% - 5px);
+    margin: 5px 5px 0 0;
+    padding: 0 5px 0 10px;
+    border-right: 1px dotted #999999;
+}
+.panel-l {
+    width: calc(75% - 5px);
+    margin: 5px 5px 0 0;
+    padding: 0 5px 0 10px;
+    border-right: 1px dotted #999999;
+}
+.panel-f {
+    width: calc(100% - 5px);
+    margin: 5px 5px 0 0;
+    padding: 0 5px 0 10px;
+}
+.panel-box {
+    margin: 5px 0 15px 0;
+    border-bottom: 1px dotted #cccccc;
+    padding: 10px 0;
+}
+.panel-container {
+    max-width: 100%;
+    overflow-y: auto;
+}
+#pan_outcomes {
+    height: 100%;
+}
+.cate-line {
+    cursor: pointer;
+}
+.cate-extract-line {
+    border-left: 1px solid black;
+    padding: 0 0 0 10px;
+    margin: 0 0 0 10px;
+}
+.cate-extract-name {
+    width: 250px;
+    min-width: 250px;
+    max-width: 250px;
+}
+.cate-extract-col {
+    width: 150px;
+    min-width: 100px;
+    max-width: 200px;
+    font-size: .9em;
+}
+.cate-extract-line:hover {
+    background-color: #efefef;
+}
+#pan_ocpapers {
+
+}
+#pan_ocpapers_ctx_menu {
+    border: 2px solid #EFEFEF;
+    box-shadow: 0px 0px 15px #cccccc;;
+}
+#pan_ocpapers_ctx_menu_txt {
+    color: black;
+}
+#pan_ocpapers_ctx_menu .menu-header {
+    font-size: .8em;
+    background-color: #ececec;
+}
+#pan_ocpapers_ctx_menu .menu-info {
+    font-size: .8em;
+}
+#pan_ocpapers_ctx_menu .menu-item {
+    font-size: .9em;
+}
+#pan_ocpapers_ctx_menu .ui-menu { 
+    width: 280px; 
+    max-width: 320px;
+}
+#pan_collector {
+
+}
+#ifr_pdfviewer {
+    width: 100%;
+    height: 400px;
+    min-height: 400px;
+}
+
+#pan_analyzer {
+
+}
+.oc-attr {
+    display: inline-block;
+    margin: 0 10px 3px 0;
+}
+.oc-attr-name {
+    background: #ececec;
+    padding: 0 3px;
+    border-bottom: 1px solid #ececec;
+}
+.oc-attr-value {
+    width: auto;
+    /* margin-left: -3px; */
+    padding: 0 3px;
+    border: 0;
+    border-bottom: 1px solid #ececec;
+}
+.oc-attr-value-sm {
+    width: 120px;
+    margin-left: 5px;
+}
+.nav-link.active {
+    font-weight: bold;
+    color: rgb(0, 110, 255);
+}
+.extract-attr-label {
+    font-weight: normal !important;
+}
+.extract-attr-sub-label {
+    font-weight: normal !important;
+}
+.paper-extract-input {
+    width: 40px;
+    min-width: 30px;
+    max-width: 80px;
+    height: 20px;
+    padding: 1px 1px;
+}
+.paper-extract-input-auto {
+    height: 20px;
+    padding: 1px 1px;
+}
+.pan-normal {
+    padding: 10px;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-top: 0;
+}
+.hide {
+    display: none;
+}
+
+.paper-table-header-th {
+    padding: 0 0 0 3px !important;
+    border-right: 1px solid #888888;
+}
+.paper-table-row {
+    min-height: 24px;
+}
+.paper-table-row:hover {
+    background: #cccccc;
+}
+.paper-table-row-clicked {
+    background-color: rgb(189, 228, 238) !important;
+}
+.paper-table-row-clicked .paper-name {
+    font-weight: bold;
+}
+.paper-table-body-td {
+    padding: 0 0 0 3px !important;
+}
+.paper-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 3px 0 0 !important;
+    cursor: pointer;
+    max-width: 150px;
+}
+.paper-name:hover {
+    font-weight: bold;
+}
+.paper-value {
+    padding: 1px 2px !important;
+}
+
+.cell-input {
+    margin: 0 0 2px 0 !important;
+}
+.n-arms-hr {
+    margin: 3px 0 !important;
+}
+.filter-div {
+    border-bottom: 1px solid #EFEFEF;
+}
+.filter-title {
+    margin: 0 !important;
+}
+.offscreen {
+    left: -8888px !important;
+}
+
+#pan_itbuilder_previewer {
+    position: fixed;
+    top: 10px;
+    min-width: 1200px;
+    min-height: 400px;
+    padding: 35px 5px 5px 5px;
+    background-color: #f5f5f5;
+    z-index: 9999;
+    border: 3px solid #efefef;
+}
+#ifr_itable_previewer {
+    width: 100%;
+    height: 400px;
+    min-height: 400px;
+}
+
+{% include 'css/box.css' %}
+</style>
+
+<!-- jQuery UI Theme -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css">
+
+{% endblock %}
+
+{% block page_name %}
+<i class="far fa-edit"></i>
+Data Extractor
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-row" style="height: calc(100% - 50px);">
+
+<div id="navi_header">
+    <button onclick="jarvis.switch_layout('build_itable');">
+        <i class="fa fa-table"></i>
+        Interactive Table Design
+    </button>
+
+    <button onclick="jarvis.switch_layout('extract_information'); 
+    pan_ocpapers.show_extract_and_papers('itable', 'itable');">
+        <i class="fa fa-table"></i>
+        Extract Interactive Table Data
+    </button>
+
+    <button onclick="jarvis.switch_layout('manage_outcomes');">
+        <i class="fa fa-list"></i>
+        Manage Outcomes
+    </button>
+
+    <hr>
+    <!-- <button onclick="jarvis.switch_layout('extract_information');">
+        <i class="fa fa-edit"></i>
+        Extract Information
+    </button>
+    -->
+
+    <button onclick="pan_itable_previewer.show_itable_preview();">
+        <i class="fa fa-table"></i>
+        Preview Interactive Table
+    </button>
+
+</div>
+<!-- /#navi_header -->
+
+<div id="main">
+    
+{% include 'extractor/_v1_pan_outcomes.html' %}
+
+{% include 'extractor/_v1_pan_itbuilder.html' %}
+
+{% include 'extractor/_v1_pan_ocpapers.html' %}
+
+{% include 'extractor/_v1_pan_collector.html' %}
+
+{% include 'extractor/_v1_pan_analyzer.html' %}
+    
+
+<div id="pan_itbuilder_previewer" class="shadow-sm" :class="{offscreen:is_hide_previewer}">
+    <div style="position: absolute; left: 5px; top: 5px;" class="d-flex flex-row">
+        <div class="mt-1 mr-5 ml-1">
+            <a href="javascript:void(0);"
+                class="mr-3"
+                v-on:click="close_itable_preview();">
+                <i class="fa fa-close"></i>
+            </a>
+
+            <i class="fa fa-table"></i>
+            Interactive Table Preivew
+        </div>
+    </div>
+
+    <iframe id="ifr_itable_previewer" src="" 
+        width="100%" scrolling="yes"
+        frameborder="0"></iframe>
+</div>
+
+
+</div>
+<!-- /#main -->
+
+
+</div>
+
+{% endblock %}
+
+{% block active_nav_link %}extractor{% endblock %}
+
+{% block script %}
+
+<script>
+
+{% include 'js/lisr_analyzer.js' %}
+{% include 'js/fg_pwma_imglist.js' %}
+
+///////////////////////////////////////////////////////////
+// bind the project information to srv_extractor.js
+///////////////////////////////////////////////////////////
+
+{% include "js/srv_extractor.js" %}
+srv_extractor.project = [[ project_json_str|safe ]];
+
+
+var pan_itable_previewer = {
+    vpp_id: '#pan_itbuilder_previewer',
+    vpp: null,
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                is_hide_previewer: true
+            },
+            methods: {
+                show_itable_preview: function() {
+                    pan_itable_previewer.show_itable_preview();
+                },
+
+                close_itable_preview: function() {
+                    this.is_hide_previewer = true;
+                },
+            }
+        });
+    },
+
+
+    show_itable_preview: function() {
+
+        var project_id = Cookies.get('project_id');
+        var project_keystr = jarvis.project.keystr;
+
+        // update url
+        var url = '/pub/itable.html?src=db&prj=' + project_keystr;
+
+        // reload the iframe
+        if (url == $('#ifr_itable_previewer').prop('src')) {
+            // reload 
+            document.getElementById('ifr_itable_previewer').contentWindow.location.reload();
+        } else {
+            // load url
+            $('#ifr_itable_previewer').prop('src', url);
+        }
+
+        // resize
+        pan_itable_previewer.resize_itable_previewer();
+
+        // show the panel
+        pan_itable_previewer.vpp.$data.is_hide_previewer = false;
+
+        this.vpp.$forceUpdate();
+    },
+
+
+    resize_itable_previewer: function() {
+        var h = $(window).height() - 25;
+
+        // resize the popup
+        $('#pan_itbuilder_previewer').height(h)
+
+        // resize the iframe
+        $('#ifr_itable_previewer').height(h - 40);
+    }
+};
+
+
+var pan_outcomes = {
+    vpp_id: '#pan_outcomes',
+    vpp: null,
+
+    data_empty: {
+        pwma: { outcomes: {} },
+        subg: { outcomes: {} },
+        nma: { outcomes: {} },
+        itable: { outcomes: {} },
+    },
+
+    load: function() {
+        var project_id = Cookies.get('project_id');
+
+        $.get(
+            jarvis.url.get_extracts,
+            {project_id:project_id},
+            function(data) {
+                console.log(data);
+                pan_outcomes.show_extracts(data.extracts);
+            }, 'json'
+        );
+    },
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                stat: {
+                    pwma: { total: 0 },
+                    subg: { total: 0 },
+                    nam: { total: 0 },
+                    itable: { total: 0 },
+                },
+                data: JSON.parse(JSON.stringify(this.data_empty))
+            },
+            methods: {
+                create_extract: function(oc_type, tpl) {
+                    pan_outcomes.create_extract(oc_type, tpl);
+                },
+
+                show_extract_data: function(oc_type, abbr) {
+                    pan_outcomes.show_extract_data(oc_type, abbr);
+                },
+
+                delete_extract: function(oc_type, abbr, full_name) {
+                    pan_outcomes.delete_extract(oc_type, abbr, full_name);
+                },
+
+                toggle_cate: function(event) {
+                    var elem = $(event.target);
+                    elem.next().toggle();
+                },
+
+                close_all_cates: function(oc_type, event) {
+                    $('.cate-extracts-' + oc_type).toggle();
+                }
+            }
+        });
+    },
+
+    delete_extract: function(oc_type, abbr, full_name) {
+        var ret = jarvis.confirm('The deleted outcome and related extractions can NOT be restored. Are you sure to delete [' + full_name + ']?');
+    
+        if (ret) {
+            var project_id = Cookies.get('project_id');
+            $.post(
+                jarvis.url.delete_extract,
+                {project_id:project_id, oc_type:oc_type, abbr:abbr},
+                function(data) {
+                    jarvis.toast('Deleted!');
+                    pan_outcomes.load();
+                }, 'json'
+            );
+        }
+    },
+
+    show_extract_data: function(oc_type, abbr) {
+        console.log('* show extract [' + oc_type + '] [' + abbr + ']');
+        pan_ocpapers.show_extract_and_papers(oc_type, abbr);
+    },
+    
+    create_extract: function(oc_type, tpl) {
+        // get the full name
+        var text = jarvis.prompt('The outcome full name:');
+        if (text == null) { return; }
+        text = text.trim();
+        if (text == '') { return; }
+
+        // create an abbr
+        var abbr = jarvis.mk_oc_abbr();
+
+        // create an meta
+        var meta = JSON.parse(JSON.stringify(jarvis.tpl.oc_type[oc_type][tpl]));
+        meta.full_name = text;
+        meta.abbr = abbr;
+
+        // copy the meta.cate_attr
+        meta.cate_attrs = JSON.parse(JSON.stringify(jarvis.tpl.input_format[oc_type][meta.input_format]));
+
+        var data = {};
+        var project_id = Cookies.get('project_id');
+
+        $.post(
+            jarvis.url.create_extract,
+            {
+                project_id: project_id,
+                oc_type: oc_type,
+                abbr: abbr,
+                meta: JSON.stringify(meta),
+                data: JSON.stringify(data)
+            }, 
+            function(data) {
+                console.log(data);
+                // update UI
+                pan_outcomes.add_extracts([data.extract]);
+            }, 'json'
+        );
+    },
+
+    show_extracts: function(extracts) {
+        // clear existing
+        this.vpp.$data.data = JSON.parse(JSON.stringify(this.data_empty));
+        this.add_extracts(extracts);
+        // update the vpp
+        this.vpp.$forceUpdate();
+    },
+
+    add_extracts: function(extracts) {
+        var cate_exts = {};
+
+        // build the sorted cate
+        for (let i = 0; i < extracts.length; i++) {
+            const extract = extracts[i];
+            var oc_type = extract.oc_type;
+            var cate = extract.meta.category;
+
+            if (!this.vpp.$data.data[oc_type].outcomes.hasOwnProperty(cate)) {
+                this.vpp.$data.data[oc_type].outcomes[cate] = [];
+            }
+
+            // put this ext into cate
+            this.vpp.$data.data[oc_type].outcomes[cate].push(
+                extract.meta
+            );
+
+            // add number
+            this.vpp.$data.stat[oc_type].total += 1;
+        }
+
+        // for (let i = 0; i < extracts.length; i++) {
+        //     var extract = extracts[i];
+        //     var oc_type = extract.oc_type;
+        //     var abbr = extract.abbr;
+        //     // add to the related type
+        //     this.vpp.data[oc_type].outcomes[abbr] = extract.meta;
+        // }
+
+        // update the vpp
+        this.vpp.$forceUpdate();
+    },
+
+    show: function() {
+        $(this.vpp_id).show();
+    },
+
+    hide: function() {
+        $(this.vpp_id).hide();
+    },
+
+    set_size: function(size) {
+        $(this.vpp_id).removeClass('panel-s panel-m panel-l')
+            .addClass('panel-' + size);
+    }
+};
+
+
+var pan_ocpapers = {
+    vpp_id: "#pan_ocpapers",
+    vpp: null,
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                // flags
+                show_settings: true,
+                only_show_selected: false,
+
+                // mode
+                mode: 'manage_outcomes',
+
+                // data
+                all_attrs: null,
+                show_attrs: null,
+                extract: null,
+                papers: []
+            },
+            computed: {
+                n_selected: function() {
+                    var n = 0;
+                    for (const pmid in this.extract.data) {
+                        if (Object.hasOwnProperty.call(this.extract.data, pmid)) {
+                            if (this.extract.data[pmid].is_selected) {
+                                n += 1;
+                            };
+                        }
+                    }
+                    return n;
+                }
+            },
+            methods: {
+                toggle_show_settings: function() {
+                    this.show_settings = !this.show_settings;
+                },
+
+                toggle_on_all_attributes: function() {
+                    for (const key in this.show_attrs) {
+                        if (Object.hasOwnProperty.call(this.show_attrs, key)) {
+                            this.show_attrs[key] = true;
+                        }
+                    }
+                    this.$forceUpdate();
+                },
+
+                toggle_off_all_attributes: function() {
+                    for (const key in this.show_attrs) {
+                        if (Object.hasOwnProperty.call(this.show_attrs, key)) {
+                            this.show_attrs[key] = false;
+                        }
+                    }
+                    this.$forceUpdate();
+                },
+
+                // save all!
+                update_extract: function() {
+                    pan_ocpapers.update_extract();
+                },
+                
+                // copy 
+                copy_extract: function() {
+                    pan_ocpapers.copy_extract();
+                },
+
+                get_input_size: function(str) {
+                    // // convert null to empty
+                    // if (str == null) {
+                    //     str = '';
+                    // }
+                    // // convert number to string
+                    // str = '' + str;
+                    // var s = str.length;
+                    // if (s<5) {
+                    //     return 5;
+                    // } else if (s > 14) {
+                    //     return 14;
+                    // } else {
+                    //     return s;
+                    // }
+                    return srv_extractor.get_input_size(str);
+                },
+
+                // get year
+                get_year: function(s) {
+                    return jarvis.get_year(s);
+                },
+
+                get_first_author: function(s) {
+                    var aus = s.split(';');
+                    if (aus.length == 1) {
+                        aus = s.split(',');
+                    }
+                    return aus[0];
+                },
+
+                on_change_input_format: function(event) {
+                    let val = event.target.value;
+                    console.log('Changed input_format: ' + val);
+
+                    // update the attrs
+                    this.extract.meta.cate_attrs = jarvis.tpl.input_format[
+                        this.extract.oc_type
+                    ][val];
+                    
+                    // update the papers setting
+                    pan_ocpapers.update_all_and_show_attrs();
+                },
+
+                on_toggle_attr_selection: function(event) {
+                    this.$forceUpdate();
+                },
+
+                on_click_paper: function(pmid) {
+                    // set the working pmid ?
+                    // no need to set
+
+                    // highlight this line
+                    $('.paper-table-row').removeClass('paper-table-row-clicked');
+                    $('#paper-table-row-' + pmid).addClass('paper-table-row-clicked');
+
+                    // call collector to do something
+                    pan_collector.show_paper(
+                        pmid, 
+                        pan_ocpapers.vpp.$data.extract.data[pmid]
+                    );
+                },
+
+                toggle_select_all_papers: function(event) {
+                    let val = event.srcElement.checked;
+                    console.log('* set all papers selected: ', val);
+                    for (const pmid in this.extract.data) {
+                        if (Object.hasOwnProperty.call(this.extract.data, pmid)) {
+                            this.extract.data[pmid].is_selected = val;
+                        }
+                    }
+                    // this.$forceUpdate();
+                },
+
+                on_toggle_itable_select_category: function(cate_idx, event) {
+                    let val = event.srcElement.checked;
+
+                    for (let i = 0; i < this.extract.meta.cate_attrs[cate_idx].attrs.length; i++) {
+                        const attr = this.extract.meta.cate_attrs[cate_idx].attrs[i];
+
+                        if (attr.subs == null) {
+                            this.show_attrs[attr.abbr] = val;
+                        } else {
+                            for (let j = 0; j < attr.subs.length; j++) {
+                                const sub = attr.subs[j];
+                                this.show_attrs[sub.abbr] = val;
+                            }
+                        }
+                    }
+                    // force update the UI because change a lot
+                    this.$forceUpdate();
+                },
+
+                on_change_itable_n_arms: function(pmid, event) {
+                    let val = event.target.value;
+                    console.log('* change ' + pmid + ' n_arms to ' + val);
+
+                    var new_n_others = val - 2;
+                    if (new_n_others == this.extract.data[pmid].attrs.other.length) {
+                        // which means the number of arms doesn't change
+
+                    } else if (new_n_others > this.extract.data[pmid].attrs.other.length) {
+                        // the number of arms increases, need to put more elements
+                        var delta = new_n_others - this.extract.data[pmid].attrs.other.length;
+                        for (let i = 0; i < delta; i++) {
+                            // just copy the keys from main track
+                            var obj = JSON.parse(JSON.stringify(this.extract.data[pmid].attrs.main));
+                            // and clear the exising data
+                            for (const key in obj) {
+                                if (Object.hasOwnProperty.call(obj, key)) {
+                                    obj[key] = '';
+                                }
+                            }
+                            this.extract.data[pmid].attrs.other.push(obj);
+                        }
+                    } else {
+                        // the number of arms decreases, need to remove
+                        var delta = this.extract.data[pmid].attrs.other.length - new_n_others;
+                        for (let i = 0; i < delta; i++) {
+                            this.extract.data[pmid].attrs.other.pop();
+                        }
+                    }
+                    this.$forceUpdate();
+                },
+
+                on_change_only_show_selected: function(event) {
+                    let val = event.srcElement.checked;                    
+                    this.only_show_selected = val;
+                    this.$forceUpdate();
+                }
+            }
+        });
+    },
+
+    set_mode: function(mode) {
+        this.vpp.$data.mode = mode;
+    },
+
+    update: function(data) {
+        // the data is a combo of extract and papers
+        this.vpp.extract = data.extract;
+        this.vpp.papers = data.papers;
+
+        // update the show show_attrs
+        // if (data.extract.oc_type == 'itable') {
+        //     // init the all_attrs which for list all the nested attrs
+        //     this.vpp.all_attrs = [];
+        //     // init the show_attrs
+        //     this.vpp.show_attrs = {}
+        //     // loop on the cate_attrs
+        //     for (let i = 0; i < data.extract.meta.cate_attrs.length; i++) {
+        //         const cate = data.extract.meta.cate_attrs[i];
+        //         for (let j = 0; j < cate.attrs.length; j++) {
+        //             const attr = cate.attrs[j];
+                    
+        //             if (attr.subs == null) {
+        //                 // which means this attr doesn't have a sub
+        //                 this.vpp.all_attrs.push(attr);
+        //                 this.vpp.show_attrs[attr.abbr] = false;
+        //             } else {
+        //                 for (let k = 0; k < attr.subs.length; k++) {
+        //                     const sub = attr.subs[k];
+        //                     this.vpp.all_attrs.push(sub);
+        //                     this.vpp.show_attrs[sub.abbr] = false;
+        //                 }
+        //             }
+        //         }
+        //     }
+        // } else if (data.extract.oc_type == 'pwma' || 
+        //            data.extract.oc_type == 'subg' ||
+        //            data.extract.oc_type == 'nma') {
+        //     // init the all_attrs for settings
+        //     this.vpp.all_attrs = []
+        //     // init the show_attrs for table
+        //     this.vpp.show_attrs = {}
+        //     // loop on the attrs of this outcome
+        //     for (let i = 0; i < data.extract.meta.attrs.length; i++) {
+        //         const attr = data.extract.meta.attrs[i];
+        //         this.vpp.all_attrs.push(attr);
+        //         this.vpp.show_attrs[attr] = true;
+        //     }
+        // }
+
+        // update the all_attrs and show_attrs variables for display
+        this.update_all_and_show_attrs();
+
+        // update
+        this.vpp.$forceUpdate();
+    },
+
+    update_all_and_show_attrs: function() {
+        // init the all_attrs which for list all the nested attrs
+        this.vpp.all_attrs = [];
+
+        // init the show_attrs
+        this.vpp.show_attrs = {}
+
+        // loop on the cate_attrs
+        for (let i = 0; i < this.vpp.extract.meta.cate_attrs.length; i++) {
+            const cate = this.vpp.extract.meta.cate_attrs[i];
+            for (let j = 0; j < cate.attrs.length; j++) {
+                const attr = cate.attrs[j];
+                
+                if (attr.subs == null) {
+                    // which means this attr doesn't have a sub
+                    this.vpp.all_attrs.push(attr);
+                    this.vpp.show_attrs[attr.abbr] = false;
+
+                } else {
+                    for (let k = 0; k < attr.subs.length; k++) {
+                        const sub = attr.subs[k];
+                        this.vpp.all_attrs.push(sub);
+                        this.vpp.show_attrs[sub.abbr] = false;
+                    }
+                }
+            }
+        }
+
+        // update
+        this.vpp.$forceUpdate();
+    },
+
+    /**
+     * Set the highlight text to pid in the box
+     * 
+     * seq: null means `main`, 0 to x means item index in `other`
+     */
+    set_highlight_text_to_attr: function(highlight_text, pid, attr_abbr, seq) {
+        console.log('* set_highlight_text_to_attr: ' + highlight_text + ', ' + pid + ', ' + attr_abbr + ', ' + seq);
+
+        // update the value for the specific paper
+        if (seq == null) {
+            // it means this is the main track
+            this.vpp.$data.extract.data[pid].attrs.main[attr_abbr] = highlight_text;
+        } else {
+            // this means the value is for other arms
+            this.vpp.$data.extract.data[pid].attrs.other[seq][attr_abbr] = highlight_text;
+        }
+        // update UI
+        this.vpp.$forceUpdate();
+    },
+
+    update_ctx_menu: function(highlight_text, pid, n_arms) {
+        // loop on the cate_attrs
+        var html = [
+            '<li class="ui-state-disabled menu-info"><div>',
+                'Highlighted <b id="pan_ocpapers_ctx_menu_txt">'+highlight_text+'</b> is:',
+            '</div></li>'
+        ];
+
+        // this is for the main extracting
+        // the last argument is null, means it's the main track
+        html = this.__update_ctx_menu_html(html, highlight_text, pid, null);
+
+        // this is for the other extracting (i.e., multiple arms)
+        if (n_arms > 2) {
+            html.push('<li class="ui-state-disabled menu-header"><div>Other Arms</div></li>');
+            
+            for (let a = 0; a < n_arms - 2; a++) {
+                html.push('<li class="menu-item"><div>Other '+(a+1)+'</div><ul>');
+                html = this.__update_ctx_menu_html(html, highlight_text, pid, a);
+                html.push('</ul></li>')
+            }
+        }
+
+        // put the new html into box
+        $('#pan_ocpapers_ctx_menu').html(
+            html.join('')
+        );
+    },
+
+    __update_ctx_menu_html: function(html, highlight_text, pid, seq) {
+
+        for (let i = 0; i < this.vpp.extract.meta.cate_attrs.length; i++) {
+
+            const cate = this.vpp.extract.meta.cate_attrs[i];
+
+            // put a new cate
+            html.push('<li class="ui-state-disabled menu-header"><div>'+cate.name+'</div></li>');
+
+            var flag_has_shown_attr = false;
+            for (let j = 0; j < cate.attrs.length; j++) {
+                const attr = cate.attrs[j];
+                
+                if (attr.subs == null) {
+                    var is_show = this.vpp.show_attrs[attr.abbr];
+                    if (is_show) {
+                        html.push(
+                        '<li class="menu-item">' +
+                            '<div onclick="pan_ocpapers.set_highlight_text_to_attr(\''+highlight_text+'\', \''+pid+'\', \''+attr.abbr+'\', '+seq+')">' +
+                            attr.name +
+                            '</div>' +
+                        '</li>'
+                        );
+                        flag_has_shown_attr = true;
+                    }
+                } else {
+                    for (let k = 0; k < attr.subs.length; k++) {
+                        const sub = attr.subs[k];
+                        if (this.vpp.show_attrs[sub.abbr]) {
+                            html.push(
+                            '<li class="menu-item">' +
+                                '<div onclick="pan_ocpapers.set_highlight_text_to_attr(\''+highlight_text+'\', \''+pid+'\', \''+sub.abbr+'\', '+seq+')">' +
+                                attr.name + ' - ' + sub.name +
+                                '</div>' +
+                            '</li>'
+                            );
+                            flag_has_shown_attr = true;
+                        }
+                    }
+                }
+            }
+
+            if (flag_has_shown_attr) {
+                //
+            } else {
+                html.pop();
+            }
+            
+        }
+
+        return html;
+    },
+
+    get_current_extract_and_papers: function() {
+        if (this.vpp.$data.extract == null) {
+            return null;
+        }
+        
+        // build a object
+        var ret = {
+            extract: this.vpp.$data.extract,
+            papers: this.vpp.$data.papers
+        };
+
+        return ret;
+    },
+
+    show_extract_and_papers: function(oc_type, abbr) {
+        var project_id = Cookies.get('project_id');
+        $.get(
+            jarvis.url.get_extract_and_papers,
+            {project_id:project_id, abbr:abbr, rnd:Math.random()},
+            function(data) {
+                pan_ocpapers.update(data);
+
+            }, 'json'
+        );
+    },
+
+    copy_extract: function() {
+        var project_id = Cookies.get('project_id');
+        var oc_type = this.vpp.$data.extract.oc_type;
+        var full_name = this.vpp.$data.extract.meta.full_name;
+        var abbr = this.vpp.$data.extract.abbr;
+        var meta = this.vpp.$data.extract.meta;
+        var data = this.vpp.$data.extract.data;
+
+        var new_full_name = jarvis.prompt('Copy current outcome [' + full_name + '] and make a new outcome. The new outcome full name is: ', full_name);
+        if (new_full_name == null) { return; }
+        new_full_name = new_full_name.trim();
+        if (new_full_name == '') { return; }
+
+        // save this new 
+        var new_abbr = jarvis.mk_oc_abbr();
+
+        // send request!
+        $.post(
+            jarvis.url.copy_extract,
+            {project_id:project_id, oc_type:oc_type, abbr:abbr,
+             new_abbr:new_abbr, new_full_name: new_full_name,
+             meta:JSON.stringify(meta), data:JSON.stringify(data)},
+            function(data) {
+                // show
+                toast('Copied the new outcome [' + data.extract.meta.full_name + ']');
+                // reload the outcomes
+                pan_outcomes.load();
+            }
+        );
+    },
+
+    update_extract: function() {
+        // there are 
+        var project_id = Cookies.get('project_id');
+        var oc_type = this.vpp.$data.extract.oc_type;
+        var abbr = this.vpp.$data.extract.abbr;
+        var meta = this.vpp.$data.extract.meta;
+        var data = this.vpp.$data.extract.data;
+
+        // send request!
+        $.post(
+            jarvis.url.update_extract,
+            {project_id:project_id, oc_type:oc_type, abbr:abbr,
+             meta:JSON.stringify(meta), data:JSON.stringify(data)},
+            function(data) {
+                // show
+                toast('Saved the outcome [' + data.extract.meta.full_name + ']');
+                // reload the outcomes
+                pan_outcomes.load();
+            }
+        );
+    },
+
+    show: function() {
+        $(this.vpp_id).show();
+    },
+
+    hide: function() {
+        $(this.vpp_id).hide();
+    },
+
+    set_size: function(size) {
+        $(this.vpp_id).removeClass('panel-s panel-m panel-l')
+            .addClass('panel-' + size);
+    }
+};
+
+
+var pan_collector = {
+    vpp_id: "#pan_collector",
+    vpp: null,
+    pdfviewer_id: '#ifr_pdfviewer',
+    current: {
+        paper: null,
+        extract_paper: null
+    },
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                paper: null,
+                show_tab: null
+            },
+            methods: {
+                switch_tab: function(tab_name) {
+                    this.show_tab = tab_name;
+                },
+
+                view_pdf: function(paper_id, file_id, folder) {
+                    pan_collector.view_pdf(paper_id, file_id, folder);
+                }
+            },
+            updated: function() {
+                pan_collector.bind_txt_ctx_menu();
+            }
+        });
+
+        this.resize_pdfviewer();
+    },
+
+    bind_txt_ctx_menu: function() {
+        $(this.vpp_id + '_basic_info').on('contextmenu', function(event) {
+            // get the highlighted text
+            var text = "";
+            if (window.getSelection) {
+                text = window.getSelection().toString();
+            } else if (document.selection && document.selection.type != "Control") {
+                text = document.selection.createRange().text;
+            }
+
+            // update the context menu content based on the selected attributes.
+            // all of the details about this paper is need to generate the menu.
+            // but since the attrs are only available in pan_ocpapers,
+            // we have to use pan_oc
+            pan_ocpapers.update_ctx_menu(
+                text, 
+                pan_collector.current.paper.pid,
+                pan_collector.current.extract_paper.n_arms
+            );
+
+            // show the context menu at where clicked
+            var top = event.pageY - 20;
+            var left = event.pageX;
+            
+            $("#pan_ocpapers_ctx_menu").css({
+                position: 'absolute',
+                display: "block",
+                top: top,
+                left: left
+            }).addClass("show").menu();
+
+            $("#pan_ocpapers_ctx_menu").menu('refresh');
+
+            $('#pan_ocpapers_ctx_menu .ui-menu-item').on('click', function() {
+                $("#pan_ocpapers_ctx_menu").hide();
+            });
+
+            //blocks default Webbrowser right click menu
+            return false; 
+        });
+        // console.log('* binded ctx menu')
+    },
+
+    on_contextmenu_pdfviewer: function(event) {
+        // get text
+        var text = this.get_pdf_selection_text();
+        
+        // update the menu
+        pan_ocpapers.update_ctx_menu(
+            text, 
+            pan_collector.current.paper.pid,
+            pan_collector.current.extract_paper.n_arms
+        );
+
+        // show the context menu at where clicked
+        // need to calculate the offset for the iframe
+        var offset = $('#ifr_pdfviewer').offset();
+        var top = offset.top + event.pageY - 20;
+        var left = offset.left + event.pageX;
+        
+        $("#pan_ocpapers_ctx_menu").css({
+            position: 'absolute',
+            display: "block",
+            top: top,
+            left: left
+        }).addClass("show").menu();
+
+        $("#pan_ocpapers_ctx_menu").menu('refresh');
+
+        $('#pan_ocpapers_ctx_menu .ui-menu-item').on('click', function() {
+            $("#pan_ocpapers_ctx_menu").hide();
+        });
+    },
+
+    get_pdf_selection_text: function() {
+        var txt = '';
+        txt = document.getElementById('ifr_pdfviewer').contentWindow.getSelection().toString();
+
+        return txt;
+    },
+
+    update: function(paper) {
+        // update data
+        this.vpp.paper = paper;
+        this.current.paper = paper;
+
+        // update the normal UI
+        this.vpp.show_tab = 'basic_info';
+        this.vpp.$forceUpdate();
+
+        // update the PDF viewer
+        // this.load_pdf();
+
+        // bind the context menu
+        this.bind_txt_ctx_menu();
+    },
+
+    show_paper: function(pid, extract_paper) {
+        // set the extract info
+        this.current.extract_paper = extract_paper;
+
+        // get the paper
+        $.get(
+            jarvis.url.get_paper,
+            {pid: pid, rnd:Math.random()},
+            function(data) {
+                pan_collector.update(data.paper);
+            }, 'json'
+        );
+        // bind the context menu
+        this.bind_txt_ctx_menu();
+    },
+
+    show: function() {
+        $(this.vpp_id).show();
+        // bind the context menu
+        this.bind_txt_ctx_menu();
+    },
+
+    hide: function() {
+        $(this.vpp_id).hide();
+    },
+
+    set_size: function(size) {
+        $(this.vpp_id).removeClass('panel-s panel-m panel-l')
+            .addClass('panel-' + size);
+    },
+
+    view_pdf: function(paper_id, file_id, folder) {
+        // update the pdf viewer size
+        this.resize_pdfviewer();
+
+        // load the pdf
+        this.load_pdf(folder, file_id);
+    },
+
+    load_pdf: function(folder, file_id) {
+        var pdf_url = "/pdfworker/pdf/" + folder + "/" + file_id + '.pdf';
+
+        // just load the blank page
+        if (typeof(folder) == 'undefined') {
+            pdf_url = '/pdfworker/view_pdf';
+        }
+
+        // show
+        document.getElementById("ifr_pdfviewer").contentWindow.PDFViewerApplication.open(pdf_url);
+    },
+
+    resize_pdfviewer: function() {
+        var h = $(window).height() - 150;
+        $(this.pdfviewer_id).css('height', h + 'px');
+    }
+};
+
+
+var pan_analyzer = {
+    vpp_id: "#pan_analyzer",
+    // vpp: null,
+
+    init: function() {
+        // this.vpp = new Vue({
+        //     el: this.vpp_id,
+        //     data: {
+        //         data: {},
+        //         type: null,
+
+        //         // show the analyzer settings
+        //         show_settings: false,
+        //     },
+        //     methods: {
+        //         toggle_show_settings: function() {
+        //             this.show_settings = !this.show_settings;
+        //         },
+
+        //         // the main entry for the analyze
+        //         analyze: function() {
+        //             // call the pan_analyzer
+        //             pan_analyzer.analyze();
+        //         }
+        //     }
+        // });
+    },
+
+
+    show: function() {
+        $(this.vpp_id).show();
+    },
+
+    hide: function() {
+        $(this.vpp_id).hide();
+    },
+
+    set_size: function(size) {
+        $(this.vpp_id).removeClass('panel-s panel-m panel-l')
+            .addClass('panel-' + size);
+    },
+
+    /**
+     * The main entry for analyze, it will detect the settings and send to the
+     * lisr_analyzer.js for details
+     */
+    analyze: function() {
+        // first, get the extract and papers from pan_ocpapers
+        // a pack is { extract: {}, papers: [] } object
+        var pack = pan_ocpapers.get_current_extract_and_papers();
+        if (pack == null) {
+            alert('Open an outcome first');
+            return -1;
+        }
+
+        // then, parse the pack to create the cfg and rs for lisr_analyzer.js
+        var oc_type = pack.extract.oc_type;
+
+        if (oc_type == 'pwma') {
+            var ret = this.__gen_pwma_cfg_and_rs(pack);
+            console.log(ret);
+            lisr_analyzer.analyze(ret.cfg, ret.rs, function(data) {
+                console.log(data);
+
+                fg_pwma_imglist.draw(data);
+            });
+        } else {
+            alert('Not implemented [' + oc_type + '] analyzing function');
+            return -2;
+        }
+
+        // submit to lisr_ana
+    },
+
+    __gen_pwma_cfg_and_rs: function(pack) {
+        var extract = pack.extract;
+        var papers = pack.papers;
+
+        var cfg = lisr_analyzer.get_blank_cfg();
+        var rs = [];
+        
+        // first, set the general cfg
+        cfg._analyze_type = 'pwma';
+        cfg.input_format = extract.meta.input_format;
+        cfg.measure_of_effect = extract.meta.measure_of_effect;
+        cfg.fixed_or_random = extract.meta.fixed_or_random;
+        cfg.which_is_better = extract.meta.which_is_better;
+
+        // then, set those for pwma PRIMARY
+        cfg.pairwise_analysis = 'PRIM';
+        cfg.pooling_method = 'Inverse';
+        cfg.tau_estimation_method = 'DL';
+        cfg.hakn_adjustment = 'no';
+        cfg.smd_estimation_method = 'Hedges';
+        cfg.prediction_interval = 'no';
+        cfg.sensitivity_analysis = 'no';
+        cfg.cumulative_meta_analysis = 'no';
+        cfg.cumulative_meta_analysis_sortby = 'year';
+        cfg.treatment = extract.meta.treatment.abbr;
+        cfg.control = extract.meta.control.abbr;
+
+        // last, build the rs
+        var rs = [];
+        for (let i = 0; i < papers.length; i++) {
+            const paper = papers[i];
+            var pid = paper.pid;
+            
+            // get the data of this paper
+            if (!extract.data.hasOwnProperty(pid)) {
+                // what??? not exists in extract data???
+                continue;
+            }
+
+            var ext_paper = extract.data[pid];
+            if (!ext_paper.selected) {
+                // unfortunely, this paper is not selected for ananlysis
+                continue;
+            }
+
+            // build a row from this paper
+
+            // first, the basic info from the paper
+            let col_year = jarvis.get_year(paper.pub_date);
+            let col_study = paper.seq_num + ' - ' + paper.authors.split(',')[0] + ' ' + col_year;
+            let col_treatment = extract.meta.treatment.abbr;
+            let col_control = extract.meta.control.abbr;
+
+            var r = {
+                study: col_study,
+                year: col_year,
+                treatment: col_treatment,
+                control: col_control
+            };
+
+            // second, the extracted info 
+            // for (let j = 0; j < extract.meta.attrs.length; j++) {
+            //     const attr = extract.meta.attrs[j];
+            //     // get the attribute value from the ext_paper
+            //     r[attr] = ext_paper.attrs[attr];
+            // }
+            for (let idx_cate = 0; idx_cate < extract.meta.cate_attrs.length; idx_cate++) {
+                const cate = extract.meta.cate_attrs[idx_cate];
+                for (let idx_attr = 0; idx_attr < cate.attrs.length; idx_attr++) {
+                    const attr = cate.attrs[idx_attr];
+                    r[attr.abbr] = ext_paper.attrs[attr.abbr];
+                }
+            }
+
+            // done! put into rs
+            rs.push(r);
+        }
+
+        return {
+            cfg: cfg,
+            rs: rs
+        };
+    }
+
+};
+
+
+var pan_itbuilder = {
+    vpp_id: '#pan_itbuilder',
+    vpp: null,
+
+    load: function() {
+        this.get_itable();
+    },
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                itable: null,
+
+            },
+            methods: {
+                save_itable: function() {
+                    pan_itbuilder.save_itable();
+                },
+
+                extract_itable: function() {
+                    // change layout to extract
+                    jarvis.switch_layout('extract_information');
+                    // load extract special for itable
+                    pan_ocpapers.show_extract_and_papers('itable', 'itable');
+                },
+
+                show_itable_preview: function() {
+                    pan_itbuilder.show_itable_preview();
+                },
+
+                create_category: function() {
+                    pan_itbuilder.create_category();
+                },
+
+                create_attribute: function(cate_abbr) {
+                    pan_itbuilder.create_attribute(cate_abbr);
+                },
+
+                create_sub: function(cate_abbr, attr_abbr) {
+                    pan_itbuilder.create_sub(cate_abbr, attr_abbr);
+                },
+
+                remove_category: function(cate_abbr) {
+                    pan_itbuilder.remove_category(cate_abbr);
+                },
+
+                remove_attribute: function(cate_abbr, attr_abbr, attr_name) {
+                    pan_itbuilder.remove_attribute(cate_abbr, attr_abbr, attr_name);
+                },
+
+                remove_sub: function(cate_abbr, attr_abbr, sub_abbr) {
+                    pan_itbuilder.remove_sub(cate_abbr, attr_abbr, sub_abbr);
+                },
+
+                ////////////////////////////////////////////////////////
+                // Filters
+                ////////////////////////////////////////////////////////
+                create_filter: function() {
+
+                    // get the full name
+                    var text = jarvis.prompt('The filter label name:');
+                    if (text == null) { return; }
+                    text = text.trim();
+                    if (text == '') { return; }
+
+                    // create a new filter
+                    var filter = JSON.parse(JSON.stringify(jarvis.tpl.filter));
+                    
+                    // update the filter's label / display_name
+                    filter.display_name = text;
+
+                    // add to the itable filters
+                    if (!this.itable.meta.hasOwnProperty('filters')) {
+                        this.itable.meta['filters'] = [];
+                    }
+                    this.itable.meta.filters.push(filter);
+
+                    // update the UI
+                    this.$forceUpdate();
+                }
+            }
+        });
+    },
+
+    /**
+     * The itable is an extract object in fact.
+     */
+    update: function(itable) {
+        console.log(itable);
+        this.vpp.$data.itable = itable;
+        
+        // update the vpp
+        this.vpp.$forceUpdate();
+    },
+
+    /**
+     * The itable is a special extract, so get_itable equals to get extract
+     */
+    get_itable: function() {
+        var project_id = Cookies.get('project_id');
+        var abbr = 'itable';
+        $.get(
+            jarvis.url.get_extract,
+            {project_id:project_id, abbr:abbr, rnd:Math.random()},
+            function(data) {
+                if (data.success) {
+                    pan_itbuilder.update(data.extract);
+                } else {
+                    // at present, there is not itable extract for this project
+                    // create an itable extract
+                    pan_itbuilder.init_itable('itable');
+                }
+            }, 'json'
+        );
+    },
+
+    /**
+     * Create an itable
+     * the abbr should be 'itable'
+     * but this could be expanded in the future
+     */
+    init_itable: function(abbr) {
+        var project_id = Cookies.get('project_id');
+        var oc_type = 'itable';
+        var tpl = 'default';
+        var meta = JSON.parse(JSON.stringify(jarvis.tpl.oc_type[oc_type][tpl]));
+        var data = {}
+
+        $.post(
+            jarvis.url.create_extract,
+            {
+                project_id: project_id,
+                oc_type: oc_type,
+                abbr: abbr,
+                meta: JSON.stringify(meta),
+                data: JSON.stringify(data)
+            }, 
+            function(data) {
+                // show what we get!
+                console.log(data);
+                // update UI
+                pan_itbuilder.update(data.extract);
+            }, 'json'
+        );
+    },
+
+    save_itable: function() {
+        var project_id = Cookies.get('project_id');
+        var oc_type = 'itable';
+        var abbr = 'itable';
+        var meta = this.vpp.$data.itable.meta;
+
+        // // send back to server
+        $.post(
+            jarvis.url.update_extract_meta,
+            {project_id:project_id, oc_type:oc_type, abbr:abbr,
+             meta:JSON.stringify(meta)},
+            function(data) {
+                // show
+                toast('Saved the interactive table');
+                // reload the outcomes
+                pan_itbuilder.load();
+            }
+        );
+    },
+
+    create_category: function() {
+        // get the full name
+        var text = jarvis.prompt('The category full name:');
+        if (text == null) { return; }
+        text = text.trim();
+        if (text == '') { return; }
+
+        // create an abbr
+        var abbr = jarvis.mk_it_abbr();
+
+        // create a new cate
+        var cate = {
+            abbr: abbr,
+            name: text,
+            attrs: []
+        };
+        
+        // add to the itable
+        this.vpp.$data.itable.meta.cate_attrs.push(cate);
+        this.vpp.$forceUpdate();
+    },
+
+    create_attribute: function(cate_abbr) {
+        // get the full name
+        // var text = jarvis.prompt('The attribute full name:');
+        // if (text == null) { return; }
+        // text = text.trim();
+        // if (text == '') { return; }
+        var text = 'New attribute';
+
+        // create an abbr
+        var abbr = jarvis.mk_it_abbr();
+
+        // create a new cate
+        var attr = {
+            abbr: abbr,
+            name: text,
+            subs: null
+        };
+        
+        for (let i = 0; i < this.vpp.$data.itable.meta.cate_attrs.length; i++) {
+            var cate = this.vpp.$data.itable.meta.cate_attrs[i];
+            if (cate.abbr == cate_abbr) {
+                this.vpp.$data.itable.meta.cate_attrs[i].attrs.push(attr);
+                break;
+            }
+        }
+
+        this.vpp.$forceUpdate();
+
+        // focus on the new input
+        $('#cate_attr_' + abbr).focus().select();
+    },
+
+
+    create_sub: function(cate_abbr, attr_abbr) {
+        // get the full name
+        // var text = jarvis.prompt('The sub-attribute name (e.g., Rx, Treatment, Control):');
+        // if (text == null) { return; }
+        // text = text.trim();
+        // if (text == '') { return; }
+
+        // create an abbr
+        var text = "New option";
+        var abbr = jarvis.mk_it_abbr();
+
+        // create a new cate
+        var sub = {
+            abbr: abbr,
+            name: text
+        };
+        
+        for (let i = 0; i < this.vpp.$data.itable.meta.cate_attrs.length; i++) {
+            var cate = this.vpp.$data.itable.meta.cate_attrs[i];
+            if (cate.abbr == cate_abbr) {
+                // check each attribute
+                for (let j = 0; j < cate.attrs.length; j++) {
+                    var attr = cate.attrs[j];
+                    if (attr.abbr == attr_abbr) {
+                        if (attr.subs == null) {
+                            // which means no sub yet
+                            this.vpp.$data.itable.meta.cate_attrs[i].attrs[j].subs = [sub];
+                        } else {
+                            this.vpp.$data.itable.meta.cate_attrs[i].attrs[j].subs.push(sub);
+                        }
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+        this.vpp.$forceUpdate();
+
+        // focus on the new input
+        $('#cate_attr_sub' + abbr).focus().select();
+    },
+
+    remove_category: function(cate_abbr) {
+    },
+
+    remove_attribute: function(cate_abbr, attr_abbr, attr_name) {
+        var ret = jarvis.confirm('Remove ['+attr_name+'], are you sure?');
+        if (ret == false) { return }
+
+        for (let i = 0; i < this.vpp.$data.itable.meta.cate_attrs.length; i++) {
+            var cate = this.vpp.$data.itable.meta.cate_attrs[i];
+            if (cate.abbr == cate_abbr) {
+                // check each attribute
+                for (let j = 0; j < cate.attrs.length; j++) {
+                    var attr = cate.attrs[j];
+                    if (attr.abbr == attr_abbr) {
+                        // ok, found out this attr
+                        this.vpp.$data.itable.meta.cate_attrs[i].attrs.splice(j, 1);
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+        console.log('* removed ' + attr_abbr + ' from ' + cate_abbr);
+    },
+
+    remove_sub: function(cate_abbr, attr_abbr, sub_abbr) {
+    },
+
+    show: function() {
+        $(this.vpp_id).show();
+    },
+
+    hide: function() {
+        $(this.vpp_id).hide();
+    },
+
+    set_size: function(size) {
+        $(this.vpp_id).removeClass('panel-s panel-m panel-l')
+            .addClass('panel-' + size);
+    },
+};
+
+
+var jarvis = {
+    project: [[ project_json_str|safe ]],
+
+    // for locating the mouse position
+    mouse: {
+        x: null,
+        y: null,
+    },
+    url: {
+        create_extract: "[[ url_for('extractor.create_extract') ]]",
+        update_extract: "[[ url_for('extractor.update_extract') ]]",
+        update_extract_meta: "[[ url_for('extractor.update_extract_meta') ]]",
+        copy_extract: "[[ url_for('extractor.copy_extract') ]]",
+        delete_extract: "[[ url_for('extractor.delete_extract') ]]",
+        get_paper: "[[ url_for('extractor.get_paper') ]]",
+        get_extract: "[[ url_for('extractor.get_extract') ]]",
+        get_extracts: "[[ url_for('extractor.get_extracts') ]]",
+        get_extract_and_papers: "[[ url_for('extractor.get_extract_and_papers') ]]",
+    },
+
+    // the templates for the extraction
+    tpl: {
+        oc_type: {
+            pwma: {
+                default: {
+                    abbr: '',
+                    oc_type: 'pwma',
+                    category: 'default',
+                    group: 'Primary',
+                    full_name: 'pwma Outcome full name',
+                    included_in_plots: 'yes',
+                    included_in_sof: 'yes',
+                    input_format: 'PRIM_CAT_RAW',
+                    measure_of_effect: 'RR',
+                    fixed_or_random: 'fixed',
+                    which_is_better: 'lower',
+                    attrs: null,
+                    cate_attrs: null
+                },
+            },
+            subg: {
+                default: {
+                    abbr: '',
+                    subgroups: ['A', 'B'],
+                    oc_type: 'subg',
+                    category: 'default',
+                    group: 'Subgroup',
+                    full_name: 'pwma Outcome full name',
+                    included_in_plots: 'yes',
+                    included_in_sof: 'yes',
+                    input_format: 'SUBG_CAT_RAW',
+                    measure_of_effect: 'RR',
+                    fixed_or_random: 'fixed',
+                    which_is_better: 'lower',
+                    attrs: [ "Et", "Nt", "Ec", "Nc" ],
+                    treatment: {
+                        abbr: "Treat",
+                        full_name: "Treatment arm full name"
+                    },
+                    control: {
+                        abbr: "Ctrl",
+                        full_name: "Control arm full name"
+                    }
+                }
+            },
+            nma: {
+                default: {
+                    abbr: '',
+                    oc_type: 'nma',
+                    category: 'default',
+                    group: 'Primary',
+                    full_name: 'NMA Outcome full name',
+                    included_in_plots: 'yes',
+                    included_in_sof: 'yes',
+                    included_in_em: 'yes',
+                    input_format: 'raw',
+                    measure_of_effect: 'HR',
+                    method: 'freq',
+                    fixed_or_random: 'fixed',
+                    which_is_better: 'lower',
+                    attrs: ['t1', 't2', 
+                        'event_t1', 'total_t1', 
+                        'event_t2', 'total_t2'],
+                    treatment: {
+                        treat_abbr: {
+                            abbr: 'treatAbbr',
+                            full_name: "Treatment full name"
+                        }
+                    }
+                }
+            },
+            itable: {
+                default: {
+                    abbr: 'itable',
+                    oc_type: 'itable',
+                    category: 'default',
+                    group: 'itable',
+                    full_name: 'Interactive Table',
+                    input_format: 'custom',
+                    filters: [{
+                        display_name: 'Included in MA',
+                        type: 'radio',
+                        attr: 'Included in MA',
+                        value: 0,
+                        values: [{
+                            display_name: 'All',
+                            value: 0,
+                            sql_cond: "{$col} is not NULL",
+                            default: true
+                        }]
+                    }],
+                    /**
+                     * To make sure the order of the cate and attr list
+                     * the attrs are saved as a hierarchical list structure.
+                     * As a result, need to implement serval functions
+                     */
+                    cate_attrs: [
+                    {
+                        abbr: 'ITABLECAT000',
+                        name: "TRIAL CHARACTERISTICS",
+                        attrs: [{
+                            abbr: 'ITABLEATT000',
+                            name: 'Phase',
+                            subs: null
+                        }]
+                    },
+                    {
+                        abbr: 'ITABLECATSYS',
+                        name: "_SYS",
+                        attrs: [{
+                            abbr: 'ITABLEECATSYS001',
+                            name: 'URL',
+                            subs: null
+                        }, {
+                            abbr: 'ITABLEECATSYSSUB002',
+                            name: 'Included in MA',
+                            subs: null
+                        }]
+                    }
+                    ]
+                }
+            }
+        },
+        input_format: {
+            pwma: {
+
+                PRIM_CAT_RAW: [{
+                    'abbr': 'PRIM_CAT_RAW_treat',
+                    'name': 'Treatment Arm',
+                    'attrs': [{
+                        'abbr': 'Et',
+                        'name': 'Event',
+                        'subs': null
+                    }, {
+                        'abbr': 'Nt',
+                        'name': 'Total',
+                        'subs': null
+                    }, {
+                        'abbr': 'treatment',
+                        'name': 'Treatment',
+                        'subs': null
+                    }]
+                }, {
+                    'abbr': 'PRIM_CAT_RAW_control',
+                    'name': 'Control Arm',
+                    'attrs': [{
+                        'abbr': 'Ec',
+                        'name': 'Event',
+                        'subs': null
+                    }, {
+                        'abbr': 'Nc',
+                        'name': 'Total',
+                        'subs': null
+                    }, {
+                        'abbr': 'control',
+                        'name': 'Control',
+                        'subs': null
+                    }]
+                }],
+
+                PRIM_CAT_PRE: [{
+                    'abbr': 'PRIM_CAT_PRE_default', 
+                    'name': 'Default attributes', 
+                    'attrs': [{
+                        'abbr': 'TE', 
+                        'name': 'TE',
+                        'subs': null,
+                    }, {
+                        'abbr': 'lowerci', 
+                        'name': 'Lower CI', 
+                        'subs': null,
+                    }, {
+                        'abbr': 'upperci', 
+                        'name': 'Upper CI', 
+                        'subs': null,
+                    }]
+                }],
+
+                PRIM_CONTD_RAW: [{
+                    'abbr': 'PRIM_CONTD_RAW_treat', 
+                    'name': 'Treatment Arm', 
+                    'attrs': [{
+                        'abbr': 'Nt', 
+                        'name': 'Nt',
+                        'subs': null,
+                    }, {
+                        'abbr': 'Mt', 
+                        'name': 'Mt', 
+                        'subs': null,
+                    }, {
+                        'abbr': 'SDt', 
+                        'name': 'SDt', 
+                        'subs': null,
+                    }]
+                }, {
+                    'abbr': 'PRIM_CONTD_RAW_control', 
+                    'name': 'Control Arm', 
+                    'attrs': [{
+                        'abbr': 'Nc', 
+                        'name': 'Nc',
+                        'subs': null,
+                    }, {
+                        'abbr': 'Mc', 
+                        'name': 'Mc', 
+                        'subs': null,
+                    }, {
+                        'abbr': 'SDc', 
+                        'name': 'SDc', 
+                        'subs': null,
+                    }]
+                }],
+
+                PRIM_CONTD_PRE: [{
+                    'abbr': 'PRIM_CONTD_PRE_default', 
+                    'name': 'Default attributes', 
+                    'attrs': [{
+                        'abbr': 'TE', 
+                        'name': 'TE',
+                        'subs': null,
+                    }, {
+                        'abbr': 'SE',
+                        'name': 'SE', 
+                        'subs': null,
+                    }]
+                }],
+
+                PRIM_CATIRR_RAW: [{
+                    'abbr': 'PRIM_CATIRR_RAW_default', 
+                    'name': 'Default attributes', 
+                    'attrs': [{
+                        'abbr': 'Et', 
+                        'name': 'Et',
+                        'subs': null,
+                    }, {
+                        'abbr': 'Tt',
+                        'name': 'Tt', 
+                        'subs': null,
+                    }, {
+                        'abbr': 'Ec', 
+                        'name': 'Ec',
+                        'subs': null,
+                    }, {
+                        'abbr': 'Tc',
+                        'name': 'Tc', 
+                        'subs': null,
+                    }]
+                }],
+
+                PRIM_CAT_RAW_G5: [{
+                    'abbr': 'default',
+                    'name': 'Treatments',
+                    'attrs': [{
+                        'abbr': 'drug_used',
+                        'name': 'Drug Used',
+                        'subs': null
+                    }, {
+                        'abbr': 'malignancy',
+                        'name': 'Malignancy',
+                        'subs': null
+                    }]
+                },{
+                    'abbr': 'GA',
+                    'name': 'All Grade',
+                    'attrs': [{
+                        'abbr': 'GA_Et',
+                        'name': 'Tx',
+                        'subs': null
+                    }, {
+                        'abbr': 'GA_Nt',
+                        'name': 'N',
+                        'subs': null
+                    }, {
+                        'abbr': 'GA_Ec',
+                        'name': 'Control',
+                        'subs': null
+                    }, {
+                        'abbr': 'GA_Nc',
+                        'name': 'n',
+                        'subs': null
+                    }]
+                }, {
+                    'abbr': 'G34',
+                    'name': 'Grade 3/4',
+                    'attrs': [{
+                        'abbr': 'G34_Et',
+                        'name': 'Tx',
+                        'subs': null
+                    }, {
+                        'abbr': 'G34_Nt',
+                        'name': 'Control',
+                        'subs': null
+                    }]
+                }, {
+                    'abbr': 'G3H',
+                    'name': 'Grade 3 or higher',
+                    'attrs': [{
+                        'abbr': 'G3H_Et',
+                        'name': 'Tx',
+                        'subs': null
+                    }, {
+                        'abbr': 'G3H_Nt',
+                        'name': 'Control',
+                        'subs': null
+                    }]
+                }, {
+                    'abbr': 'G5N',
+                    'name': 'Grade 5 only',
+                    'attrs': [{
+                        'abbr': 'G5N_Et',
+                        'name': 'Tx',
+                        'subs': null
+                    }, {
+                        'abbr': 'G5N_Nt',
+                        'name': 'Control',
+                        'subs': null
+                    }]
+                }]
+            },
+            subg: {
+                SUBG_CATIRR_RAW: ['Et', 'Tt', 'Ec', 'Tc'],
+                SUBG_CAT_RAW: ['Et', 'Nt', 'Ec', 'Nc'],
+                SUBG_CAT_PRE: ['TE', 'lowerci', 'upperci'],
+                SUBG_CONTD_RAW: ['Nt', 'Nt', 'SDt', 'Nc', 'Mc', 'SDc'],
+                SUBG_CONTD_PRE: ['TE', 'SE'],
+            },
+            nma: {
+                raw: ['t1', 't2', 'event_t1', 'total_t1', 'event_t2', 'total_t2'],
+                pre: ['t1', 't2', 'sm', 'lowerci', 'upperci', 
+                      'survival_t1', 'survival_t2',
+                      'Ec_t1', 'Et_t1', 'Ec_t2', 'Et_t2']
+            }
+        },
+
+        filter: {
+            display_name: '',
+            type: 'radio',
+            attr: null,
+            value: 0,
+            values: [{
+                display_name: 'All',
+                value: 0,
+                sql_cond: "{$col} is not NULL",
+                default: true
+            }]
+        }
+    },
+
+    layout: {
+        manage_outcomes: 'manage_outcomes',
+        extract_information: 'extract_information',
+        analyze_outcome: 'analyze_outcome'
+    },
+
+    /**
+     * Make the oc abbr for an outcome / ae
+     */
+    mk_oc_abbr: function() {
+        var result = '';
+        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        var len = characters.length;
+        for (var i = 0; i < 8; i++) {
+            result += characters.charAt(Math.floor(Math.random() * len));
+        }
+        return result;
+    },
+
+    /**
+     * Make the column abbr / id for itable
+     */
+    mk_it_abbr: function() {
+        var result = '';
+        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        var len = characters.length;
+        for (var i = 0; i < 12; i++) {
+            result += characters.charAt(Math.floor(Math.random() * len));
+        }
+        return result;
+    },
+
+    init: function() {
+        // $('#pan_outcomes').accordion();
+
+        pan_outcomes.init();
+
+        pan_ocpapers.init();
+
+        pan_collector.init();
+
+        pan_analyzer.init();
+
+        pan_itbuilder.init();
+
+        // the sub module of analyzers
+        fg_pwma_imglist.init();
+
+        // the preview for itable
+        pan_itable_previewer.init();
+
+        // switch to default layout
+        this.switch_layout('manage_outcomes')
+
+        // the load the init outcomes
+        pan_outcomes.load();
+
+        // when resize
+        this.adjust_panel_height();
+        $(window).resize(function() {
+
+            // adjust the panel size
+            jarvis.adjust_panel_height();
+
+            // adjust the pdf view size
+            pan_collector.resize_pdfviewer();
+        });
+
+        // when mouse move
+        $(document).on('mousemove', function(event) {
+            jarvis.mouse = {
+                x: event.clientX,
+                y: event.clientY
+            }
+        });
+    },
+
+    switch_layout: function(layout) {
+        // the layout is important for this interface
+        pan_ocpapers.set_mode(layout);
+
+        // change the layout
+        if (layout == 'manage_outcomes') {
+            pan_itbuilder.hide();
+            pan_outcomes.show();
+            pan_ocpapers.show();
+            pan_collector.hide();
+            pan_analyzer.hide();
+
+            // set the default size
+            pan_outcomes.set_size('m');
+            pan_ocpapers.set_size('m');
+            pan_ocpapers.set_mode(layout);
+
+        } else if (layout == 'extract_information') {
+            pan_itbuilder.hide();
+            pan_outcomes.hide();
+            pan_ocpapers.show();
+            pan_collector.show();
+            pan_analyzer.hide();
+
+            // set the default size
+            pan_ocpapers.set_size('m');
+            pan_collector.set_size('m');
+
+        } else if (layout == 'analyze_outcome') {
+            pan_itbuilder.hide();
+            pan_outcomes.hide();
+            pan_ocpapers.show();
+            pan_collector.hide();
+            pan_analyzer.show();
+
+            // set the default size
+            pan_ocpapers.set_size('m');
+            pan_analyzer.set_size('m');
+
+        } else if (layout == 'build_itable') {
+            pan_itbuilder.show();
+            pan_outcomes.hide();
+            pan_ocpapers.hide();
+            pan_collector.hide();
+            pan_analyzer.hide();
+
+            // set the default size
+            pan_itbuilder.set_size('f');
+
+            // and load the itable
+            pan_itbuilder.get_itable();
+
+        } else {
+
+        }
+    },
+
+    prompt: function(text, value) {
+        return window.prompt(text, value);
+    },
+
+    confirm: function(text) {
+        return window.confirm(text);
+    },
+
+    toast: function(s) {
+        toast(s);
+    },
+
+    adjust_panel_height: function() {
+        var height = $( window ).height();
+        $('.panel-container').css(
+            'max-height', (height - 60) + 'px'
+        );
+    },
+
+    get_year: function(s) {
+        const regex = /\d{4}/gm;
+        let m;
+        if ((m = regex.exec(s)) !== null) {
+            return m[0];
+        }
+        return '';
+    },
+
+    download_file: function(fn) {
+        // fixed image download bug
+        // Thanks to https://stackoverflow.com/questions/17311645/download-image-with-javascript
+        var a = $('<a>').attr('href', '/f/' + fn)
+            .attr('download', fn)
+            .appendTo("body");
+        a[0].click()
+        a.remove();
+    },
+
+}
+
+$(document).ready(function() {
+    jarvis.init();
+})
+</script>
+{% endblock %}
